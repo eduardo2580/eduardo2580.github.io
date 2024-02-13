@@ -1,0 +1,7 @@
+{
+  "name": "my_awesome-website",
+  "version": "1.0.1",
+  "description": "question description: A website shocasing my awesome projects and portfolio.",
+  "main": "main.js",
+  "license": "MIT"
+}
