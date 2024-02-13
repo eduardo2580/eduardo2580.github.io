@@ -8,6 +8,8 @@
         <title>Eduardo Rodrigues</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css' rel='stylesheet' />
         <!-- Font Awesome icons (free version)-->
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
         <!-- Simple line icons-->
@@ -165,10 +167,19 @@
                                                                                                                                                         </div>
                                                                                                                                                     </section>
                                                                                                                                                     <!-- Map-->
-                                                                                                                                                    <!-- OpenStreetMap Embed for Brazil -->
-<iframe width="100%" height="400" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
-src="https://www.openstreetmap.org/export/embed.html?bbox=-74.00976562500001%2C-33.7243396617476%2C-28.564453125000004%2C5.61598581915534&layer=mapnik&marker=-14.604847155053898%2C-51.32812500000001"></iframe>
-<br/><small><a href="https://www.openstreetmap.org/?mlat=-14.6050&mlon=-51.3281#map=4/-14.605/-51.328" target="_blank">View Larger Map</a></small>
+                                                                                                                                                    <div id='map'></div>
+
+    <script>
+        mapboxgl.accessToken = pk.eyJ1IjoiZWR1YXJkbzI1ODAiLCJhIjoiY2xza2RlODlqMDBrYTJqbXR2Nm11ZWVieSJ9.Ivd6pYGX-ABvgwVdll3n0g;
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11', // Default Mapbox streets style
+            center: [-51.3281, -14.6050], // Brazil coordinates
+            zoom: 5
+        });
+    </script>
+
 
                                                                                                                                                     <!-- Footer-->
                                                                                                                                                     <footer class="footer text-center">
