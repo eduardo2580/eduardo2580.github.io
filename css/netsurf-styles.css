@@ -1,206 +1,45 @@
-/* Global styles */
+/* Common styles for all browsers */
 body {
   font-family: 'Source Sans Pro', sans-serif;
-  margin: 0;
-  padding: 0;
+  /* Add other common styles here */
 }
 
-/* Header styles */
-header {
-  background-color: #f8f9fa;
-  padding: 50px;
-  text-align: center;
-}
-
-h1 {
-  font-size: 36px;
-  margin-bottom: 10px;
-}
-
-h3 {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-.btn {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 5px;
-}
-
-/* Navigation styles */
-.menu-toggle {
-  display: none;
-}
-
-.sidebar-nav {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sidebar-nav-item {
-  margin-bottom: 10px;
-}
-
-.sidebar-nav-item a {
-  display: block;
-  padding: 10px;
-  color: #333;
-  text-decoration: none;
-}
-
-/* Content sections */
-.content-section {
-  padding: 50px;
-}
-
-.bg-light {
-  background-color: #f8f9fa;
-}
-
-.bg-primary {
-  background-color: #007bff;
-  color: #fff;
-}
-
-.text-secondary {
-  color: #6c757d;
-}
-
-.text-white {
-  color: #fff;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-faded {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-/* Portfolio section */
-.portfolio-item {
-  display: block;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 30px;
-}
-
-.portfolio-item .caption {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.portfolio-item:hover .caption {
-  opacity: 1;
-}
-
-.portfolio-item .caption-content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-}
-
-.portfolio-item .h2 {
-  font-size: 24px;
-  margin-bottom: 10px;
-}
-
-.portfolio-item p {
-  font-size: 16px;
-  margin-bottom: 0;
-}
-
-/* Callout section */
-.callout {
-  padding: 100px 0;
-  text-align: center;
-}
-
-/* Footer section */
-.footer {
-  padding: 50px 0;
-  background-color: #f8f9fa;
-}
-
-.social-link {
-  display: inline-block;
-  width: 40px;
-  height: 40px;
-  line-height: 40px;
-  text-align: center;
-  background-color: #007bff;
-  color: #fff;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-.scroll-to-top {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 50px;
-  height: 50px;
-  line-height: 50px;
-  text-align: center;
-  background-color: #007bff;
-  color: #fff;
-  border-radius: 50%;
-  display: none;
-}
-
-/* Media queries */
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: block;
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 999;
-    font-size: 24px;
-    color: #333;
-    cursor: pointer;
+/* Styles for Netsurf */
+@media screen and (max-width: 640px) {
+  body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: white;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
   }
 
-  .active .menu-toggle {
-    color: #fff;
+  body::after {
+      content: "Redirecting to text-only version for Netsurf...";
+      color: black;
+      font-size: 16px;
   }
 
-  #sidebar-wrapper {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 250px;
-    padding: 50px;
-    background-color: #f8f9fa;
-    transform: translateX(-100%);
-    transition: transform 0.3s;
+  /* Redirect to textOnly.html after a delay */
+  @keyframes redirect {
+      0% {
+          opacity: 0;
+      }
+
+      100% {
+          opacity: 1;
+      }
   }
 
-  .active #sidebar-wrapper {
-    transform: translateX(0);
-  }
-
-  .sidebar-nav-item a {
-    color: #333;
-    transition: color 0.2s;
-  }
-
-  .sidebar-nav-item a:hover {
-    color: #007bff;
+  body::before,
+  body::after {
+      animation: redirect 3s ease-out forwards;
   }
 }
+

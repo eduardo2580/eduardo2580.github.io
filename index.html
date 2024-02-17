@@ -19,15 +19,22 @@
 
 
           <!-- Include Netsurf-specific styles if detected -->
-  <script>
-    const isNetsurf = navigator.userAgent.toLowerCase().includes('netsurf');
-    if (isNetsurf) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'netsurf-styles.css';
-      document.head.appendChild(link);
-    }
-  </script>
+          <script>
+            // JavaScript code for feature detection
+            const isNetsurf = navigator.userAgent.toLowerCase().includes('netsurf');
+            if (isNetsurf) {
+                // Redirect to textOnly.html after a delay
+                setTimeout(function () {
+                    window.location.href = 'textOnly.html';
+                }, 3000); // 3 seconds delay, adjust as needed
+            }
+        </script>
+    
+        <noscript>
+            <p>
+                Click <a href="textOnly.html">here</a> for a compatible page.
+            </p>
+        </noscript>
 
   <!-- Include JavaScript files -->
   <script src="scripts.js" defer></script>
@@ -176,7 +183,7 @@
                                                                                                                                                     </section>
                                                                                                                                                     <!-- Map-->
                                                                                                                                                     <div class="map" id="contact">
-                                                                                                                                                        <iframe width="425" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=-74.00976562500001%2C-33.7243396617476%2C-28.564453125000004%2C5.61598581915534&layer=mapnik&marker=-14.604847155053898%2C-51.32812500000001" style="border: 1px solid black"></iframe><br/><small><a href="https://www.openstreetmap.org/?mlat=-14.6050&mlon=-51.3281#map=4/-14.605/-51.328">View Larger Map</a></small>
+                                                                                                                                                        <iframe width="425" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=-74.00976562500001%2C-33.7243396617476%2C-28.564453125000004%2C5.61598581915534&layer=mapnik&marker=-14.604847155053898%2C-51.32812500000001" style="border: 1px solid black"></iframe><br/><small><a href="https://www.openstreetmap.org/?mlat=-14.6050&mlon=-51.3281#map=4/-14.605/-51.328">View Larger Map</a><a href="textOnly.html"> | Text Only Page</a></small>
 
                                                                                                                                                     </div>
                                                                                                                                                     <!-- Footer-->
@@ -193,12 +200,17 @@
                                                                                                                                                                     <a class="social-link rounded-circle text-white" href="https://www.instagram.com/eduardobenattii/"><i class="icon-social-instagram"></i></a>
                                                                                                                                                                 </li>
                                                                                                                                                             </ul>
+                                                                                                                                                             <br>
+                                                                                                                                                        </div>
+                                                                                                                                                        <div class="container px-4 px-lg-5">
                                                                                                                                                             <p class="text-muted small mb-0">Copyright &copy; Eduardo Souza Rodrigues 2024 |
-                                                                                                                                                                <a href="https://www.linkedin.com/">LinkedIn</a> |
-                                                                                                                                                                <a href="https://instagram.com/">Instagram</a>
+                                                                                                                                                              <a href="https://www.linkedin.com/">LinkedIn</a> |
+                                                                                                                                                              <a href="https://instagram.com/">Instagram</a>
                                                                                                                                                             </p>
                                                                                                                                                         </div>
                                                                                                                                                     </footer>
+                                                                                                                                                   
+                                                                                                                                                    
                                                                                                                                                     <!-- Scroll to Top Button-->
                                                                                                                                                     <a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up"></i></a>
                                                                                                                                                     <!-- Bootstrap core JS-->
