@@ -3,7 +3,7 @@
 * Copyright 2013-2023 Start Bootstrap
 * Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-stylish-portfolio/blob/master/LICENSE)
 */
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', event => {
 
     const sidebarWrapper = document.getElementById('sidebar-wrapper');
     let scrollToTopVisible = false;
@@ -17,7 +17,7 @@ window.addEventListener('DOMContentLoaded', () => {
     })
 
     // Closes responsive menu when a scroll trigger link is clicked
-    const scrollTriggerList = [].slice.call(document.querySelectorAll('#sidebar-wrapper .js-scroll-trigger'));
+    var scrollTriggerList = [].slice.call(document.querySelectorAll('#sidebar-wrapper .js-scroll-trigger'));
     scrollTriggerList.map(scrollTrigger => {
         scrollTrigger.addEventListener('click', () => {
             sidebarWrapper.classList.remove('active');
@@ -26,7 +26,7 @@ window.addEventListener('DOMContentLoaded', () => {
         })
     });
 
-    const _toggleMenuIcon = () => {
+    function _toggleMenuIcon() {
         const menuToggleBars = document.body.querySelector('.menu-toggle > .fa-bars');
         const menuToggleTimes = document.body.querySelector('.menu-toggle > .fa-xmark');
         if (menuToggleBars) {
@@ -47,9 +47,11 @@ window.addEventListener('DOMContentLoaded', () => {
                 fadeIn(scrollToTop);
                 scrollToTopVisible = true;
             }
-        } else if (scrollToTopVisible) {
-            fadeOut(scrollToTop);
-            scrollToTopVisible = false;
+        } else {
+            if (scrollToTopVisible) {
+                fadeOut(scrollToTop);
+                scrollToTopVisible = false;
+            }
         }
     })
 })
@@ -69,7 +71,7 @@ function fadeIn(el, display) {
     el.style.opacity = 0;
     el.style.display = display || "block";
     (function fade() {
-        const val = parseFloat(el.style.opacity);
+        var val = parseFloat(el.style.opacity);
         if (!((val += .1) > 1)) {
             el.style.opacity = val;
             requestAnimationFrame(fade);
