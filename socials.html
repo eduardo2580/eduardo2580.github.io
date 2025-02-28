@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+   <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'self'; 
+          script-src 'self' 'unsafe-inline'; 
+          style-src 'self' 'unsafe-inline' https://cdn.simplecss.org; 
+          img-src 'self' data: https://cdn.simplecss.org;
+          font-src 'self' data:;
+          frame-ancestors 'none'">
+    
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="copyright" content="Eduardo Souza Rodrigues">
+    <title>Eduardo Rodrigues - Junior Developer</title>
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
+    <script src="main.js"></script>
+    <style type="text/css">
+        /* Base reset */
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            border: 0;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+        
+        /* Page structure */
+        body {
+            background: #888888;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.5;
+            color: #ffffff;
+        }
+        
+        .container {
+            width: 95%;
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 25px 0;
+        }
+        
+        /* Improved Profile Section */
+        .profile-header {
+            text-align: center;
+            margin: 0 0 35px 0;
+        }
+
+        .photo-container {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            border: 4px solid #ffffff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .profile-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 30%; /* Adjust vertical centering */
+        }
+
+        /* Protection Overlay */
+        .photo-protection {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="transparent"/></svg>');
+        }
+
+        /* Link styling */
+        .link-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .link-item {
+            margin: 15px 0;
+        }
+        
+        .link-button {
+            display: block;
+            padding: 16px 24px;
+            background: #ffffff;
+            color: #888888;
+            border: 2px solid #000000;
+            box-shadow: 8px 8px 0 #000000;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .link-button:hover {
+            box-shadow: 4px 4px 0 #000000;
+            position: relative;
+            left: 4px;
+            top: 4px;
+        }
+        
+        /* Footer */
+        .page-footer {
+            text-align: center;
+            margin: 40px 0 0 0;
+            padding: 25px 0;
+            color: #ffffff;
+        }
+        
+        .anybrowser-badge {
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none; /* Allows clicks to pass through */
+  background: transparent;
+"></div>
+    <div class="container">
+        <div class="profile-header">
+            <div class="photo-container" oncontextmenu="return false;">
+                <img 
+                    src="imgs/profile.jpg" 
+                    class="profile-photo" 
+                    alt="Eduardo Rodrigues"
+                    aria-hidden="true"
+                >
+                <div class="photo-protection"></div>
+            </div>
+            <h1>Eduardo Rodrigues</h1>
+            <p>Junior Developer</p>
+        </div>
+        <ul class="link-list">
+            <li class="link-item">
+                <a href="https://github.com/eduardo2580" class="link-button">GitHub</a>
+            </li>
+            <li class="link-item">
+                <a href="https://linkedin.com/in/eduardo-souza-rodrigues" class="link-button">LinkedIn</a>
+            </li>
+            <li class="link-item">
+                <a href="https://eduardo2580.github.io/" class="link-button">
+                    Personal Website
+                </a>
+            </li>
+            <li class="link-item">
+                <a href="https://instagram.com/eduardobenattii" class="link-button">Instagram</a>
+            </li>
+        </ul>
+
+        <div class="page-footer">
+            <p class="anybrowser-badge">
+                <p><a href="http://www.anybrowser.org/campaign/"><img src="imgs/anyweb-8831.png" width="graphic-width-in-pixels" height="graphic-height-in-pixels" alt="Viewable With Any Browser" /></a></p>
+            <p>© 2025 Eduardo Souza Rodrigues<br />
+            Built with Web Standards</p>
+        </div>
+    </div>
+</body>
+</ht
