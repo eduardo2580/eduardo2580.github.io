@@ -1,0 +1,16 @@
+@media print {
+    * {
+        user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+      display: none !important;
+    }
+    body::after {
+      content: "Printing is not allowed.";
+      display: block;
+    }
+  }
+img[alt="Secured by GitHub Pages"] {
+    user-select: auto !important; /* Allow badge interaction */
+  }

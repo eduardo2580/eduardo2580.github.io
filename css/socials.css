@@ -1,0 +1,100 @@
+       /* Base reset */
+       * {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        border: 0;
+        text-decoration: none;
+        box-sizing: border-box;
+    }
+    
+    /* Page structure */
+    body {
+        background: #888888;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.5;
+        color: #ffffff;
+    }
+    
+    .container {
+        width: 95%;
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 25px 0;
+    }
+    
+    /* Improved Profile Section */
+    .profile-header {
+        text-align: center;
+        margin: 0 0 35px 0;
+    }
+
+    .photo-container {
+        width: 160px;
+        height: 160px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        border: 4px solid #ffffff;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .profile-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 30%; /* Adjust vertical centering */
+    }
+
+    /* Protection Overlay */
+    .photo-protection {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="transparent"/></svg>');
+    }
+
+    /* Link styling */
+    .link-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .link-item {
+        margin: 15px 0;
+    }
+    
+    .link-button {
+        display: block;
+        padding: 16px 24px;
+        background: #ffffff;
+        color: #888888;
+        border: 2px solid #000000;
+        box-shadow: 8px 8px 0 #000000;
+        text-align: center;
+        font-weight: bold;
+    }
+    
+    .link-button:hover {
+        box-shadow: 4px 4px 0 #000000;
+        position: relative;
+        left: 4px;
+        top: 4px;
+    }
+    
+    /* Footer */
+    .page-footer {
+        text-align: center;
+        margin: 40px 0 0 0;
+        padding: 25px 0;
+        color: #ffffff;
+    }
+    
+    .anybrowser-badge {
+        margin: 15px 0;
+    }

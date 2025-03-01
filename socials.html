@@ -3,13 +3,13 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-   <meta http-equiv="Content-Security-Policy" 
-          content="default-src 'self'; 
-          script-src 'self' 'unsafe-inline'; 
-          style-src 'self' 'unsafe-inline' https://cdn.simplecss.org; 
-          img-src 'self' data: https://cdn.simplecss.org;
-          font-src 'self' data:;
-          frame-ancestors 'none'">
+    <meta http-equiv="Content-Security-Policy" 
+    content="default-src 'self'; 
+    script-src 'self' 'unsafe-inline'; 
+    style-src 'self' 'unsafe-inline' https://cdn.simplecss.org; 
+    img-src 'self' data: https://cdn.simplecss.org https://img.shields.io;
+    font-src 'self' data:;
+    frame-ancestors 'none'">
     
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,109 +22,9 @@
     <meta name="copyright" content="Eduardo Souza Rodrigues">
     <title>Eduardo Rodrigues - Junior Developer</title>
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/socials.css">
     <script src="main.js"></script>
-    <style type="text/css">
-        /* Base reset */
-        * {
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            border: 0;
-            text-decoration: none;
-            box-sizing: border-box;
-        }
-        
-        /* Page structure */
-        body {
-            background: #888888;
-            font-family: Arial, Helvetica, sans-serif;
-            line-height: 1.5;
-            color: #ffffff;
-        }
-        
-        .container {
-            width: 95%;
-            max-width: 680px;
-            margin: 0 auto;
-            padding: 25px 0;
-        }
-        
-        /* Improved Profile Section */
-        .profile-header {
-            text-align: center;
-            margin: 0 0 35px 0;
-        }
-
-        .photo-container {
-            width: 160px;
-            height: 160px;
-            margin: 0 auto 20px;
-            border-radius: 50%;
-            border: 4px solid #ffffff;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .profile-photo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center 30%; /* Adjust vertical centering */
-        }
-
-        /* Protection Overlay */
-        .photo-protection {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="transparent"/></svg>');
-        }
-
-        /* Link styling */
-        .link-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .link-item {
-            margin: 15px 0;
-        }
-        
-        .link-button {
-            display: block;
-            padding: 16px 24px;
-            background: #ffffff;
-            color: #888888;
-            border: 2px solid #000000;
-            box-shadow: 8px 8px 0 #000000;
-            text-align: center;
-            font-weight: bold;
-        }
-        
-        .link-button:hover {
-            box-shadow: 4px 4px 0 #000000;
-            position: relative;
-            left: 4px;
-            top: 4px;
-        }
-        
-        /* Footer */
-        .page-footer {
-            text-align: center;
-            margin: 40px 0 0 0;
-            padding: 25px 0;
-            color: #ffffff;
-        }
-        
-        .anybrowser-badge {
-            margin: 15px 0;
-        }
-    </style>
 </head>
 <body>
     <div style="
@@ -173,12 +73,79 @@
                     <div class="bottom-bar">
                         <p>Last updated in 2025-03-01</p>
                         <p>&copy; Eduardo Rodrigues. All rights reserved.</p>
-                        <p>Please read our <a href="terms.html">Terms & Privacy Policy</a>.</p>
+                        <p>Please read our <a href="terms.html">Terms &amp; Privacy Policy</a>.</p>
                     </div>
                     <div class="bottom-bar">
-                        <p><a href="http://www.anybrowser.org/campaign/"><img src="imgs/anyweb-8831.png" width="graphic-width-in-pixels" height="graphic-height-in-pixels" alt="Viewable With Any Browser" /></a></p>
-                    </div>
+                        <p>
+                          <a href="https://github.blog/news-insights/product-news/https-for-github-pages/" 
+                             target="_blank"
+                             rel="noopener noreferrer">
+                            <img src="https://img.shields.io/badge/Secured_by-GitHub_Pages-success" 
+                                 alt="Secured by GitHub Pages" 
+                                 width="200" 
+                                 height="28">
+                          </a>
+                        </p>
+                          <p><a href="http://www.anybrowser.org/campaign/"><img src="imgs/anyweb-8831.png" width="graphic-width-in-pixels" height="graphic-height-in-pixels" alt="Viewable With Any Browser" /></a></p>
+                      </div>
         </div>
     </div>
+    <script>// Prevent right-click context menu
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Prevent image dragging and new window opening
+        document.querySelectorAll('img').forEach(img => {
+            img.oncontextmenu = e => e.preventDefault();
+            img.ondragstart = e => e.preventDefault();
+            img.setAttribute('draggable', false);
+        });
+        
+        // Prevent text selection and copying
+        document.addEventListener('copy', e => {
+            e.clipboardData.setData('text/plain', 'Copying is disabled');
+            e.preventDefault();
+        });
+        
+        document.addEventListener('cut', e => {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('paste', e => {
+            e.preventDefault();
+        });
+        
+        // Disable keyboard shortcuts (Ctrl+C, Ctrl+V, etc.)
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Disable printing
+        window.addEventListener('beforeprint', (e) => {
+            e.preventDefault();
+            window.close();
+        });
+        
+        // Prevent frame embedding
+        if (window.top !== window.self) {
+            window.top.location = window.self.location;
+        }
+        
+        // Add CSS to disable text selection
+        const antiCopyStyle = document.createElement('style');
+        antiCopyStyle.textContent = `
+            * {
+                user-select: none !important;
+                -webkit-user-select: none !important;
+                -moz-user-select: none !important;
+                -ms-user-select: none !important;
+            }
+        `;
+        document.head.appendChild(antiCopyStyle);</script>
 </body>
-</ht
+</html>

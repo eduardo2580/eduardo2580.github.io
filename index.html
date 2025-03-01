@@ -1,13 +1,13 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <meta http-equiv="Content-Security-Policy" 
-          content="default-src 'self'; 
-          script-src 'self' 'unsafe-inline'; 
-          style-src 'self' 'unsafe-inline' https://cdn.simplecss.org; 
-          img-src 'self' data: https://cdn.simplecss.org;
-          font-src 'self' data:;
-          frame-ancestors 'none'">
+  <meta http-equiv="Content-Security-Policy" 
+  content="default-src 'self'; 
+  script-src 'self' 'unsafe-inline'; 
+  style-src 'self' 'unsafe-inline' https://cdn.simplecss.org; 
+  img-src 'self' data: https://cdn.simplecss.org https://img.shields.io;
+  font-src 'self' data:;
+  frame-ancestors 'none'">
     
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,22 +20,8 @@
     <meta name="copyright" content="Eduardo Souza Rodrigues">
     <title>Eduardo Rodrigues - Junior Developer</title>
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
+    <link rel="stylesheet" href="css/styles.css">
     <script src="main.js"></script>
-    <style type="text/css">
-  @media print {
-    * {
-        user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-      display: none !important;
-    }
-    body::after {
-      content: "Printing is not allowed.";
-      display: block;
-    }
-  }
-    </style>
 </head>
 <body>
     <div style="
@@ -83,11 +69,78 @@
         <div class="bottom-bar">
             <p>Last updated in 2025-03-01</p>
             <p>&copy; Eduardo Rodrigues. All rights reserved.</p>
-            <p>Please read our <a href="terms.html">Terms & Privacy Policy</a>.</p>
+            <p>Please read our <a href="terms.html">Terms &amp; Privacy Policy</a>.</p>
         </div>
         <div class="bottom-bar">
+          <p>
+            <a href="https://github.blog/news-insights/product-news/https-for-github-pages/" 
+               target="_blank"
+               rel="noopener noreferrer">
+              <img src="https://img.shields.io/badge/Secured_by-GitHub_Pages-success" 
+                   alt="Secured by GitHub Pages" 
+                   width="200" 
+                   height="28">
+            </a>
+          </p>
             <p><a href="http://www.anybrowser.org/campaign/"><img src="imgs/anyweb-8831.png" width="graphic-width-in-pixels" height="graphic-height-in-pixels" alt="Viewable With Any Browser" /></a></p>
         </div>
     </footer> 
+    <script>// Prevent right-click context menu
+      document.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+          return false;
+      });
+      
+      // Prevent image dragging and new window opening
+      document.querySelectorAll('img').forEach(img => {
+          img.oncontextmenu = e => e.preventDefault();
+          img.ondragstart = e => e.preventDefault();
+          img.setAttribute('draggable', false);
+      });
+      
+      // Prevent text selection and copying
+      document.addEventListener('copy', e => {
+          e.clipboardData.setData('text/plain', 'Copying is disabled');
+          e.preventDefault();
+      });
+      
+      document.addEventListener('cut', e => {
+          e.preventDefault();
+      });
+      
+      document.addEventListener('paste', e => {
+          e.preventDefault();
+      });
+      
+      // Disable keyboard shortcuts (Ctrl+C, Ctrl+V, etc.)
+      document.addEventListener('keydown', e => {
+          if (e.ctrlKey || e.metaKey) {
+              e.preventDefault();
+              return false;
+          }
+      });
+      
+      // Disable printing
+      window.addEventListener('beforeprint', (e) => {
+          e.preventDefault();
+          window.close();
+      });
+      
+      // Prevent frame embedding
+      if (window.top !== window.self) {
+          window.top.location = window.self.location;
+      }
+      
+      // Add CSS to disable text selection
+      const antiCopyStyle = document.createElement('style');
+      antiCopyStyle.textContent = `
+          * {
+              user-select: none !important;
+              -webkit-user-select: none !important;
+              -moz-user-select: none !important;
+              -ms-user-select: none !important;
+          }
+      `;
+      document.head.appendChild(antiCopyStyle);</script>
 </body>
 </html>
