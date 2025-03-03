@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//PT" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pt" lang="pt">
 <head>
   <meta http-equiv="Content-Security-Policy" 
@@ -20,7 +20,7 @@
     <meta name="copyright" content="Eduardo Souza Rodrigues">
     <title>Eduardo Rodrigues - Desenvolvedor Júnior</title>
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
     <script src="main.js"></script>
 </head>
 <body>
@@ -31,39 +31,202 @@
         <a href="../pt/index.html" class="lang-flag">BR</a>
     </div>
         <nav>
-            <a href="about.html">Sobre</a>
-            <a href="index.html" class="atual">Início</a>
-            <a href="socials.html">Redes Sociais</a>
+            <a href="about.html">
+              <svg class="icon" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+              Sobre mim
+            </a>
+          
+            <a href="index.html" class="current">
+              <svg class="icon" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2zm0 4.83l6 6V18h-2v-6h-8v6H6v-7.17l6-6z"/>
+              </svg>
+              Início
+            </a>
+          
+            <a href="socials.html">
+              <svg class="icon" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92zM18 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM6 13c-.55 0-1-.45-1-1s.45-1 1 1-.45 1-1 1zm12 7.02c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>
+              </svg>
+              Redes sociais
+            </a>
           </nav>
         <h1>Eduardo Rodrigues</h1>
     </header>
     <main>
         <section>
             <h2>Introdução</h2>
-            <p class="aviso">Olá, sou Eduardo Rodrigues, um desenvolvedor do Brasil. Sou apaixonado por tecnologia e estou sempre buscando novos desafios para aprimorar minhas habilidades.</p>
+            <p class="notice">Olá, sou Eduardo Rodrigues, um desenvolvedor do Brasil. Sou apaixonado por tecnologia e estou sempre buscando novos desafios para aprimorar minhas habilidades.</p>
         </section>
     </main>
-    
     <footer>
-        <div class="bottom-bar">
-            <p>Última atualização em 2025-03-01</p>
-            <p>&copy; Eduardo Rodrigues. Todos os direitos reservados.</p>
-            <p>Por favor, leia nossos <a href="terms.html">Termos &amp; Política de Privacidade</a>.</p>
-        </div>
-        <div class="bottom-bar">
-            <p>
+      <div class="bottom-bar">
+          <p>Última atualização em 2025-03-03</p>
+          <p>&copy; Eduardo Rodrigues. Todos os direitos reservados.</p>
+          <p>Por favor, leia nossa <a href="terms.html">Política de Termos e Privacidade</a>.</p>
+      </div>
+      <div class="bottom-bar">
+          <p>
               <a href="https://github.blog/news-insights/product-news/https-for-github-pages/" 
                  target="_blank"
                  rel="noopener noreferrer">
-                <img src="https://img.shields.io/badge/Secured_by-GitHub_Pages-success" 
-                     alt="Protegido por GitHub Pages" 
-                     width="200" 
-                     height="28">
+                  <img src="https://img.shields.io/badge/Secured_by-GitHub_Pages-success" 
+                       alt="Protegido por GitHub Pages" 
+                       width="200" 
+                       height="28">
               </a>
-            </p>
-            <p><a href="http://www.anybrowser.org/campaign/"><img src="imgs/anyweb-8831.png" width="graphic-width-in-pixels" height="graphic-height-in-pixels" alt="Visualizável em Qualquer Navegador" /></a></p>
-        </div>
-    </footer>
-  </div>
+          </p>
+          <p><a href="http://www.anybrowser.org/campaign/"><img src="imgs/anyweb-8831.png" width="graphic-width-in-pixels" height="graphic-height-in-pixels" alt="Visível em qualquer navegador" /></a></p>
+      </div>
+      
+  </footer>
+  <script>// Prevent right-click context menu
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Prevent image dragging and new window opening
+    document.querySelectorAll('img').forEach(img => {
+        img.oncontextmenu = e => e.preventDefault();
+        img.ondragstart = e => e.preventDefault();
+        img.setAttribute('draggable', false);
+    });
+    
+    // Prevent text selection and copying
+    document.addEventListener('copy', e => {
+        e.clipboardData.setData('text/plain', 'Copying is disabled');
+        e.preventDefault();
+    });
+    
+    document.addEventListener('cut', e => {
+        e.preventDefault();
+    });
+    
+    document.addEventListener('paste', e => {
+        e.preventDefault();
+    });
+    
+    // Disable keyboard shortcuts (Ctrl+C, Ctrl+V, etc.)
+    document.addEventListener('keydown', e => {
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    // Disable printing
+    window.addEventListener('beforeprint', (e) => {
+        e.preventDefault();
+        window.close();
+    });
+    
+    // Prevent frame embedding
+    if (window.top !== window.self) {
+        window.top.location = window.self.location;
+    }
+    
+    // Add CSS to disable text selection
+    const antiCopyStyle = document.createElement('style');
+    antiCopyStyle.textContent = `
+        * {
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+        }
+    `;
+    document.head.appendChild(antiCopyStyle);
+    
+    // File: animations.js - Add this as a separate file and link it in your HTML
+document.addEventListener('DOMContentLoaded', function() {
+// Only run animations if JavaScript is enabled
+document.body.classList.add('js-enabled');
+
+// Fade in the header elements sequentially
+const headerElements = document.querySelectorAll('header h1, header nav a');
+headerElements.forEach((element, index) => {
+  setTimeout(() => {
+    element.classList.add('fade-in');
+  }, 100 * index);
+});
+
+// Subtle hover effects for navigation
+const navLinks = document.querySelectorAll('nav a');
+navLinks.forEach(link => {
+  link.addEventListener('mouseenter', function() {
+    this.classList.add('hover-effect');
+  });
+  
+  link.addEventListener('mouseleave', function() {
+    this.classList.remove('hover-effect');
+  });
+});
+
+// Animate introduction paragraph
+const introText = document.querySelector('.notice');
+if (introText) {
+  // Add a subtle slide-in effect
+  introText.classList.add('slide-in');
+  
+  // Add a typing effect to the introduction text
+  const text = introText.textContent;
+  if (text.length > 0) {
+    introText.textContent = '';
+    introText.style.opacity = '1';
+    let i = 0;
+    const typingSpeed = 30; // milliseconds per character
+    
+    function typeWriter() {
+      if (i < text.length) {
+        introText.textContent += text.charAt(i);
+        i++;
+        setTimeout(typeWriter, typingSpeed);
+      }
+    }
+    
+    // Start typing effect with a slight delay
+    setTimeout(typeWriter, 800);
+  }
+}
+
+// Subtle animation for section headings when they come into view
+const sectionHeadings = document.querySelectorAll('section h2');
+
+// Simple function to check if an element is in viewport
+function isInViewport(element) {
+  const rect = element.getBoundingClientRect();
+  return (
+    rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
+}
+
+// Animate elements when they come into view
+function animateOnScroll() {
+  sectionHeadings.forEach(heading => {
+    if (isInViewport(heading) && !heading.classList.contains('animated')) {
+      heading.classList.add('animated', 'slide-in-from-left');
+    }
+  });
+}
+
+// Run once on load
+animateOnScroll();
+
+// Then on scroll
+window.addEventListener('scroll', animateOnScroll);
+
+// Footer animation
+const footerElements = document.querySelectorAll('footer p');
+footerElements.forEach((element, index) => {
+  setTimeout(() => {
+    element.classList.add('fade-up');
+  }, 100 * index);
+});
+});</script>
 </body>
 </html>
