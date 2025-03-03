@@ -22,6 +22,66 @@
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
     <link rel="stylesheet" href="../css/styles.css">
     <script src="main.js"></script>
+    <style>
+      .project-card {
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          padding: 1rem;
+          margin-bottom: 1.5rem;
+      }
+      
+      .project-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          margin-bottom: 0.5rem;
+      }
+      
+      .project-title {
+          margin: 0;
+          font-size: 1.4rem;
+      }
+      
+      .project-language {
+          color: #666;
+          font-size: 0.9rem;
+      }
+      
+      .project-description {
+          margin-bottom: 1rem;
+      }
+      
+      .project-stats {
+          display: flex;
+          gap: 1rem;
+          margin-bottom: 0.5rem;
+          font-size: 0.9rem;
+      }
+      
+      .project-stat {
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
+      }
+      
+      .project-links {
+          margin-top: 0.5rem;
+      }
+      
+      header {
+          margin-bottom: 2rem;
+      }
+      
+      footer {
+          margin-top: 2rem;
+          text-align: center;
+      }
+      
+      .bio {
+          max-width: 650px;
+          margin: 0 auto 2rem auto;
+      }
+  </style>
 </head>
 <body>
     <header> 
@@ -59,6 +119,33 @@
             <h2>Introdução</h2>
             <p class="notice">Olá, sou Eduardo Rodrigues, um desenvolvedor do Brasil. Sou apaixonado por tecnologia e estou sempre buscando novos desafios para aprimorar minhas habilidades.</p>
         </section>
+        <section>
+          <h2>Meus projetos web</h2>
+          <div class="project-card">
+              <div class="project-header">
+                  <h2 class="project-title">BMIwebapp</h2>
+                  <span class="project-language">JavaScript</span>
+              </div>
+              <p class="project-description">Um aplicativo web de cálculo de IMC construído com NodeJS, em inglês.</p>
+              <div class="project-links">
+                  <a href="https://github.com/eduardo2580/BMIwebapp" class="button">Ver Projeto</a>
+                  <a href="https://bmi-calculator-pi-beige.vercel.app/" class="button">Demo</a>
+              </div>
+          </div>
+      
+          <div class="project-card">
+              <div class="project-header">
+                  <h2 class="project-title">TicTacToe-NodeJS</h2>
+                  <span class="project-language">JavaScript</span>
+              </div>
+              <p class="project-description">Um jogo da velha construído com NodeJS, em inglês.</p>
+              <div class="project-links">
+                  <a href="https://github.com/eduardo2580/TicTacToe-NodeJS" class="button">Ver Projeto</a>
+                  <a href="https://tictactoe-game-eight.vercel.app/" class="button">Demo</a>
+              </div>
+          </div>
+      </section>
+      
     </main>
     <footer>
       <div class="bottom-bar">
