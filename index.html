@@ -177,7 +177,7 @@
     <div class="hero-section">
         <div class="language-stripe">
             <h1>Eduardo Rodrigues</h1>
-            <h2>Select Language</h2>
+            <h2 id="languageHeading">Select Language</h2>
             <div class="language-selector mt-4">
                 <a href="en/index.html" class="lang-flag">🇺🇸 English</a><br>
                 <a href="es/index.html" class="lang-flag">🇪🇸 Español</a><br>
@@ -192,7 +192,44 @@
         </div>
     </div>
 
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Language rotation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const languageHeading = document.getElementById('languageHeading');
+            const languages = [
+                { text: 'Select Language', lang: 'en' },
+                { text: 'Seleccione el Idioma', lang: 'es' },
+                { text: 'Selecione o Idioma', lang: 'pt' }
+            ];
+            
+            let currentIndex = 0;
+            
+            // Function to change the language text
+            function rotateLanguage() {
+                currentIndex = (currentIndex + 1) % languages.length;
+                const newLanguage = languages[currentIndex];
+                
+                // Add a fade-out effect
+                languageHeading.style.opacity = 0;
+                
+                setTimeout(() => {
+                    // Update the text and language attribute
+                    languageHeading.textContent = newLanguage.text;
+                    languageHeading.lang = newLanguage.lang;
+                    
+                    // Fade back in
+                    languageHeading.style.opacity = 1;
+                }, 300);
+            }
+            
+            // Set transition for smooth fade effect
+            languageHeading.style.transition = 'opacity 0.3s ease';
+            
+            // Start rotating languages every 3 seconds
+            setInterval(rotateLanguage, 3000);
+        });
+    </script>
 </body>
 </html>
