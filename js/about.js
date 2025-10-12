@@ -1,3 +1,33 @@
+function toggleMenu() {
+    const navMenu = document.getElementById('navMenu');
+    navMenu.classList.toggle('active');
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', function(event) {
+    const navMenu = document.getElementById('navMenu');
+    const menuToggle = document.querySelector('.menu-toggle');
+    
+    if (!navMenu.contains(event.target) && !menuToggle.contains(event.target)) {
+        navMenu.classList.remove('active');
+    }
+});
+
+// Handle dropdown toggles on mobile
+document.querySelectorAll('.nav-menu > li > a').forEach(link => {
+    link.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768) {
+            const parent = this.parentElement;
+            const hasDropdown = parent.querySelector('.dropdown-menu');
+            
+            if (hasDropdown) {
+                e.preventDefault();
+                parent.classList.toggle('active');
+            }
+        }
+    });
+});
+
 document.addEventListener('DOMContentLoaded', function() {
   // Only run animations if JavaScript is enabled
   document.body.classList.add('js-enabled');
