@@ -1,42 +1,99 @@
 name: Minify and Deploy
-on: push
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - '**.html'
+      - '**.js'
+      - '**.css'
+
 permissions:
   contents: write
 
 jobs:
   minify:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install minifiers
         run: |
-          npm install -g html-minifier terser csso-cli
+          npm install -g html-minifier-terser terser csso-cli
 
-      - name: Minify HTML
+      - name: Create backup directory
+        run: mkdir -p .minify-backup
+
+      - name: Minify HTML files
         run: |
-          html-minifier --collapse-whitespace --remove-comments --remove-optional-tags \
-          --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace \
-          --use-short-doctype --minify-css true --minify-js true --input-dir . --output-dir .
+          find . -type f -name "*.html" ! -path "./node_modules/*" ! -path "./.git/*" ! -path "./.minify-backup/*" | while read file; do
+            echo "Minifying: $file"
+            html-minifier-terser \
+              --collapse-whitespace \
+              --remove-comments \
+              --remove-optional-tags \
+              --remove-redundant-attributes \
+              --remove-script-type-attributes \
+              --remove-tag-whitespace \
+              --use-short-doctype \
+              --minify-css true \
+              --minify-js true \
+              "$file" -o "$file.min" && mv "$file.min" "$file"
+          done
 
-      - name: Minify JS
+      - name: Minify JavaScript files
         run: |
-          find . -name "*.js" -type f -exec terser {} --compress --mangle -o {} \;
+          find . -type f -name "*.js" ! -name "*.min.js" ! -path "./node_modules/*" ! -path "./.git/*" ! -path "./.minify-backup/*" | while read file; do
+            echo "Minifying: $file"
+            terser "$file" \
+              --compress passes=2,drop_console=true,drop_debugger=true \
+              --mangle \
+              --output "$file"
+          done
 
-      - name: Minify CSS
+      - name: Minify CSS files
         run: |
-          find . -name "*.css" -type f -exec csso {} --output {} \;
+          find . -type f -name "*.css" ! -name "*.min.css" ! -path "./node_modules/*" ! -path "./.git/*" ! -path "./.minify-backup/*" | while read file; do
+            echo "Minifying: $file"
+            csso "$file" --output "$file"
+          done
 
-      - name: Commit and push
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.has_changes == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Minify: reduce file size" || echo "No changes to commit"
-          git push   
+          git commit -m "🗜️ Minify: optimize HTML, CSS, and JS files [skip ci]"
+          git push
+
+      - name: Generate summary
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          echo "## ✅ Minification Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Files have been successfully minified and committed." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Modified Files:" >> $GITHUB_STEP_SUMMARY
+          git diff --name-only HEAD~1 HEAD >> $GITHUB_STEP_SUMMARY
