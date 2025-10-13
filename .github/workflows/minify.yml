@@ -20,55 +20,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Minify files
+        uses: anthonyftwang/minify@v1.0.0
         with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install minifiers
-        run: |
-          npm install -g html-minifier-terser terser csso-cli
-
-      - name: Create backup directory
-        run: mkdir -p .minify-backup
-
-      - name: Minify HTML files
-        run: |
-          find . -type f -name "*.html" ! -path "./node_modules/*" ! -path "./.git/*" ! -path "./.minify-backup/*" | while read file; do
-            echo "Minifying: $file"
-            html-minifier-terser \
-              --collapse-whitespace \
-              --remove-comments \
-              --remove-optional-tags \
-              --remove-redundant-attributes \
-              --remove-script-type-attributes \
-              --remove-tag-whitespace \
-              --use-short-doctype \
-              --minify-css true \
-              --minify-js true \
-              "$file" -o "$file.min" && mv "$file.min" "$file"
-          done
-
-      - name: Minify JavaScript files
-        run: |
-          find . -type f -name "*.js" ! -name "*.min.js" ! -path "./node_modules/*" ! -path "./.git/*" ! -path "./.minify-backup/*" | while read file; do
-            echo "Minifying: $file"
-            terser "$file" \
-              --compress passes=2,drop_console=true,drop_debugger=true \
-              --mangle \
-              --output "$file"
-          done
-
-      - name: Minify CSS files
-        run: |
-          find . -type f -name "*.css" ! -name "*.min.css" ! -path "./node_modules/*" ! -path "./.git/*" ! -path "./.minify-backup/*" | while read file; do
-            echo "Minifying: $file"
-            csso "$file" --output "$file"
-          done
+          directory: './' # Minify files in the root and all subdirectories
 
       - name: Check for changes
         id: check_changes
@@ -81,19 +37,14 @@ jobs:
 
       - name: Commit and push changes
         if: steps.check_changes.outputs.has_changes == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "🗜️ Minify: optimize HTML, CSS, and JS files [skip ci]"
-          git push
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "🗜️ Minify: optimize assets [skip ci]"
+          branch: ${{ github.ref }}
 
       - name: Generate summary
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
           echo "## ✅ Minification Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Files have been successfully minified and committed." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Modified Files:" >> $GITHUB_STEP_SUMMARY
-          git diff --name-only HEAD~1 HEAD >> $GITHUB_STEP_SUMMARY
+          echo "Files have been successfully minified and committed." >> $GITHUB_STEP_SUMMARY   
