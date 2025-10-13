@@ -9,6 +9,7 @@ on:
       - '**.html'
       - '**.js'
       - '**.css'
+  workflow_dispatch: # Allow manual trigger
 
 permissions:
   contents: write
@@ -20,31 +21,109 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Minify files
-        uses: anthonyftwang/minify@v1.0.0
         with:
-          directory: './' # Minify files in the root and all subdirectories
+          fetch-depth: 0 # Full history for better git operations
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install minification tools
+        run: |
+          npm install -g html-minifier-terser terser clean-css-cli
+          echo "✅ Installed minification tools"
+
+      - name: Backup original files
+        run: |
+          mkdir -p .backup
+          find . -type f \( -name "*.html" -o -name "*.js" -o -name "*.css" \) \
+            ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/.backup/*" \
+            -exec cp --parents {} .backup/ \;
+          echo "✅ Created backup of original files"
+
+      - name: Minify HTML files
+        run: |
+          echo "## 📄 Minifying HTML files..."
+          find . -type f -name "*.html" \
+            ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/.backup/*" | while read file; do
+            echo "  Minifying: $file"
+            html-minifier-terser \
+              --collapse-whitespace \
+              --remove-comments \
+              --remove-optional-tags \
+              --remove-redundant-attributes \
+              --remove-script-type-attributes \
+              --remove-tag-whitespace \
+              --use-short-doctype \
+              --minify-css true \
+              --minify-js true \
+              "$file" -o "$file.tmp" && mv "$file.tmp" "$file"
+          done
+          echo "✅ HTML minification complete"
+
+      - name: Minify JavaScript files
+        run: |
+          echo "## 📜 Minifying JavaScript files..."
+          find . -type f -name "*.js" \
+            ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/.backup/*" \
+            ! -name "*.min.js" ! -name "sw.js" | while read file; do
+            echo "  Minifying: $file"
+            terser "$file" \
+              --compress \
+              --mangle \
+              --output "$file.tmp" && mv "$file.tmp" "$file"
+          done
+          echo "✅ JavaScript minification complete"
+
+      - name: Minify CSS files
+        run: |
+          echo "## 🎨 Minifying CSS files..."
+          find . -type f -name "*.css" \
+            ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/.backup/*" \
+            ! -name "*.min.css" | while read file; do
+            echo "  Minifying: $file"
+            cleancss -o "$file.tmp" "$file" && mv "$file.tmp" "$file"
+          done
+          echo "✅ CSS minification complete"
+
+      - name: Clean up backup
+        run: rm -rf .backup
 
       - name: Check for changes
         id: check_changes
         run: |
-          if git diff --quiet; then
+          git add -A
+          if git diff --cached --quiet; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No changes detected"
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "✅ Changes detected and staged"
           fi
 
       - name: Commit and push changes
         if: steps.check_changes.outputs.has_changes == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "🗜️ Minify: optimize assets [skip ci]"
-          branch: ${{ github.ref }}
+          branch: ${{ github.ref_name }}
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
 
       - name: Generate summary
-        if: steps.check_changes.outputs.has_changes == 'true'
         run: |
-          echo "## ✅ Minification Complete" >> $GITHUB_STEP_SUMMARY
+          echo "## 🗜️ Minification Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Files have been successfully minified and committed." >> $GITHUB_STEP_SUMMARY   
+          if [ "${{ steps.check_changes.outputs.has_changes }}" == "true" ]; then
+            echo "✅ **Status:** Files successfully minified and committed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Files processed:" >> $GITHUB_STEP_SUMMARY
+            echo "- 📄 HTML files (html-minifier-terser)" >> $GITHUB_STEP_SUMMARY
+            echo "- 📜 JavaScript files (terser)" >> $GITHUB_STEP_SUMMARY
+            echo "- 🎨 CSS files (clean-css)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ **Status:** No changes needed - files already optimized" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY   
