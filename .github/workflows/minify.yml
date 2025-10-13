@@ -1,17 +1,42 @@
-name: Minify Site
-on: [push]
+name: Minify and Deploy
+on: push
 permissions:
   contents: write
+
 jobs:
-  build:
+  minify:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Minify HTML, CSS, JS
-        uses: Dra1ex/minify-action@v1.0.3
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./   
+          node-version: '18'
+
+      - name: Install minifiers
+        run: |
+          npm install -g html-minifier terser csso-cli
+
+      - name: Minify HTML
+        run: |
+          html-minifier --collapse-whitespace --remove-comments --remove-optional-tags \
+          --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace \
+          --use-short-doctype --minify-css true --minify-js true --input-dir . --output-dir .
+
+      - name: Minify JS
+        run: |
+          find . -name "*.js" -type f -exec terser {} --compress --mangle -o {} \;
+
+      - name: Minify CSS
+        run: |
+          find . -name "*.css" -type f -exec csso {} --output {} \;
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Minify: reduce file size" || echo "No changes to commit"
+          git push   
