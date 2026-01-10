@@ -1,9 +1,13 @@
 <!doctype html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#000000">
+
 
     <title>Eduardo Rodrigues — Términos y Privacidad</title>
 
@@ -22,132 +26,155 @@
 </head>
 
 <body>
-    <div class="grid-bg"></div>
-    <div class="scanlines"></div>
-    <canvas id="canvas3d"></canvas>
 
-    <header class="nav-block">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <canvas id="canvas3d" aria-label="Fondo decorativo 3D interactivo"></canvas>
+
+    <header class="nav-block" role="banner">
         <div class="nav-content">
-            <h1>Términos y Privacidad</h1>
-            <nav class="nav-menu">
+            <h1 id="page-title">Términos y Privacidad</h1>
+
+            <nav class="nav-menu" aria-label="Navegación principal">
                 <a href="index.es.html" class="nav-item">Inicio</a>
                 <a href="about.es.html" class="nav-item">Acerca de</a>
                 <a href="socials.es.html" class="nav-item">Conectar</a>
-                <a href="terms.es.html" class="nav-item active">Términos de Uso</a>
+                <a href="terms.es.html" class="nav-item active" aria-current="page">Términos de Uso</a>
             </nav>
         </div>
     </header>
 
-    <section class="language-block">
-        <div class="lang-content">
-            <h2>Idioma</h2>
-            <div class="lang-buttons">
-                <a href="terms.en.html" class="lang-btn">English</a>
-                <a href="terms.es.html" class="lang-btn active">Español</a>
-                <a href="terms.pt.html" class="lang-btn">Português</a>
+    <main id="content" role="main">
+
+        <section class="language-block" aria-labelledby="lang-title">
+            <div class="lang-content">
+                <h2 id="lang-title">Idioma</h2>
+
+                <div class="lang-buttons" role="group" aria-label="Selección de idioma">
+                    <a href="terms.en.html" class="lang-btn" lang="en">English</a>
+                    <a href="terms.es.html" class="lang-btn active" aria-current="true" lang="es">Español</a>
+                    <a href="terms.pt.html" class="lang-btn" lang="pt-BR">Português</a>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="profile-block">
-        <div class="profile-content">
-            <h2>Información del Sitio</h2>
-            <p>Portafolio personal desarrollado con HTML, CSS, JavaScript y Three.js.</p>
-            <p>Diseño interactivo en 3D con soporte para navegadores modernos.</p>
-        </div>
-    </section>
-
-    <section class="projects-block">
-        <div class="projects-content">
-            <h2>Términos de Uso Parte 1</h2>
-
-            <div class="project-item">
-                <p>EL SOFTWARE SE PROPORCIONA “TAL CUAL”, SIN GARANTÍA DE NINGÚN TIPO,
-EXPRESA O IMPLÍCITA, INCLUYENDO, ENTRE OTRAS, LAS GARANTÍAS DE
-COMERCIALIZACIÓN, IDONEIDAD PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN.</p>
+        <section class="profile-block" aria-labelledby="site-info-title">
+            <div class="profile-content">
+                <h2 id="site-info-title">Información del Sitio</h2>
+                <p>Portafolio personal desarrollado con HTML, CSS, JavaScript y Three.js.</p>
+                <p>Diseño interactivo en 3D con soporte para navegadores modernos.</p>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="projects-block">
-        <div class="projects-content">
-            <h2>Términos de Uso Parte 2</h2>
+        <section class="projects-block" aria-labelledby="terms-part1">
+            <div class="projects-content">
+                <h2 id="terms-part1">Términos de Uso — Parte 1</h2>
 
-            <div class="project-item">
-                <p>
-EN NINGÚN CASO LOS AUTORES SERÁN RESPONSABLES DE NINGUNA RECLAMACIÓN, DAÑO U
-OTRA RESPONSABILIDAD, YA SEA EN UNA ACCIÓN CONTRACTUAL, EXTRACONTRACTUAL O DE OTRO TIPO,
-DERIVADA DE, O EN CONEXIÓN CON EL SOFTWARE O EL USO U
-OTRAS OPERACIONES RELACIONADAS CON EL SOFTWARE.</p>
+                <div class="project-item">
+                    <p>
+                        EL SOFTWARE SE PROPORCIONA “TAL CUAL”, SIN GARANTÍA DE NINGÚN TIPO,
+                        EXPRESA O IMPLÍCITA, INCLUYENDO, ENTRE OTRAS, LAS GARANTÍAS DE
+                        COMERCIALIZACIÓN, IDONEIDAD PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN.
+                    </p>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="education-block">
-        <div class="education-content">
-            <h2>Legal</h2>
+        <section class="projects-block" aria-labelledby="terms-part2">
+            <div class="projects-content">
+                <h2 id="terms-part2">Términos de Uso — Parte 2</h2>
 
-            <div class="edu-item">
-                <h4>Derechos de Autor</h4>
-                <p>&copy; 2025 Eduardo Souza Rodrigues.</p>
+                <div class="project-item">
+                    <p>
+                        EN NINGÚN CASO LOS AUTORES SERÁN RESPONSABLES DE NINGUNA RECLAMACIÓN, DAÑO U
+                        OTRA RESPONSABILIDAD, YA SEA EN UNA ACCIÓN CONTRACTUAL, EXTRACONTRACTUAL O DE OTRO TIPO,
+                        DERIVADA DE, O EN CONEXIÓN CON EL SOFTWARE O EL USO U
+                        OTRAS OPERACIONES RELACIONADAS CON EL SOFTWARE.
+                    </p>
+                </div>
             </div>
+        </section>
 
-            <div class="edu-item">
-                <h4>Atribución</h4>
-                <p>Uso de bibliotecas de código abierto, incluyendo Three.js (MIT).</p>
+        <section class="education-block" aria-labelledby="legal-title">
+            <div class="education-content">
+                <h2 id="legal-title">Legal</h2>
+
+                <div class="edu-item">
+                    <h4>Derechos de Autor</h4>
+                    <p>&copy; 2025 Eduardo Souza Rodrigues.</p>
+                </div>
+
+                <div class="edu-item">
+                    <h4>Atribución</h4>
+                    <p>Uso de bibliotecas de código abierto, incluyendo Three.js (MIT).</p>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="skills-block">
-        <div class="skills-content">
-            <h2>Tecnologías Utilizadas</h2>
+        <section class="skills-block" aria-labelledby="tech-title">
+            <div class="skills-content">
+                <h2 id="tech-title">Tecnologías Utilizadas</h2>
 
-            <div class="skill-group">
-                <h4>Frontend</h4>
-                <p>HTML5, CSS3, JavaScript, Three.js</p>
+                <div class="skill-group">
+                    <h4>Frontend</h4>
+                    <p>HTML5, CSS3, JavaScript, Three.js</p>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="skills-block">
-        <div class="skills-content">
-            <h2>Tecnologías Utilizadas</h2>
+        <section class="skills-block" aria-labelledby="infra-title">
+            <div class="skills-content">
+                <h2 id="infra-title">Infraestructura</h2>
 
-            <div class="skill-group">
-                <h4>Alojamiento</h4>
-                <p>GitHub Pages</p>
+                <div class="skill-group">
+                    <h4>Alojamiento</h4>
+                    <p>GitHub Pages</p>
+                </div>
+
+                <div class="skill-group">
+                    <h4>Herramientas</h4>
+                    <p>Git, VS Code</p>
+                </div>
             </div>
+        </section>
 
-            <div class="skill-group">
-                <h4>Herramientas</h4>
-                <p>Git, VS Code</p>
+        <section class="contact-block" aria-labelledby="contact-title">
+            <div class="contact-content">
+                <h2 id="contact-title">¿Dudas?</h2>
+                <a href="socials.es.html"
+                   class="cta-button"
+                   aria-label="Ir a la página de contacto">
+                    Contactar →
+                </a>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="contact-block">
-        <div class="contact-content">
-            <h2>¿Dudas?</h2>
-            <a href="socials.pt.html" class="cta-button">Contactar →</a>
-        </div>
-    </section>
+    </main>
 
-    <footer class="footer-block">
+    <footer class="footer-block" role="contentinfo">
         <div class="footer-content">
             <p>&copy; 2025 - 2026 Eduardo Souza Rodrigues</p>
+
             <a href="https://orcid.org/0009-0001-7877-2153"
                target="_blank"
-               rel="noopener"><img
-                    src="imgs/ORCIDiD_icon16x16.png" alt="Orcid Logo"
-                    style="height:20px; vertical-align:middle; margin-right:6px;">
+               rel="noopener"
+               aria-label="Perfil ORCID de Eduardo Souza Rodrigues">
+                <img src="imgs/ORCIDiD_icon16x16.png"
+                     alt="Ícono ORCID"
+                     style="height:20px; vertical-align:middle; margin-right:6px;">
                 ORCID: 0009-0001-7877-2153
             </a>
-            <a href="https://humanstxt.org/"><img src="imgs/humanstxt-isolated-orange.gif" alt="Humans TXT"></a>
+
+            <a href="https://humanstxt.org/" aria-label="Más información sobre humans.txt">
+                <img src="imgs/humanstxt-isolated-orange.gif" alt="Humans TXT">
+            </a>
         </div>
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="js/main.js"></script>
+
 </body>
 </html>
+

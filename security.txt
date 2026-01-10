@@ -1,0 +1,1 @@
+Preferred-Languages: pt-BR, en
