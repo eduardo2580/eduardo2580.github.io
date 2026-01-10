@@ -515,6 +515,12 @@ function updateOrbitalPositions() {
 
         focusedBlock.style.opacity = "1";
         focusedBlock.style.zIndex = "2500";
+        
+        // On mobile, override position to center the focused block
+        if (isMobile) {
+            focusedBlock.style.left = (viewportWidth / 2) + "px";
+            focusedBlock.style.top = (viewportHeight / 2) + "px";
+        }
 
         if (focusedBlock.classList) {
             focusedBlock.classList.add("orbital-focus");

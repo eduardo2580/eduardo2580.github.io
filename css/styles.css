@@ -725,37 +725,29 @@ body {
    ============================================ */
 
 @media (max-width:576px) {
-    /* Make blocks larger and more readable on mobile */
+    /* Match desktop block sizing and behavior */
     .orbital-block {
-        max-width: 90vw;
-        width: 90vw;
-        max-height: 75vh;
+        max-width: 85vw;
+        width: 85vw;
+        max-height: 70vh;
         padding: 22px;
         font-size: 1rem;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
 
-    /* Enhanced focus state for mobile - make it VERY clear which block is active */
+    /* Keep desktop-like focus state */
     .orbital-block.orbital-focus {
-        background: linear-gradient(135deg, rgba(5, 8, 20, .99) 0, rgba(2, 4, 12, .99) 100%);
-        backdrop-filter: blur(25px) saturate(220%);
-        box-shadow: 0 0 100px rgba(0, 255, 65, .9), 
-                    inset 0 0 50px rgba(0, 255, 65, .3), 
-                    0 20px 80px rgba(0, 0, 0, .95);
         border-width: 3px;
-        z-index: 2500 !important;
-        left: 50% !important;
-        top: 50% !important;
-        transform: translate(-50%, -50%) !important;
+        box-shadow: 0 0 80px #00ff41, inset 0 0 45px rgba(0, 255, 65, .25), 0 20px 70px rgba(0, 0, 0, .9), 0 0 150px rgba(0, 255, 65, .4);
+        background: linear-gradient(135deg, rgba(5, 8, 20, .99) 0, #02040c 100%);
+        backdrop-filter: blur(20px) saturate(200%);
     }
 
-    /* Make focused text MORE readable with higher contrast */
+    /* Desktop-like text styling for focused block */
     .orbital-block.orbital-focus p {
-        color: #ffffff;
-        font-size: 1.05rem;
-        line-height: 1.9;
-        text-shadow: 0 2px 8px rgba(0, 0, 0, .95);
+        color: #fff;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, .8);
         font-weight: 500;
     }
 
@@ -763,16 +755,7 @@ body {
     .orbital-block.orbital-focus h2,
     .orbital-block.orbital-focus h3,
     .orbital-block.orbital-focus h4 {
-        text-shadow: 0 0 25px currentColor, 
-                     0 0 50px currentColor, 
-                     0 3px 12px rgba(0, 0, 0, .95);
-    }
-
-    /* Show all blocks on mobile but dim non-focused ones */
-    .orbital-block:not(.orbital-focus) {
-        opacity: 0.25 !important;
-        pointer-events: none;
-        transform: translate(-50%, -50%) scale(0.85) !important;
+        text-shadow: 0 0 20px currentColor, 0 0 40px currentColor, 0 2px 8px rgba(0, 0, 0, .9);
     }
 
     /* Adjust heading sizes for mobile */
