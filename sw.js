@@ -1,36 +1,130 @@
-self.addEventListener('install', event => {
+var CACHE_VERSION = '1.0.0';
+
+/* ── Files to pre-cache on install (app shell) ── */
+var PRECACHE_URLS = [
+  './index.html',
+  './manifest.json',
+  './css/style.css',
+  './js/compat.js',
+  './js/knowledge.js',
+  './js/db.js',
+  './js/avatar.js',
+  './js/voice.js',
+  './js/chat.js',
+  './favicon.ico',
+  './favicon-16x16.png',
+  './favicon-32x32.png',
+  './apple-touch-icon.png',
+  './android-chrome-192x192.png',
+  './android-chrome-512x512.png'
+];
+
+/* ════════════════════════════════════════════
+   INSTALL — pre-cache the app shell
+════════════════════════════════════════════ */
+self.addEventListener('install', function (event) {
   event.waitUntil(
-    caches.open('meu-cache').then(cache => {
-      return cache.addAll([
-        '/',
-        '/index.html',
-        '/index.pt.html',
-        '/index.es.html',
-        '/index.en.html',
-        '/manifest.json',
-        '/site.webmanifest',
-        '/index.html',
-        '/terms.en.html',
-        '/terms.pt.html',
-        '/terms.es.html',
-        '/style.css',
-        '/script.js',
-        '/socials.pt.html',
-        '/socials.es.html',
-        '/socials.en.html',
-        '/about.en.html',
-        '/about.pt.html',
-        '/about.es.html',
-      ]);
-      
+    caches.open(CACHE_VERSION).then(function (cache) {
+      return cache.addAll(PRECACHE_URLS);
+    }).then(function () {
+      /* Skip waiting so the new SW activates immediately */
+      return self.skipWaiting();
     })
   );
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(resp => {
-      return resp || fetch(event.request);
+/* ════════════════════════════════════════════
+   ACTIVATE — delete old cache versions
+════════════════════════════════════════════ */
+self.addEventListener('activate', function (event) {
+  event.waitUntil(
+    caches.keys().then(function (cacheNames) {
+      return Promise.all(
+        cacheNames
+          .filter(function (name) { return name !== CACHE_VERSION; })
+          .map(function (name) {
+            if (self.console) self.console.info('[SW] Deleting old cache:', name);
+            return caches.delete(name);
+          })
+      );
+    }).then(function () {
+      /* Take control of all open pages immediately */
+      return self.clients.claim();
     })
   );
 });
+
+/* ════════════════════════════════════════════
+   FETCH — serve from cache or network
+════════════════════════════════════════════ */
+self.addEventListener('fetch', function (event) {
+  var url = event.request.url;
+
+  /* Only handle GET requests */
+  if (event.request.method !== 'GET') return;
+
+  /* Skip chrome-extension and non-http(s) requests */
+  if (url.indexOf('http') !== 0) return;
+
+  /* ── CDN / external assets (fonts, WebLLM) → Network First ── */
+  var isExternal = (
+    url.indexOf('fonts.googleapis.com') >= 0 ||
+    url.indexOf('fonts.gstatic.com')    >= 0 ||
+    url.indexOf('cdn.jsdelivr.net')     >= 0 ||
+    url.indexOf('esm.run')              >= 0 ||
+    url.indexOf('esm.sh')               >= 0 ||
+    url.indexOf('cdnjs.cloudflare.com') >= 0
+  );
+
+  if (isExternal) {
+    event.respondWith(networkFirst(event.request));
+    return;
+  }
+
+  /* ── App shell → Cache First ── */
+  event.respondWith(cacheFirst(event.request));
+});
+
+/* ── Cache First strategy ── */
+function cacheFirst(request) {
+  return caches.match(request).then(function (cached) {
+    if (cached) return cached;
+    return fetchAndCache(request);
+  });
+}
+
+/* ── Network First strategy ── */
+function networkFirst(request) {
+  return fetch(request).then(function (response) {
+    if (response && response.ok) {
+      var cloned = response.clone();
+      caches.open(CACHE_VERSION).then(function (cache) {
+        cache.put(request, cloned);
+      });
+    }
+    return response;
+  }).catch(function () {
+    return caches.match(request);
+  });
+}
+
+/* ── Fetch + store in cache ── */
+function fetchAndCache(request) {
+  return fetch(request).then(function (response) {
+    /* Only cache valid responses */
+    if (!response || response.status !== 200 || response.type === 'opaque') {
+      return response;
+    }
+    var cloned = response.clone();
+    caches.open(CACHE_VERSION).then(function (cache) {
+      cache.put(request, cloned);
+    });
+    return response;
+  }).catch(function () {
+    /* Offline fallback for navigation requests */
+    if (request.mode === 'navigate') {
+      return caches.match('./index.html');
+    }
+    return new Response('', { status: 503, statusText: 'Service Unavailable' });
+  });
+}

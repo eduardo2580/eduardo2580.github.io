@@ -1,22 +1,53 @@
 # Security Policy
 
-## Reporting Security Issues
+## Supported Versions
 
-If you discover a security issue in this project, please report it to the project maintainers. Do not disclose the issue publicly until it has been addressed.
+| Version | Supported |
+|---------|-----------|
+| Latest  | ✅        |
+
+---
 
 ## Scope
 
-This security policy applies to all aspects of the project.
+This policy covers the Eduardo.AI interactive portfolio, including:
 
-## Reporting Process
+- Client-side JavaScript (`js/`)
+- Service Worker (`sw.js`)
+- IndexedDB data handling (`js/db.js`)
+- Web Speech API integration (`js/voice.js`)
+- WebLLM / WebGPU model loading (`js/chat.js`)
+- PWA manifest and caching behaviour
 
-1. **Submit a Report:** Report security issues to the project maintainers.
+**Out of scope:** third-party CDNs (WebLLM, Google Fonts, jsDelivr), the WebGPU/WASM runtime, or Phi-3.5-mini model weights.
 
-2. **Wait for Response:** The maintainers will acknowledge your report and work to validate and address the issue.
+---
 
-3. **Fixing Process:** Once a fix is ready, it will be deployed, and details will be shared appropriately.
+## Reporting a Vulnerability
 
-## Handling of Reports
+If you discover a security issue, **do not open a public GitHub issue**. Instead:
 
-- Security reports will be promptly and thoroughly investigated.
-- Regular updates will be provided on the progress of fixing reported vulnerabilities.
+1. **Email:** [eduardo.kvsw3@aleeas.com](mailto:eduardo.kvsw3@aleeas.com)
+   Subject line: `[SECURITY] Brief description`
+
+2. **Include in your report:**
+   - Description of the vulnerability
+   - Steps to reproduce
+   - Potential impact
+   - Suggested fix (optional)
+
+---
+
+## What to Look For
+
+Given the nature of this project (a fully client-side PWA), relevant security concerns include:
+
+- **XSS vulnerabilities** in message rendering (`renderMsgContent()` in `js/chat.js`)
+- **Malicious cached content** injected via the IndexedDB learned-answers store
+- **Service Worker cache poisoning** that could serve tampered files
+- **Voice/microphone permission bypass** or unexpected data exposure via Web Speech API
+- **WebLLM prompt injection** through user input affecting the system prompt
+
+---
+
+*Eduardo Souza Rodrigues — [eduardo2580.github.io](https://eduardo2580.github.io)*

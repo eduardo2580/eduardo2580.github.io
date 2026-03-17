@@ -17,7 +17,12 @@
   /* ════════════════════════════════════════════
      CONFIG
   ════════════════════════════════════════════ */
-  var WEBLLM_CDN = 'https://esm.run/@mlc-ai/web-llm';
+  /* ── CDN list — tried in order until one works ── */
+  var WEBLLM_CDNS = [
+    'https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm',  /* most reliable, Safari-safe */
+    'https://esm.run/@mlc-ai/web-llm',                     /* fallback */
+    'https://esm.sh/@mlc-ai/web-llm'                       /* last resort */
+  ];
   var MODEL_ID   = 'Phi-3.5-mini-instruct-q4f16_1-MLC';
   var MAX_TOKENS = 200;
   var PREDICT_DEBOUNCE_MS = 80;
@@ -682,7 +687,7 @@
 
   /* ════════════════════════════════════════════
      WEBLLM — loads silently in background
-     Only attempted if browser supports dynamic import + WebGPU
+     Safari-safe: async WebGPU probe + CDN fallback chain
   ════════════════════════════════════════════ */
   var PROGRESS_LABELS = {
     checking: { pt:'Verificando WebGPU…',    en:'Checking WebGPU…',      es:'Verificando WebGPU…'    },
@@ -691,22 +696,61 @@
 
   function initWebLLM() {
     var caps = win.CAPS || {};
-    if (!caps.webgpu || !caps.dynamicImport || !caps.asyncAwait) {
-      activateFallback('caps-missing');
+
+    /* Must have async/await and dynamic import */
+    if (!caps.asyncAwait || !caps.dynamicImport) {
+      activateFallback('no-async-or-import');
       return;
     }
 
-    setProgress(5, PROGRESS_LABELS.checking[lang]);
+    /* WebGPU check — on Safari the GPU adapter request is async,
+       so we probe it properly before giving up */
+    probeWebGPU(function (hasGPU) {
+      if (!hasGPU) {
+        activateFallback('no-webgpu');
+        return;
+      }
+      setProgress(5, PROGRESS_LABELS.checking[lang]);
+      tryLoadWebLLM(0);
+    });
+  }
 
+  /* Async WebGPU probe — requests an adapter to confirm GPU is actually usable.
+     Safari 17 has navigator.gpu but requestAdapter can return null on some
+     hardware/config combinations. */
+  function probeWebGPU(cb) {
+    /* Quick sync check first */
+    if (typeof navigator === 'undefined' || !navigator.gpu) { cb(false); return; }
+    /* Async adapter request */
+    try {
+      navigator.gpu.requestAdapter().then(function (adapter) {
+        cb(!!adapter);
+      }).catch(function () { cb(false); });
+    } catch (e) { cb(false); }
+  }
+
+  /* Try each CDN in sequence until one loads successfully */
+  function tryLoadWebLLM(cdnIndex) {
+    if (cdnIndex >= WEBLLM_CDNS.length) {
+      activateFallback('all-cdns-failed');
+      return;
+    }
+    var url = WEBLLM_CDNS[cdnIndex];
     var importer;
     try {
-      importer = new Function('url', 'return import(url)');
+      importer = new Function('u', 'return import(u)');
     } catch (e) {
       activateFallback('import-syntax');
       return;
     }
 
-    importer(WEBLLM_CDN).then(function (webllm) {
+    importer(url).then(function (webllm) {
+      /* Confirm the module has the API we need */
+      if (!webllm || typeof webllm.CreateMLCEngine !== 'function') {
+        if (win.console) win.console.warn('[Chat] CDN', url, 'missing CreateMLCEngine, trying next');
+        tryLoadWebLLM(cdnIndex + 1);
+        return;
+      }
       return webllm.CreateMLCEngine(MODEL_ID, {
         initProgressCallback: function (r) {
           var pct = Math.round((r.progress || 0) * 100);
@@ -714,12 +758,13 @@
         }
       });
     }).then(function (eng) {
+      if (!eng) return; /* previous .then() returned undefined (CDN retry case) */
       engine = eng;
       hideLoader();
       setAvatarState('online');
     }).catch(function (e) {
-      activateFallback('engine-error');
-      if (win.console) win.console.warn('[Chat] WebLLM failed:', e);
+      if (win.console) win.console.warn('[Chat] CDN', url, 'failed:', e && e.message);
+      tryLoadWebLLM(cdnIndex + 1);
     });
   }
 

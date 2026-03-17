@@ -4,9 +4,27 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Eduardo.AI</title>
+
+  <!-- ── PWA / Favicon ── -->
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#0d0d1a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Eduardo.AI"/>
+  <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"/>
+  <link rel="shortcut icon" href="favicon.ico"/>
+
+  <!-- ── SEO / Social ── -->
+  <meta name="description" content="Eduardo Souza Rodrigues — Desenvolvedor Junior. Portfólio interativo com IA local."/>
+  <meta name="author" content="Eduardo Souza Rodrigues"/>
+
+  <!-- ── Fonts ── -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/style.css"/>
+
   <!-- compat.js MUST be first — patches DOM before anything else runs -->
   <script src="js/compat.js"></script>
 </head>
@@ -283,5 +301,20 @@
   <script src="js/avatar.js"></script>
   <script src="js/voice.js"></script>
   <script src="js/chat.js"></script>
+
+  <!-- Service Worker registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js')
+          .then(function (reg) {
+            if (window.console) window.console.info('[SW] Registered, scope:', reg.scope);
+          })
+          .catch(function (err) {
+            if (window.console) window.console.warn('[SW] Registration failed:', err);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
