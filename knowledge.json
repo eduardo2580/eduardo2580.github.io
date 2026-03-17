@@ -1,0 +1,311 @@
+{
+  "en": {
+    "greeting": [
+      "Hello! I'm Eduardo's AI companion. Ask me anything about him!",
+      "Hi there! I'm here to tell you all about Eduardo Souza Rodrigues.",
+      "Welcome! What would you like to know about Eduardo?",
+      "Nice to meet you! I can tell you about Eduardo's skills, education, projects, and more."
+    ],
+    "about": [
+      "Eduardo Souza Rodrigues is a Junior Developer born on August 9, 2005, in Campinas, SP, Brazil.",
+      "He graduated from the Technical High School in Computer Science at SENAC and is currently pursuing a degree in Systems Analysis and Development at São Francisco University (USF).",
+      "He is passionate about creating digital solutions that improve people's lives and promote sustainable development.",
+      "Since childhood, Eduardo has had hands-on experience with software and hardware, including Unity, Arduino IDE, and Construct 3."
+    ],
+    "portfolio": [
+      "Eduardo's portfolio is available at https://eduardo2580.github.io/ and showcases his development projects.",
+      "His work spans web development, game development, and open-source contributions.",
+      "He maintains an active GitHub profile at https://github.com/eduardo2580 with his latest projects."
+    ],
+    "projects": [
+      "Eduardo developed Campo Minado (Minesweeper) in 2026, a computer program available on his GitHub.",
+      "As a Young Apprentice (Jovem Aprendiz) in 2024, he built games using Construct 3 and managed game registration and spreadsheet organization.",
+      "He participates in immersive development programs such as Alura's AI Agents Immersion and Back-End Dev Immersion.",
+      "His academic work includes the presentation 'The Future of Work' (2023), awarded Best Social Impact Project at SENAC."
+    ],
+    "technologies": [
+      "Frontend: HTML5, CSS3, JavaScript, Responsive Design, GitHub Pages",
+      "Backend & Platforms: C#, SQL, Node.js, ServiceNow, Windows Forms",
+      "Tools & Environments: Git, Visual Studio, Oracle VirtualBox, Microsoft 365, Android Studio",
+      "Other: Unity, Arduino IDE, Construct 3, Cybersecurity basics"
+    ],
+    "skills": [
+      "Web Development: HTML5, CSS3, JavaScript (University of Michigan certified)",
+      "Platforms: ServiceNow (Shark Bootcamp editions 4 and 8, Cask Camp), Introduction to Generative AI",
+      "Hardware & Support: Computer assembly and maintenance (SENAC certified, 272h)",
+      "Soft Skills: Problem-solving, teamwork, communication, social impact mindset, sustainability"
+    ],
+    "education": [
+      "Systems Analysis and Development – São Francisco University, USF (2024–present, in progress)",
+      "Technical High School in Computer Science – SENAC Registro, SP (2022–2023)",
+      "Web Design for Everybody Specialization – University of Michigan (2023), including HTML5, CSS3, JavaScript, and Responsive Design",
+      "Additional courses from Alura, Fundação Bradesco, Ondaro (Cask), and ServiceNow Learning"
+    ],
+    "experience": [
+      "Young Apprentice (Jovem Aprendiz) at ETAPA Ensino e Cultura Ltda. (2024) – built games with Construct 3, managed game registration, organized spreadsheets.",
+      "Earned the SENAC Project of the Year Award in Social Impact (2023) for the 'Future of Work' project.",
+      "Participated in Bootcamp Shark in ServiceNow editions 4 and 8, and the Cask Camp Ultimate ServiceNow Bootcamp (20h).",
+      "Attended multiple academic events at USF on cybersecurity, academic writing, and international exchange experiences."
+    ],
+    "certifications": [
+      "Web Design for Everybody Capstone – University of Michigan (2023)",
+      "Advanced Styling with Responsive Design – University of Michigan (2023)",
+      "Interactivity with JavaScript – University of Michigan (2023)",
+      "Introduction to HTML5 & CSS3 – University of Michigan (2023)",
+      "Bootcamp Shark in ServiceNow #8 – Aoop Shark Academy (2023)",
+      "Cask Camp: The Ultimate ServiceNow Bootcamp – Ondaro Brasil (2024, 20h)",
+      "Introduction to Generative AI – ServiceNow Learning (2024)",
+      "Imersão Dev Back-End & Imersão Dev com Google Gemini – Alura (2024)",
+      "Imersão Dev Agentes de IA Google – Alura (2026)",
+      "Developing Mobile Applications with Android Studio – Fundação Bradesco (2026, 15h)",
+      "Computer Hardware and Software Fundamentals – Fundação Bradesco (2024, 7h)",
+      "Introduction to OOP – Fundação Bradesco (2024, 5h)",
+      "Computer Support and Maintenance Assistant – SENAC (2022, 272h)"
+    ],
+    "awards": [
+      "SENAC Project of the Year Award in Social Impact (2023) – for the 'Future of Work' academic project."
+    ],
+    "languages": [
+      "Portuguese: Native – reads, writes, speaks, and understands fluently.",
+      "English: Intermediate – reads and understands well, speaks and writes reasonably.",
+      "Spanish: Basic – understands reasonably, limited speaking, reading, and writing."
+    ],
+    "contact": [
+      "GitHub: https://github.com/eduardo2580",
+      "LinkedIn: https://www.linkedin.com/in/eduardo-souza-rodrigues",
+      "Portfolio Website: https://eduardo2580.github.io/",
+      "ORCID: https://orcid.org/0009-0001-7877-2153",
+      "Lattes CV: https://lattes.cnpq.br/2487835899987366"
+    ],
+    "social": [
+      "Find Eduardo's open-source projects and code on GitHub: https://github.com/eduardo2580",
+      "Connect with him professionally on LinkedIn: https://www.linkedin.com/in/eduardo-souza-rodrigues",
+      "Visit his personal website and portfolio: https://eduardo2580.github.io/",
+      "He is also on the Fediverse (Federated Universe) social network."
+    ],
+    "personality": [
+      "I'm Eduardo's AI assistant — here to chat about his work and journey in tech!",
+      "Eduardo is curious, driven, and passionate about technology that makes a real difference.",
+      "He's always learning: from ServiceNow bootcamps to AI immersion programs.",
+      "Think of me as Eduardo's digital companion — ask me anything!"
+    ],
+    "terms": [
+      "This is Eduardo Souza Rodrigues' personal portfolio and professional showcase.",
+      "All content is protected under copyright and intellectual property laws.",
+      "Use of this portfolio for commercial purposes requires explicit permission from Eduardo.",
+      "For more details, please review the complete terms of use on his website."
+    ],
+    "unknown": [
+      "Interesting question! Feel free to ask about Eduardo's projects, skills, certifications, or experience.",
+      "I'm not sure about that specifically. Would you like to know more about his education or tech stack?",
+      "Try asking about his portfolio, awards, languages, or the technologies he works with!",
+      "I'd love to help! What else would you like to know about Eduardo?"
+    ]
+  },
+  "es": {
+    "greeting": [
+      "¡Hola! Soy la asistente IA de Eduardo. ¡Pregúntame cualquier cosa sobre él!",
+      "¡Hola! Estoy aquí para contarte todo sobre Eduardo Souza Rodrigues.",
+      "¡Bienvenido! ¿Qué te gustaría saber sobre Eduardo?",
+      "¡Encantada de conocerte! Puedo contarte sobre sus habilidades, educación, proyectos y más."
+    ],
+    "about": [
+      "Eduardo Souza Rodrigues es un Desarrollador Junior nacido el 9 de agosto de 2005 en Campinas, SP, Brasil.",
+      "Se graduó en la Escuela Técnica de Informática del SENAC y actualmente cursa Análisis de Sistemas y Desarrollo en la Universidad São Francisco (USF).",
+      "Es apasionado por crear soluciones digitales que mejoren la vida de las personas y promuevan el desarrollo sostenible.",
+      "Desde la infancia, Eduardo tiene experiencia práctica con software y hardware, incluyendo Unity, Arduino IDE y Construct 3."
+    ],
+    "portfolio": [
+      "El portafolio de Eduardo está disponible en https://eduardo2580.github.io/ y muestra sus proyectos de desarrollo.",
+      "Su trabajo abarca desarrollo web, creación de juegos y contribuciones de código abierto.",
+      "Mantiene un perfil activo en GitHub en https://github.com/eduardo2580 con sus proyectos más recientes."
+    ],
+    "projects": [
+      "Eduardo desarrolló Campo Minado (Buscaminas) en 2026, un programa disponible en su GitHub.",
+      "Como Joven Aprendiz en 2024, construyó juegos con Construct 3 y gestionó registros y planillas.",
+      "Participó en programas de inmersión como Alura Dev AI Agents e Inmersión Dev Back-End.",
+      "Su trabajo académico incluye la presentación 'El Futuro del Trabajo' (2023), premiada como Mejor Proyecto de Impacto Social en SENAC."
+    ],
+    "technologies": [
+      "Frontend: HTML5, CSS3, JavaScript, Diseño Responsivo, GitHub Pages",
+      "Backend y Plataformas: C#, SQL, Node.js, ServiceNow, Windows Forms",
+      "Herramientas y Entornos: Git, Visual Studio, Oracle VirtualBox, Microsoft 365, Android Studio",
+      "Otros: Unity, Arduino IDE, Construct 3, fundamentos de Ciberseguridad"
+    ],
+    "skills": [
+      "Desarrollo Web: HTML5, CSS3, JavaScript (certificado por la Universidad de Michigan)",
+      "Plataformas: ServiceNow (Bootcamps Shark ediciones 4 y 8, Cask Camp), Introducción a IA Generativa",
+      "Hardware y Soporte: Ensamble y mantenimiento de computadoras (certificado SENAC, 272h)",
+      "Habilidades Blandas: Resolución de problemas, trabajo en equipo, comunicación, impacto social, sostenibilidad"
+    ],
+    "education": [
+      "Análisis de Sistemas y Desarrollo – Universidad São Francisco, USF (2024–presente, en curso)",
+      "Bachillerato Técnico en Informática – SENAC Registro, SP (2022–2023)",
+      "Especialización Web Design for Everybody – Universidad de Michigan (2023): HTML5, CSS3, JavaScript y Diseño Responsivo",
+      "Cursos adicionales de Alura, Fundação Bradesco, Ondaro (Cask) y ServiceNow Learning"
+    ],
+    "experience": [
+      "Joven Aprendiz en ETAPA Ensino e Cultura Ltda. (2024) – desarrolló juegos con Construct 3, gestionó registros y planillas.",
+      "Ganó el Premio SENAC al Proyecto del Año en Impacto Social (2023) por el proyecto 'Futuro del Trabajo'.",
+      "Participó en los Bootcamps Shark in ServiceNow ediciones 4 y 8, y en el Cask Camp Ultimate ServiceNow Bootcamp (20h).",
+      "Asistió a múltiples eventos académicos en la USF sobre ciberseguridad, escritura académica e intercambios internacionales."
+    ],
+    "certifications": [
+      "Web Design for Everybody Capstone – Universidad de Michigan (2023)",
+      "Estilo Avanzado con Diseño Responsivo – Universidad de Michigan (2023)",
+      "Interactividad con JavaScript – Universidad de Michigan (2023)",
+      "Introducción a HTML5 y CSS3 – Universidad de Michigan (2023)",
+      "Bootcamp Shark in ServiceNow #8 – Aoop Shark Academy (2023)",
+      "Cask Camp: The Ultimate ServiceNow Bootcamp – Ondaro Brasil (2024, 20h)",
+      "Introducción a IA Generativa – ServiceNow Learning (2024)",
+      "Inmersión Dev Back-End e Inmersión Dev con Google Gemini – Alura (2024)",
+      "Inmersión Dev Agentes de IA Google – Alura (2026)",
+      "Desarrollo de Apps Móviles con Android Studio – Fundação Bradesco (2026, 15h)",
+      "Fundamentos de Hardware y Software – Fundação Bradesco (2024, 7h)",
+      "Introducción a POO – Fundação Bradesco (2024, 5h)",
+      "Asistente de Soporte y Mantenimiento de Computadoras – SENAC (2022, 272h)"
+    ],
+    "awards": [
+      "Premio SENAC al Proyecto del Año en Impacto Social (2023) – por el proyecto académico 'Futuro del Trabajo'."
+    ],
+    "languages": [
+      "Portugués: Nativo – lee, escribe, habla y comprende con fluidez.",
+      "Inglés: Intermedio – lee y comprende bien, habla y escribe razonablemente.",
+      "Español: Básico – comprende razonablemente, habla, lee y escribe de forma limitada."
+    ],
+    "contact": [
+      "GitHub: https://github.com/eduardo2580",
+      "LinkedIn: https://www.linkedin.com/in/eduardo-souza-rodrigues",
+      "Sitio web y Portafolio: https://eduardo2580.github.io/",
+      "ORCID: https://orcid.org/0009-0001-7877-2153",
+      "Currículo Lattes: https://lattes.cnpq.br/2487835899987366"
+    ],
+    "social": [
+      "Encuentra los proyectos de código abierto de Eduardo en GitHub: https://github.com/eduardo2580",
+      "Conéctate con él profesionalmente en LinkedIn: https://www.linkedin.com/in/eduardo-souza-rodrigues",
+      "Visita su sitio web y portafolio personal: https://eduardo2580.github.io/",
+      "También está presente en el Fediverso (Universo Federado)."
+    ],
+    "personality": [
+      "¡Soy la asistente IA de Eduardo, aquí para hablar sobre su trabajo y trayectoria en tecnología!",
+      "Eduardo es curioso, comprometido y apasionado por la tecnología que genera un impacto real.",
+      "Siempre está aprendiendo: desde bootcamps de ServiceNow hasta programas de inmersión en IA.",
+      "¡Piensa en mí como la compañera digital de Eduardo — pregúntame lo que quieras!"
+    ],
+    "terms": [
+      "Este es el portafolio personal de Eduardo Souza Rodrigues y su vitrina profesional.",
+      "Todo el contenido está protegido bajo las leyes de derechos de autor y propiedad intelectual.",
+      "El uso de este portafolio con fines comerciales requiere permiso explícito de Eduardo.",
+      "Para más detalles, consulta los términos de uso completos en su sitio web."
+    ],
+    "unknown": [
+      "¡Pregunta interesante! Puedes preguntarme sobre sus proyectos, habilidades, certificaciones o experiencia.",
+      "No estoy segura de eso en específico. ¿Te gustaría saber más sobre su educación o stack tecnológico?",
+      "¡Intenta preguntar sobre su portafolio, premios, idiomas o las tecnologías con las que trabaja!",
+      "¡Con gusto te ayudo! ¿Qué más te gustaría saber sobre Eduardo?"
+    ]
+  },
+  "pt": {
+    "greeting": [
+      "Olá! Sou a assistente IA do Eduardo. Pergunte-me qualquer coisa sobre ele!",
+      "Oi! Estou aqui para contar tudo sobre Eduardo Souza Rodrigues.",
+      "Bem-vindo! O que você gostaria de saber sobre Eduardo?",
+      "Prazer em conhecê-lo! Posso falar sobre suas habilidades, formação, projetos e muito mais."
+    ],
+    "about": [
+      "Eduardo Souza Rodrigues é um Desenvolvedor Junior nascido em 09/08/2005, em Campinas, SP, Brasil.",
+      "Formado no Ensino Médio Técnico em Informática pelo SENAC Registro, está cursando Análise e Desenvolvimento de Sistemas na Universidade São Francisco (USF).",
+      "É entusiasta de tecnologia, motivado por criar soluções digitais que melhorem a vida das pessoas e promovam o desenvolvimento sustentável.",
+      "Desde a infância, tem experiência prática com software e hardware, incluindo Unity, Arduino IDE e Construct 3."
+    ],
+    "portfolio": [
+      "O portfólio de Eduardo está disponível em https://eduardo2580.github.io/ e apresenta seus projetos de desenvolvimento.",
+      "Seu trabalho abrange desenvolvimento web, criação de jogos e contribuições de código aberto.",
+      "Ele mantém um perfil ativo no GitHub em https://github.com/eduardo2580 com seus projetos mais recentes."
+    ],
+    "projects": [
+      "Eduardo desenvolveu o Campo Minado em 2026, um programa disponível no seu GitHub.",
+      "Como Jovem Aprendiz em 2024, construiu jogos com o Construct 3, realizou cadastramento de jogos e organizou planilhas.",
+      "Participou de imersões como a Imersão Dev Agentes de IA Google e a Imersão Dev Back-End da Alura.",
+      "Seu trabalho acadêmico inclui a apresentação 'O Futuro do Trabalho' (2023), premiada como Melhor Projeto de Impacto Social no SENAC."
+    ],
+    "technologies": [
+      "Frontend: HTML5, CSS3, JavaScript, Design Responsivo, GitHub Pages",
+      "Backend e Plataformas: C#, SQL, Node.js, ServiceNow, Windows Forms",
+      "Ferramentas e Ambientes: Git, Visual Studio, Oracle VirtualBox, Microsoft 365, Android Studio",
+      "Outros: Unity, Arduino IDE, Construct 3, fundamentos de Cibersegurança"
+    ],
+    "skills": [
+      "Desenvolvimento Web: HTML5, CSS3, JavaScript (certificado pela Universidade de Michigan)",
+      "Plataformas: ServiceNow (Bootcamps Shark edições 4 e 8, Cask Camp), Introdução à IA Generativa",
+      "Hardware e Suporte: Montagem e manutenção de computadores (certificado SENAC, 272h)",
+      "Habilidades Interpessoais: Resolução de problemas, trabalho em equipe, comunicação, impacto social, sustentabilidade"
+    ],
+    "education": [
+      "Análise e Desenvolvimento de Sistemas – Universidade São Francisco, USF (2024–presente, em andamento)",
+      "Ensino Médio Técnico em Informática – SENAC Registro, SP (2022–2023)",
+      "Especialização Web Design for Everybody – Universidade de Michigan (2023): HTML5, CSS3, JavaScript e Design Responsivo",
+      "Cursos adicionais pela Alura, Fundação Bradesco, Ondaro (Cask) e ServiceNow Learning"
+    ],
+    "experience": [
+      "Jovem Aprendiz na ETAPA Ensino e Cultura Ltda. (2024) – criou jogos com Construct 3, realizou cadastramento de jogos e organizou planilhas.",
+      "Conquistou o Prêmio SENAC de Projeto do Ano Letivo na categoria Impacto Social (2023) pelo projeto 'O Futuro do Trabalho'.",
+      "Participou dos Bootcamps Shark in ServiceNow edições 4 e 8, e do Cask Camp Ultimate ServiceNow Bootcamp (20h).",
+      "Participou de diversos eventos acadêmicos na USF sobre cibersegurança, escrita acadêmica e vivências internacionais."
+    ],
+    "certifications": [
+      "Web Design for Everybody Capstone – Universidade de Michigan (2023)",
+      "Advanced Styling with Responsive Design – Universidade de Michigan (2023)",
+      "Interactivity with JavaScript – Universidade de Michigan (2023)",
+      "Introduction to HTML5 e CSS3 – Universidade de Michigan (2023)",
+      "Bootcamp Shark in ServiceNow #8 – Aoop Shark Academy (2023)",
+      "Cask Camp: The Ultimate ServiceNow Bootcamp – Ondaro Brasil (2024, 20h)",
+      "Introduction to Generative AI – ServiceNow Learning (2024)",
+      "Imersão Dev Back-End e Imersão Dev com Google Gemini – Alura (2024)",
+      "Imersão Dev Agentes de IA Google – Alura (2026)",
+      "Desenvolvendo Aplicações Mobile com Android Studio – Fundação Bradesco (2026, 15h)",
+      "Fundamentos de TI: Hardware e Software – Fundação Bradesco (2024, 7h)",
+      "Introdução à Programação Orientada a Objetos (POO) – Fundação Bradesco (2024, 5h)",
+      "Assistente de Suporte e Manutenção de Computadores – SENAC (2022, 272h)"
+    ],
+    "awards": [
+      "Prêmio SENAC de Projeto do Ano Letivo na categoria Impacto Social (2023) – pelo projeto acadêmico 'O Futuro do Trabalho'."
+    ],
+    "languages": [
+      "Português: Nativo – compreende, fala, lê e escreve bem.",
+      "Inglês: Intermediário – compreende e lê bem, fala e escreve razoavelmente.",
+      "Espanhol: Básico – compreende razoavelmente, fala, lê e escreve pouco."
+    ],
+    "contact": [
+      "GitHub: https://github.com/eduardo2580",
+      "LinkedIn: https://www.linkedin.com/in/eduardo-souza-rodrigues",
+      "Site e Portfólio: https://eduardo2580.github.io/",
+      "ORCID: https://orcid.org/0009-0001-7877-2153",
+      "Currículo Lattes: https://lattes.cnpq.br/2487835899987366"
+    ],
+    "social": [
+      "Encontre os projetos de código aberto do Eduardo no GitHub: https://github.com/eduardo2580",
+      "Conecte-se com ele profissionalmente no LinkedIn: https://www.linkedin.com/in/eduardo-souza-rodrigues",
+      "Visite seu site pessoal e portfólio: https://eduardo2580.github.io/",
+      "Ele também está presente no Fediverso (Universo Federado)."
+    ],
+    "personality": [
+      "Sou a assistente IA do Eduardo, aqui para conversar sobre seu trabalho e trajetória na tecnologia!",
+      "Eduardo é curioso, determinado e apaixonado por tecnologia que gera impacto real.",
+      "Está sempre aprendendo: dos bootcamps de ServiceNow às imersões em IA.",
+      "Pense em mim como a companheira digital do Eduardo — pode perguntar à vontade!"
+    ],
+    "terms": [
+      "Este é o portfólio pessoal de Eduardo Souza Rodrigues e seu espaço de apresentação profissional.",
+      "Todo o conteúdo está protegido pelas leis de direitos autorais e propriedade intelectual.",
+      "O uso deste portfólio para fins comerciais requer permissão explícita do Eduardo.",
+      "Para mais detalhes, consulte os termos de uso completos no site."
+    ],
+    "unknown": [
+      "Que pergunta interessante! Você pode perguntar sobre seus projetos, habilidades, certificações ou experiência.",
+      "Não tenho certeza sobre isso especificamente. Quer saber mais sobre sua formação ou stack de tecnologias?",
+      "Tente perguntar sobre seu portfólio, prêmios, idiomas ou as tecnologias com as quais ele trabalha!",
+      "Adoraria ajudar! O que mais você gostaria de saber sobre Eduardo?"
+    ]
+  }
+}
