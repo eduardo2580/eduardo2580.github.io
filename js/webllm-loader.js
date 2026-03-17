@@ -188,22 +188,45 @@ function buildLabel(report, pct) {
 
 /* ═══════════════════════════════════════════════════════════════════════════
    STAGE 1 — WebGPU probe
-   Tries up to 3 times with 1s gaps (some browsers are slow to init the GPU).
-   Returns true only if requestAdapter() returns a non-null adapter.
-   Does NOT return true on null — that caused CreateMLCEngine to hang silently.
+   Safari-specific issue: requestAdapter() with no options returns null on many
+   Mac configurations. Safari's WebGPU backend (Metal) requires an explicit
+   powerPreference hint to decide which GPU to expose. Without it, Safari may
+   silently decline — navigator.gpu exists but every adapter call returns null.
+
+   Fix: try three powerPreference variants before declaring no WebGPU:
+     1. 'high-performance' — discrete GPU, works on most Safari + Chrome/Edge
+     2. 'low-power'        — integrated GPU, needed on single-GPU Mac configs
+     3. (no hint)          — spec default, reliable on Firefox
+
+   Each attempt gets a 7s timeout — Safari's Metal stack initialises slowly,
+   especially on first use. 800ms pause between variants lets it settle.
 ═══════════════════════════════════════════════════════════════════════════ */
 async function probeWebGPU() {
   if (!navigator.gpu) return false;
-  for (let i = 0; i < 3; i++) {
+
+  const variants = [
+    { powerPreference: 'high-performance' },
+    { powerPreference: 'low-power' },
+    {}
+  ];
+
+  for (let i = 0; i < variants.length; i++) {
     try {
       const adapter = await Promise.race([
-        navigator.gpu.requestAdapter(),
-        new Promise(r => setTimeout(() => r(null), 5000))
+        navigator.gpu.requestAdapter(variants[i]),
+        new Promise(r => setTimeout(() => r(null), 7000))
       ]);
-      if (adapter) return true;
-    } catch (_) {}
-    if (i < 2) await new Promise(r => setTimeout(r, 1000));
+      if (adapter) {
+        console.info('[WebLLM] WebGPU adapter OK with', JSON.stringify(variants[i]));
+        return true;
+      }
+    } catch (e) {
+      console.warn('[WebLLM] requestAdapter variant', i, 'threw:', e && e.message);
+    }
+    if (i < variants.length - 1) await new Promise(r => setTimeout(r, 800));
   }
+
+  console.info('[WebLLM] All requestAdapter variants returned null');
   return false;
 }
 
