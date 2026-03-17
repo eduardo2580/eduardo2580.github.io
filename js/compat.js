@@ -154,9 +154,6 @@ window.CSS_ANIM = (function () {
 })();
 
 /* ── WebGPU detection ── */
-/* navigator.gpu exists in Chrome 113+, Edge 113+, Safari 17+ (macOS/iOS).
-   Some Safari 17 builds have gpu but it's undefined inside workers —
-   we only check the main thread here so this is safe. */
 window.HAS_WEBGPU = !!(
   typeof navigator !== 'undefined' &&
   navigator.gpu !== undefined &&
@@ -164,50 +161,49 @@ window.HAS_WEBGPU = !!(
 );
 
 /* ── Dynamic import detection ── */
-/* The old `new Function('return import("")')` trick fails on Safari because:
-   1. An empty-string specifier throws a TypeError before the test completes
-   2. Strict-mode iframes on Safari reject the Function constructor version
-   We use a real data: URI import probe instead — the cleanest cross-browser check. */
-window.HAS_DYNAMIC_IMPORT = false; /* default; upgraded asynchronously below */
-(function () {
-  /* Synchronous heuristic first: Safari 15+ always has import() */
-  var ua = (navigator && navigator.userAgent) || '';
-  var safariVersion = ua.match(/Version\/(\d+)/);
-  if (safariVersion && parseInt(safariVersion[1], 10) >= 15) {
-    window.HAS_DYNAMIC_IMPORT = true;
-  }
-  /* Chrome/Edge/Firefox: check via Function constructor with a safe specifier */
+/* Safari iOS blocks new Function('return import(u)') via CSP.
+   The only reliable cross-browser test is a UA version check
+   combined with a safe syntax probe. */
+window.HAS_DYNAMIC_IMPORT = (function () {
+  var ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
+
+  /* Safari / Mobile Safari: Version/15+ always supports dynamic import */
+  var safVer = ua.match(/Version\/(\d+)/);
+  if (safVer && parseInt(safVer[1], 10) >= 15) return true;
+
+  /* Chrome, Edge, Firefox, Samsung: check by syntax without executing */
   try {
-    /* Use a blob URL so the import() call itself doesn't throw on specifier */
-    var fn = new Function('return typeof import !== "undefined"');
-    /* If the above doesn't throw, the syntax is supported */
-    window.HAS_DYNAMIC_IMPORT = true;
-  } catch (e) { /* syntax not supported */ }
-})();
+    /* This parses without executing — just confirms the parser accepts import() */
+    new Function('return import.meta');
+    return true;
+  } catch (e) {}
+
+  /* Last-resort: Function constructor with a no-op */
+  try {
+    new Function('return import("data:text/javascript,")');
+    return true;
+  } catch (e) {}
+
+  return false;
+}());
 
 /* ── Async/Await detection ── */
 window.HAS_ASYNC = (function () {
-  /* Safari 10.1+ supports async/await. Detect reliably: */
   try {
-    /* Use Function constructor — if it parses, async/await is supported */
-    var f = new Function('return (async () => {})()');
-    return !!(f && typeof f().then === 'function');
+    var f = new Function('return (async function _t(){})()');
+    return !!(f && typeof f.then === 'function');
   } catch (e) {
-    /* Arrow function syntax might fail in very old engines, try without */
-    try {
-      new Function('async function _t(){}');
-      return true;
-    } catch (e2) { return false; }
+    try { new Function('async function _t(){}'); return true; }
+    catch (e2) { return false; }
   }
-})();
+}());
 
-/* ── CAPABILITY SUMMARY (read by chat.js) ── */
+/* ── CAPABILITY SUMMARY ── */
 window.CAPS = {
   webgpu:        window.HAS_WEBGPU,
   dynamicImport: window.HAS_DYNAMIC_IMPORT,
   asyncAwait:    window.HAS_ASYNC,
   svgAnimate:    window.SVG_ANIMATE,
   cssAnim:       window.CSS_ANIM,
-  /* true = full modern browser capable of running WebLLM */
   modern: window.HAS_WEBGPU && window.HAS_DYNAMIC_IMPORT && window.HAS_ASYNC
 };

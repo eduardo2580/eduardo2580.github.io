@@ -1,4 +1,4 @@
-var CACHE_VERSION = '1.0.0';
+var CACHE_VERSION = '1.0.11';
 
 /* ── Files to pre-cache on install (app shell) ── */
 var PRECACHE_URLS = [
@@ -10,6 +10,7 @@ var PRECACHE_URLS = [
   './js/db.js',
   './js/avatar.js',
   './js/voice.js',
+  './js/webllm-loader.js',
   './js/chat.js',
   './favicon.ico',
   './favicon-16x16.png',

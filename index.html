@@ -295,7 +295,12 @@
   <!-- Disclaimer — always visible, translated by chat.js on boot + lang switch -->
   <p id="disclaimer">Eduardo.AI pode cometer erros. Verifique as respostas.</p>
 
-  <!-- Scripts in dependency order -->
+  <!-- WebLLM loader — native ES module, runs in Chrome/Edge/Firefox/Safari -->
+  <!-- Loads the model and sets window.__webllmReady when done           -->
+  <!-- Browsers that don't support <script type="module"> ignore this    -->
+  <script type="module" src="js/webllm-loader.js"></script>
+
+  <!-- Scripts in dependency order (ES5, work in all browsers) -->
   <script src="js/knowledge.js"></script>
   <script src="js/db.js"></script>
   <script src="js/avatar.js"></script>
