@@ -1,38 +1,11 @@
 /*
- * chat.js — Eduardo.AI
+ * chat.js — Eduardo.AI  (patched)
  *
- * Browser support: Chrome, Edge, Firefox, Safari (all modern versions).
- * Written in ES5 — no const/let, no arrow functions, no template literals,
- * no async/await. Works in any browser regardless of WebGPU support.
- *
- * Architecture:
- *   ┌─────────────────────────────────────────────────────┐
- *   │  KEYBOARD MODE  (always active from first keystroke) │
- *   │  • Chip clicks  → instant cached answer              │
- *   │  • Free text    → keyword lookup → canned reply      │
- *   └───────────────────────┬─────────────────────────────┘
- *                           │ if WebLLM loads in background
- *                           ▼
- *   ┌─────────────────────────────────────────────────────┐
- *   │  AI MODE  (seamless upgrade, no reload)             │
- *   │  • Free text → WebLLM engine → generated reply      │
- *   │  • Chip clicks remain instant (no change needed)    │
- *   └─────────────────────────────────────────────────────┘
- *
- * Key design decisions:
- *   1. Never make the user wait for the AI download.
- *      If a message arrives while the engine is loading, it gets a keyword
- *      reply immediately. Once the engine is ready, the next message uses AI.
- *
- *   2. WebLLM failure is silent from the user's perspective.
- *      The progress bar shows the error briefly, then disappears.
- *      The status dot turns orange (keyword mode). No scary error dialog.
- *
- *   3. knowledge.js and db.js are untouched.
- *      This file only reads their public globals:
- *        window.SUGGESTIONS, window.GREETINGS, window.ANSWER_CACHE,
- *        window.KEYWORD_MAP, window.getAnswer, window.keywordLookup,
- *        window.buildSystemPrompt, window.DB
+ * Patch summary vs original:
+ *   resolveKeyword() — now reads ANSWER_CACHE directly instead of going
+ *   through DB.getDefault, which had a race condition where db.js could
+ *   open before knowledge.js finished seeding the GK keys into ANSWER_CACHE.
+ *   All other logic is identical to the original.
  */
 (function (win, doc) {
   'use strict';
@@ -40,21 +13,18 @@
   /* ════════════════════════════════════════════════════════════════════════
      CONFIG
   ════════════════════════════════════════════════════════════════════════ */
-  var MAX_TOKENS         = 300;   /* max tokens per WebLLM reply */
-  var PREDICT_DEBOUNCE   = 80;    /* ms debounce on type-ahead prediction */
-  var POLL_INTERVAL      = 400;   /* ms between WebLLM readiness polls */
-  var FAIL_MIN_POLLS     = 8;     /* minimum polls before trusting __webllmFailed */
-                                   /* loader's hang detector fires at 30s, so by  */
-                                   /* the time __webllmFailed is set all slow ops  */
-                                   /* are done — 8 × 400ms = 3.2s grace period   */
+  var MAX_TOKENS         = 300;
+  var PREDICT_DEBOUNCE   = 80;
+  var POLL_INTERVAL      = 400;
+  var FAIL_MIN_POLLS     = 8;
 
   /* ════════════════════════════════════════════════════════════════════════
      STATE
   ════════════════════════════════════════════════════════════════════════ */
-  var lang             = 'pt';   /* current UI language */
-  var engine           = null;   /* WebLLM MLCEngine — null until loaded */
-  var busy             = false;  /* true while a response is in flight */
-  var stopRequested    = false;  /* set by stop button during WebLLM call */
+  var lang             = 'pt';
+  var engine           = null;
+  var busy             = false;
+  var stopRequested    = false;
   var talkTimer        = null;
   var greetBubble      = null;
   var predictTimer     = null;
@@ -121,7 +91,7 @@
   }
 
   /* ════════════════════════════════════════════════════════════════════════
-     UI STRINGS  (everything visible to the user, translated)
+     UI STRINGS
   ════════════════════════════════════════════════════════════════════════ */
   var STR = {
     placeholder:   { pt: 'Enviar mensagem…',   en: 'Send a message…',   es: 'Enviar mensaje…'   },
@@ -148,7 +118,6 @@
 
   /* ════════════════════════════════════════════════════════════════════════
      AVATAR / STATUS
-     States: loading | online | thinking | fallback | error
   ════════════════════════════════════════════════════════════════════════ */
   var STATUS = {
     loading:  { dot: '#facc15', txt: { pt: 'Carregando IA…', en: 'Loading AI…',    es: 'Cargando IA…'   }, talk: false },
@@ -168,11 +137,7 @@
 
   /* ════════════════════════════════════════════════════════════════════════
      LOADER BAR
-     Only updates the fill width — the label text is owned by webllm-loader.js
-     from the moment __webllmStarted is true. We never write to $loaderLbl
-     while the loader is running to avoid overwriting live progress messages.
   ════════════════════════════════════════════════════════════════════════ */
-  /* Registered before boot so no early progress events are missed */
   win.__webllmProgress = function (pct) {
     if ($fill) $fill.style.width = Math.min(100, pct) + '%';
   };
@@ -184,30 +149,25 @@
   ════════════════════════════════════════════════════════════════════════ */
   function applyLang(l) {
     lang = l;
-    win.__webllmLang = l;   /* loader reads this for translated progress strings */
+    win.__webllmLang = l;
 
-    /* Sync lang-pill buttons */
     var i;
     for (i = 0; i < $langBtns.length; i++) {
       toggleClass($langBtns[i], 'active', $langBtns[i].getAttribute('data-lang') === l);
     }
 
-    /* Input placeholder + aria */
     if ($input) {
       $input.placeholder = s('placeholder');
       setAttr($input, 'aria-label', s('ariaMsg'));
     }
     if ($send) setAttr($send, 'aria-label', s('ariaSend'));
 
-    /* Greeting bubble — re-render rich HTML in new language */
     if (greetBubble && win.GREETINGS) {
       greetBubble.innerHTML = renderMsgContent(win.GREETINGS[l]);
     }
 
-    /* Disclaimer */
     if ($disc) $disc.innerHTML = escapeHtml(s('disclaimer'));
 
-    /* Loader label — only if loader hasn't started (it owns the label once started) */
     if ($loaderLbl && !win.__webllmStarted) {
       $loaderLbl.textContent = s('loaderInit');
     }
@@ -218,7 +178,6 @@
     if (win.VoiceController) win.VoiceController.setLang(l);
   }
 
-  /* Bind lang buttons */
   (function () {
     for (var i = 0; i < $langBtns.length; i++) {
       (function (btn) {
@@ -228,7 +187,7 @@
   }());
 
   /* ════════════════════════════════════════════════════════════════════════
-     SUGGESTIONS (chips)
+     SUGGESTIONS
   ════════════════════════════════════════════════════════════════════════ */
   function renderSuggestions() {
     if (!$suggs) return;
@@ -254,11 +213,6 @@
     bot:  { pt: 'Eduardo.AI', en: 'Eduardo.AI', es: 'Eduardo.AI' }
   };
 
-  /**
-   * renderMsgContent — converts safe markup to HTML.
-   * [[url|label]] → <a>  |  **text** → <strong>  |  \n → <br>
-   * Everything is escaped first so there is no injection path.
-   */
   function renderMsgContent(text) {
     if (!text) return '';
     var links = [];
@@ -328,7 +282,7 @@
   }
 
   /* ════════════════════════════════════════════════════════════════════════
-     SEND BUTTON  (send icon ↔ stop icon swap)
+     SEND BUTTON
   ════════════════════════════════════════════════════════════════════════ */
   function setSendState(st) {
     if (!$send) return;
@@ -362,8 +316,6 @@
 
   /* ════════════════════════════════════════════════════════════════════════
      ENGINE SYNC
-     Always reads the latest value of window.__webllmReady before deciding
-     whether to use AI or keyword mode. Called in the hot path of every send.
   ════════════════════════════════════════════════════════════════════════ */
   function syncEngine() {
     if (!engine && win.__webllmReady) engine = win.__webllmReady;
@@ -371,8 +323,6 @@
 
   /* ════════════════════════════════════════════════════════════════════════
      TYPE-AHEAD PREDICTION
-     Shows ghost completion text as the user types.
-     Scores suggestion labels against the current input value.
   ════════════════════════════════════════════════════════════════════════ */
   function predScore(input, candidate) {
     if (!input) return 0;
@@ -470,15 +420,13 @@
 
   if ($input) {
     on($input, 'input',   onInputChange);
-    on($input, 'keyup',   onInputChange);  /* IE fallback */
+    on($input, 'keyup',   onInputChange);
     on($input, 'keydown', onInputKey);
     on($input, 'blur',    clearPrediction);
   }
 
   /* ════════════════════════════════════════════════════════════════════════
      SEND — CHIP CLICK
-     Chips always use the instant cached answer — no engine involved.
-     This keeps chip responses at zero latency regardless of AI state.
   ════════════════════════════════════════════════════════════════════════ */
   function sendChip(label, key) {
     if (busy) return;
@@ -494,20 +442,10 @@
 
   /* ════════════════════════════════════════════════════════════════════════
      SEND — FREE TEXT
-     Decision tree:
-       1. Stop button pressed while busy → cancel, reset
-       2. Keyword match found → instant keyword answer (even if AI loaded)
-          Rationale: questions about Eduardo should always use the curated
-          answer, not a potentially hallucinated AI response.
-       3. DB learned cache hit → return cached AI answer instantly
-       4. Engine loaded → send to WebLLM
-       5. Engine not loaded (still downloading or failed) → keyword fallback
-          Do NOT wait — give an answer now using keyword/unknown reply.
   ════════════════════════════════════════════════════════════════════════ */
   function sendFreeText() {
     if (!$input) return;
 
-    /* Stop */
     if (busy) {
       stopRequested = true;
       setSendState('send');
@@ -525,14 +463,13 @@
     clearPrediction();
     busy = true;
     stopRequested = false;
-    syncEngine(); /* pick up engine if it just finished loading */
+    syncEngine();
 
     appendMsg(text, 'user');
     showTyping();
     setAvatarState('thinking');
     setSendState('stop');
 
-    /* Step 1: keyword match → instant curated answer */
     var keyHit     = win.keywordLookup ? win.keywordLookup(text, lang) : 'unknown';
     var isKnownKey = (keyHit !== 'unknown' && keyHit !== 'default');
 
@@ -541,7 +478,6 @@
       return;
     }
 
-    /* Step 2: DB learned cache */
     if (win.DB) {
       win.DB.getLearned(text, lang, function (cached) {
         if (stopRequested) { finish(); return; }
@@ -559,20 +495,51 @@
     }
   }
 
-  /* Resolve a known keyword key via DB or cache */
+  /* ── PATCHED resolveKeyword ──────────────────────────────────────────────
+   * Original went to DB.getDefault first, which caused a race condition:
+   * db.js could open before knowledge.js finished seeding GK keys into
+   * ANSWER_CACHE, so any GK key (python, docker, etc.) would return null
+   * from the DB and fall through to the 'unknown' answer.
+   *
+   * Fix: read ANSWER_CACHE directly — it's always synchronously populated
+   * by knowledge.js before any user interaction can happen. Only fall back
+   * to DB.getDefault if ANSWER_CACHE doesn't have the key (for safety),
+   * then fall through to getAnswer as the final guaranteed source.
+   * ──────────────────────────────────────────────────────────────────────── */
   function resolveKeyword(key) {
+    /* 1. ANSWER_CACHE — synchronous, always populated, covers all GK keys */
+    var cache = win.ANSWER_CACHE && win.ANSWER_CACHE[lang];
+    if (cache && cache[key]) {
+      removeTyping();
+      appendMsg(cache[key], 'bot');
+      talkAnim(cache[key].length);
+      finish();
+      return;
+    }
+
+    /* 2. getAnswer — direct lookup into _A / _GK (also synchronous) */
+    if (win.getAnswer) {
+      var direct = win.getAnswer(key, lang);
+      if (direct) {
+        removeTyping();
+        appendMsg(direct, 'bot');
+        talkAnim(direct.length);
+        finish();
+        return;
+      }
+    }
+
+    /* 3. DB fallback — for any edge case where the above both miss */
     if (win.DB) {
       win.DB.getDefault(key, lang, function (cached) {
-        var reply = cached
-          || (win.ANSWER_CACHE && win.ANSWER_CACHE[lang] && win.ANSWER_CACHE[lang][key])
-          || (win.getAnswer ? win.getAnswer(key, lang) : '');
+        var reply = cached || (win.getAnswer ? win.getAnswer('unknown', lang) : '');
         removeTyping();
         appendMsg(reply, 'bot');
         talkAnim(reply.length);
         finish();
       });
     } else {
-      var reply = win.getAnswer ? win.getAnswer(key, lang) : '';
+      var reply = win.getAnswer ? win.getAnswer('unknown', lang) : '';
       removeTyping();
       appendMsg(reply, 'bot');
       talkAnim(reply.length);
@@ -580,21 +547,15 @@
     }
   }
 
-  /* Route to WebLLM if available, otherwise keyword fallback immediately */
   function routeToEngine(text) {
     syncEngine();
-
     if (engine) {
       sendViaWebLLM(text);
       return;
     }
-
-    /* Engine not ready (downloading or permanently failed) →
-       use keyword/unknown reply right now — don't make user wait */
     useKeywordFallback(text);
   }
 
-  /* Keyword/unknown fallback for free text */
   function useKeywordFallback(text) {
     if (stopRequested) { finish(); return; }
     removeTyping();
@@ -606,7 +567,6 @@
     finish();
   }
 
-  /* WebLLM send */
   function sendViaWebLLM(text) {
     var sys = win.buildSystemPrompt ? win.buildSystemPrompt(lang) : '';
     engine.chat.completions.create({
@@ -641,20 +601,15 @@
 
   /* ════════════════════════════════════════════════════════════════════════
      WEBLLM POLLER
-     Polls window.__webllmReady / __webllmFailed in the background.
-     When the engine becomes ready, hides the loader and upgrades status.
-     When failure is confirmed, activates fallback mode.
-     The user can always chat during this entire process.
   ════════════════════════════════════════════════════════════════════════ */
   function startWebLLMPoller() {
     var polls = 0;
-    var MAX   = 3000;  /* 3000 × 400ms = 20 min absolute ceiling */
+    var MAX   = 3000;
 
     function poll() {
       polls++;
       syncEngine();
 
-      /* Engine loaded ✓ */
       if (engine) {
         hideLoader();
         setAvatarState('online');
@@ -662,13 +617,11 @@
         return;
       }
 
-      /* Failure confirmed */
       if (win.__webllmFailed && polls >= FAIL_MIN_POLLS) {
         onWebLLMFailed(win.__webllmFailed);
         return;
       }
 
-      /* Absolute ceiling */
       if (polls >= MAX) {
         onWebLLMFailed('poll-ceiling');
         return;
@@ -682,8 +635,6 @@
 
   function onWebLLMFailed(reason) {
     if (win.console) win.console.info('[Chat] WebLLM not available:', reason);
-    /* Keep whatever error message the loader wrote in the label for 2s,
-       then hide the loader bar and switch to fallback status dot. */
     later(function () {
       hideLoader();
       setAvatarState('fallback');
@@ -702,28 +653,23 @@
   }
 
   /* ════════════════════════════════════════════════════════════════════════
-     SEND BUTTON — bind
+     SEND BUTTON
   ════════════════════════════════════════════════════════════════════════ */
   on($send, 'click', function () { sendFreeText(); });
-  win.chatSend = sendFreeText;  /* voice.js calls this after transcription */
+  win.chatSend = sendFreeText;
 
   /* ════════════════════════════════════════════════════════════════════════
      BOOT
   ════════════════════════════════════════════════════════════════════════ */
   function boot() {
-    /* Expose language to webllm-loader.js before it fires any progress */
     win.__webllmLang = lang;
 
-    /* Initial disclaimer */
     if ($disc) $disc.innerHTML = escapeHtml(s('disclaimer'));
 
-    /* Loader label — only set if the loader module hasn't started yet.
-       If __webllmStarted is already true, the loader owns the label. */
     if ($loaderLbl && !win.__webllmStarted) {
       $loaderLbl.textContent = s('loaderInit');
     }
 
-    /* Enable input immediately — keyboard mode is always available */
     if ($input) $input.disabled = false;
     setSendState('send');
 
@@ -731,11 +677,9 @@
     renderSuggestions();
     showGreeting();
 
-    /* Start background WebLLM poller */
     startWebLLMPoller();
   }
 
-  /* Guard: boot exactly once */
   var booted = false;
   function bootOnce() {
     if (booted) return;

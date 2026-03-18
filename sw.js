@@ -1,4 +1,4 @@
-var CACHE_VERSION = '1.0.107';
+var CACHE_VERSION = '1.0.110';
 
 /* ── Files to pre-cache on install (app shell) ── */
 var PRECACHE_URLS = [
@@ -12,6 +12,8 @@ var PRECACHE_URLS = [
   './js/voice.js',
   './js/webllm-loader.js',
   './js/chat.js',
+  './js/glow-sync.js',
+  './js/sw-register.js',
   './favicon.ico',
   './favicon-16x16.png',
   './favicon-32x32.png',
@@ -28,7 +30,6 @@ self.addEventListener('install', function (event) {
     caches.open(CACHE_VERSION).then(function (cache) {
       return cache.addAll(PRECACHE_URLS);
     }).then(function () {
-      /* Skip waiting so the new SW activates immediately */
       return self.skipWaiting();
     })
   );
@@ -49,7 +50,6 @@ self.addEventListener('activate', function (event) {
           })
       );
     }).then(function () {
-      /* Take control of all open pages immediately */
       return self.clients.claim();
     })
   );
@@ -61,13 +61,10 @@ self.addEventListener('activate', function (event) {
 self.addEventListener('fetch', function (event) {
   var url = event.request.url;
 
-  /* Only handle GET requests */
   if (event.request.method !== 'GET') return;
-
-  /* Skip chrome-extension and non-http(s) requests */
   if (url.indexOf('http') !== 0) return;
 
-  /* ── CDN / external assets (fonts, WebLLM) → Network First ── */
+  /* CDN / external assets → Network First */
   var isExternal = (
     url.indexOf('fonts.googleapis.com') >= 0 ||
     url.indexOf('fonts.gstatic.com')    >= 0 ||
@@ -82,11 +79,10 @@ self.addEventListener('fetch', function (event) {
     return;
   }
 
-  /* ── App shell → Cache First ── */
+  /* App shell → Cache First */
   event.respondWith(cacheFirst(event.request));
 });
 
-/* ── Cache First strategy ── */
 function cacheFirst(request) {
   return caches.match(request).then(function (cached) {
     if (cached) return cached;
@@ -94,7 +90,6 @@ function cacheFirst(request) {
   });
 }
 
-/* ── Network First strategy ── */
 function networkFirst(request) {
   return fetch(request).then(function (response) {
     if (response && response.ok) {
@@ -109,10 +104,8 @@ function networkFirst(request) {
   });
 }
 
-/* ── Fetch + store in cache ── */
 function fetchAndCache(request) {
   return fetch(request).then(function (response) {
-    /* Only cache valid responses */
     if (!response || response.status !== 200 || response.type === 'opaque') {
       return response;
     }
@@ -122,7 +115,6 @@ function fetchAndCache(request) {
     });
     return response;
   }).catch(function () {
-    /* Offline fallback for navigation requests */
     if (request.mode === 'navigate') {
       return caches.match('./index.html');
     }
