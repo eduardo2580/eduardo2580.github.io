@@ -2,231 +2,154 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8"/>
-
-  <!--
-    viewport-fit=cover is REQUIRED for safe-area-inset-* env() vars to work.
-    Without it, the browser adds automatic letterboxing around the notch
-    and env() always returns 0. With it, we paint under the notch and
-    manually push content below it using CSS padding + env().
-  -->
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-
   <title>Eduardo.AI</title>
 
-  <!-- ══ PWA manifest ══ -->
   <link rel="manifest" href="manifest.json"/>
-
-  <!--
-    theme-color controls the browser chrome tint on Android Chrome
-    and Safari on iOS (when NOT in standalone mode).
-    Match our --bg token exactly.
-  -->
-  <meta name="theme-color" content="#0e0b16"/>
-
-  <!-- ══ Apple PWA meta tags ══ -->
-  <!--
-    apple-mobile-web-app-capable: adds the app to the home screen as a
-    full-screen PWA (hides Safari chrome when launched from home screen).
-  -->
+  <meta name="theme-color" content="#000000"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-
-  <!--
-    apple-mobile-web-app-status-bar-style:
-      "default"            — light status bar, white background behind it
-      "black"              — dark status bar, black background
-      "black-translucent"  — dark status bar, app paints UNDER it
-                             (requires viewport-fit=cover + safe-area padding)
-    We use black-translucent so the background gradient shows through the
-    status bar area, and CSS padding-top pushes content below it.
-  -->
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-
-  <!-- App name shown under icon on home screen -->
   <meta name="apple-mobile-web-app-title" content="Eduardo.AI"/>
-
-  <!-- ══ Apple touch icons ══
-    iOS uses apple-touch-icon for home screen and splash screens.
-    Provide multiple sizes — iOS picks the best fit automatically.
-    The 180px size covers iPhone Retina; iPad needs 167px but falls
-    back to 180px gracefully.
-  -->
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"/>
-
-  <!-- Apple splash screens (optional but prevents white flash on launch)
-    These are precomposed images for each device. If you don't have them
-    comment these lines out — the app still works, just flashes white briefly.
-  -->
-  <!--
-  <link rel="apple-touch-startup-image"
-    href="splash/splash-2048x2732.png"
-    media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)"/>
-  <link rel="apple-touch-startup-image"
-    href="splash/splash-1668x2224.png"
-    media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)"/>
-  <link rel="apple-touch-startup-image"
-    href="splash/splash-1536x2048.png"
-    media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)"/>
-  <link rel="apple-touch-startup-image"
-    href="splash/splash-1290x2796.png"
-    media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)"/>
-  <link rel="apple-touch-startup-image"
-    href="splash/splash-1179x2556.png"
-    media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)"/>
-  <link rel="apple-touch-startup-image"
-    href="splash/splash-1170x2532.png"
-    media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"/>
-  <link rel="apple-touch-startup-image"
-    href="splash/splash-1080x1920.png"
-    media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"/>
-  -->
-
-  <!-- ══ Standard favicons ══ -->
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"/>
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"/>
   <link rel="shortcut icon" href="favicon.ico"/>
 
-  <!-- ══ SEO ══ -->
   <meta name="description"
     content="Eduardo Souza Rodrigues — Desenvolvedor Junior. Portfólio interativo com IA local."/>
   <meta name="author" content="Eduardo Souza Rodrigues"/>
 
-  <!-- Open Graph (for sharing) -->
-  <meta property="og:title"       content="Eduardo.AI"/>
-  <meta property="og:description" content="Portfólio interativo de Eduardo Souza Rodrigues com IA local"/>
-  <meta property="og:type"        content="website"/>
-  <meta property="og:image"       content="android-chrome-512x512.png"/>
-
-  <!-- ══ Fonts ══
-    Google Fonts with graceful degradation:
-    - preconnect speeds up the DNS + TLS handshake
-    - If Google Fonts is blocked (LibreWolf), CSS falls through to the
-      system font stack defined in --sans / --serif custom properties
+  <!--
+    Fira Code from Google Fonts — monospace, coding feel.
+    Falls back to system monospace if blocked (LibreWolf / TV).
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap"
     rel="stylesheet"/>
 
-  <!-- ══ Stylesheet ══ -->
   <link rel="stylesheet" href="css/style.css"/>
-
-  <!--
-    compat.js patches the DOM for older browsers (ES3/ES5 polyfills,
-    classList, dataset, requestAnimationFrame, console guard).
-    MUST be the first script — everything else depends on it.
-  -->
   <script src="js/compat.js"></script>
 </head>
 <body>
 
-  <!-- ══ BACKGROUND — bleeds under notch/home indicator intentionally ══ -->
+  <!-- bg-layer hidden by CSS in TUI mode -->
   <div id="bg-layer" aria-hidden="true"></div>
 
-  <!-- ══ APP COLUMN ══ -->
   <div id="app">
 
-    <!-- ╔══════════════════════════════════════╗
-         ║  HEADER — avatar + identity + nav   ║
-         ╚══════════════════════════════════════╝ -->
+    <!-- ══════════════════════════════════════════════════
+         TOP STATUS BAR  (Profanity title bar)
+         "Eduardo.AI  [PT][EN][ES]         [ ...online ]"
+    ══════════════════════════════════════════════════ -->
     <header id="header">
+      <div class="tui-top-bar">
 
-      <!-- Lang selector — positioned top-right, below notch via CSS -->
-      <nav id="lang-bar" aria-label="Language / Idioma">
-        <button class="lang-pill active" data-lang="pt" aria-pressed="true">PT</button>
-        <button class="lang-pill" data-lang="en" aria-pressed="false">EN</button>
-        <button class="lang-pill" data-lang="es" aria-pressed="false">ES</button>
-      </nav>
+        <!-- Left: title + lang switcher -->
+        <div id="tui-identity">
+          <span id="tui-title">Eduardo.AI</span>
+          <nav id="lang-bar" aria-label="Language">
+            <button class="lang-pill active" data-lang="pt" aria-pressed="true">PT</button>
+            <button class="lang-pill" data-lang="en" aria-pressed="false">EN</button>
+            <button class="lang-pill" data-lang="es" aria-pressed="false">ES</button>
+          </nav>
+        </div>
 
-      <!-- Breathing glow — animated by glow-sync.js -->
+        <!-- Right: status badge -->
+        <span id="tui-status-badge" aria-live="polite">
+          <svg width="7" height="7" viewBox="0 0 7 7"
+            style="display:inline;vertical-align:middle;margin-right:3px;"
+            aria-hidden="true">
+            <circle cx="3.5" cy="3.5" r="3.5" fill="#00ff87" id="status-dot-shape"/>
+          </svg><span id="status-text">online</span>
+        </span>
+
+      </div>
+    </header>
+
+    <!-- ══════════════════════════════════════════════════
+         AVATAR SECTION  — robot + name + status
+    ══════════════════════════════════════════════════ -->
+    <section id="avatar-section" aria-label="Avatar Eduardo.AI">
+
       <div id="avatar-glow" aria-hidden="true"></div>
 
-      <!-- ── Avatar wrap ── -->
+      <!-- Avatar wrap -->
       <div id="avatar-wrap">
 
-        <!-- Halo ring — avatar.js toggles .talking class here -->
+        <!-- Halo ring -->
         <svg id="avatar-halo"
           viewBox="0 0 100 100"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true">
           <defs>
             <linearGradient id="hring" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stop-color="#e8a0b4" stop-opacity="0.88"/>
-              <stop offset="35%"  stop-color="#c4aee8" stop-opacity="0.65"/>
-              <stop offset="70%"  stop-color="#e8a0b4" stop-opacity="0.48"/>
-              <stop offset="100%" stop-color="#c4aee8" stop-opacity="0.88"/>
-            </linearGradient>
-            <linearGradient id="hring2" x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stop-color="#c4aee8" stop-opacity="0.28"/>
-              <stop offset="100%" stop-color="#e8a0b4" stop-opacity="0.18"/>
+              <stop offset="0%"   stop-color="#00afff" stop-opacity="0.70"/>
+              <stop offset="50%"  stop-color="#ffaf00" stop-opacity="0.50"/>
+              <stop offset="100%" stop-color="#00afff" stop-opacity="0.70"/>
             </linearGradient>
           </defs>
-          <!-- Outer dashed ring -->
           <circle cx="50" cy="50" r="46" fill="none"
-            stroke="url(#hring)" stroke-width="1.2"
-            stroke-dasharray="5 3.5" opacity="0.82"/>
-          <!-- Inner solid ring -->
-          <circle cx="50" cy="50" r="42" fill="none"
-            stroke="url(#hring2)" stroke-width="0.7"/>
-          <!-- Cardinal dots -->
-          <circle cx="50" cy="3.5" r="2" fill="#e8a0b4" opacity="0.78"/>
-          <circle cx="96.5" cy="50" r="2" fill="#c4aee8" opacity="0.78"/>
-          <circle cx="50" cy="96.5" r="2" fill="#e8a0b4" opacity="0.78"/>
-          <circle cx="3.5" cy="50" r="2" fill="#c4aee8" opacity="0.78"/>
+            stroke="url(#hring)" stroke-width="1"
+            stroke-dasharray="4 4" opacity="0.70"/>
+          <circle cx="50" cy="50" r="41" fill="none"
+            stroke="#005f87" stroke-width="0.6" opacity="0.50"/>
+          <!-- Cardinal dots — terminal green/cyan -->
+          <circle cx="50" cy="4"  r="1.5" fill="#00ff87" opacity="0.80"/>
+          <circle cx="96" cy="50" r="1.5" fill="#00afff" opacity="0.80"/>
+          <circle cx="50" cy="96" r="1.5" fill="#ffaf00" opacity="0.80"/>
+          <circle cx="4"  cy="50" r="1.5" fill="#00ff87" opacity="0.80"/>
         </svg>
 
-        <!-- ══ SVG ROBOT ══
-          id="avatar-canvas" — referenced by avatar.js
-          id="av-mouth"      — animated by avatar.js (talking)
-          id="av-scan"       — visor scan bar
-        -->
+        <!-- SVG Robot -->
         <svg id="avatar-canvas"
           viewBox="0 0 320 340"
           xmlns="http://www.w3.org/2000/svg"
-          aria-label="Avatar Eduardo.AI — Robot"
+          aria-label="Robot Avatar"
           role="img"
-          style="width:100%;height:100%;display:block;position:relative;z-index:1;overflow:visible;">
+          style="width:100%;height:100%;display:block;overflow:visible;">
 
           <defs>
+            <!-- Terminal palette: dark body, cyan accents, amber highlights -->
             <radialGradient id="av-body" cx="38%" cy="32%" r="65%">
-              <stop offset="0%"   stop-color="#2e1f46"/>
-              <stop offset="100%" stop-color="#0e0b1e"/>
+              <stop offset="0%"   stop-color="#0a1a2e"/>
+              <stop offset="100%" stop-color="#000510"/>
             </radialGradient>
             <radialGradient id="av-rim-l" cx="12%" cy="45%" r="55%">
-              <stop offset="0%"   stop-color="#e8a0b4" stop-opacity="0.24"/>
-              <stop offset="100%" stop-color="#e8a0b4" stop-opacity="0"/>
+              <stop offset="0%"   stop-color="#00afff" stop-opacity="0.20"/>
+              <stop offset="100%" stop-color="#00afff" stop-opacity="0"/>
             </radialGradient>
             <radialGradient id="av-rim-r" cx="88%" cy="55%" r="50%">
-              <stop offset="0%"   stop-color="#c4aee8" stop-opacity="0.20"/>
-              <stop offset="100%" stop-color="#c4aee8" stop-opacity="0"/>
+              <stop offset="0%"   stop-color="#ffaf00" stop-opacity="0.14"/>
+              <stop offset="100%" stop-color="#ffaf00" stop-opacity="0"/>
             </radialGradient>
             <radialGradient id="av-eye-l" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#fce8ef"/>
-              <stop offset="45%"  stop-color="#e8a0b4"/>
-              <stop offset="100%" stop-color="#c0607a" stop-opacity="0"/>
+              <stop offset="0%"   stop-color="#ffffff"/>
+              <stop offset="40%"  stop-color="#00afff"/>
+              <stop offset="100%" stop-color="#005f87" stop-opacity="0"/>
             </radialGradient>
             <radialGradient id="av-eye-r" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#ede8ff"/>
-              <stop offset="45%"  stop-color="#c4aee8"/>
-              <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+              <stop offset="0%"   stop-color="#ffffff"/>
+              <stop offset="40%"  stop-color="#5faf5f"/>
+              <stop offset="100%" stop-color="#005f00" stop-opacity="0"/>
             </radialGradient>
             <radialGradient id="av-core" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#e8a0b4"/>
-              <stop offset="60%"  stop-color="#c0607a" stop-opacity="0.6"/>
-              <stop offset="100%" stop-color="#c0607a" stop-opacity="0"/>
+              <stop offset="0%"   stop-color="#00afff"/>
+              <stop offset="60%"  stop-color="#005f87" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#005f87" stop-opacity="0"/>
             </radialGradient>
             <radialGradient id="av-visor" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#fce8ef"/>
-              <stop offset="100%" stop-color="#e8a0b4" stop-opacity="0.4"/>
+              <stop offset="0%"   stop-color="#00afff"/>
+              <stop offset="100%" stop-color="#003f5f" stop-opacity="0.4"/>
             </radialGradient>
             <radialGradient id="av-ant" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#fce8ef"/>
-              <stop offset="100%" stop-color="#e8a0b4" stop-opacity="0"/>
+              <stop offset="0%"   stop-color="#00ff87"/>
+              <stop offset="100%" stop-color="#00ff87" stop-opacity="0"/>
             </radialGradient>
             <filter id="av-shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="3" stdDeviation="5"
-                flood-color="#c0607a" flood-opacity="0.22"/>
+              <feDropShadow dx="0" dy="2" stdDeviation="4"
+                flood-color="#00afff" flood-opacity="0.18"/>
             </filter>
             <filter id="av-glow" x="-40%" y="-40%" width="180%" height="180%">
               <feGaussianBlur stdDeviation="2.5" result="blur"/>
@@ -238,193 +161,207 @@
             </filter>
           </defs>
 
-          <!-- Full robot — idle float applied here -->
           <g id="av-robot" filter="url(#av-shadow)">
 
             <!-- ANTENNA -->
             <g id="av-antenna">
-              <rect x="156" y="18" width="8" height="32" rx="4"
-                fill="#2e1f46" stroke="#e8a0b4" stroke-width="0.8" opacity="0.7"/>
+              <rect x="156" y="18" width="8" height="32" rx="2"
+                fill="#0a1a2e" stroke="#005f87" stroke-width="0.8" opacity="0.8"/>
               <circle cx="160" cy="14" r="9" fill="url(#av-body)"
-                stroke="#e8a0b4" stroke-width="1.2" filter="url(#av-glow-soft)"/>
+                stroke="#00afff" stroke-width="1" filter="url(#av-glow-soft)"/>
               <circle cx="160" cy="14" r="5" fill="url(#av-ant)" opacity="0.95">
-                <animate attributeName="r"       values="4;6;4"     dur="1.9s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" values="0.8;1;0.8" dur="1.9s" repeatCount="indefinite"/>
+                <animate attributeName="r"       values="4;6;4"     dur="1.8s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.8;1;0.8" dur="1.8s" repeatCount="indefinite"/>
               </circle>
-              <circle cx="160" cy="14" r="2.5" fill="#fce8ef">
-                <animate attributeName="opacity" values="0.65;1;0.65" dur="1.9s" repeatCount="indefinite"/>
+              <circle cx="160" cy="14" r="2.5" fill="#00ff87">
+                <animate attributeName="opacity" values="0.6;1;0.6" dur="1.8s" repeatCount="indefinite"/>
               </circle>
             </g>
 
             <!-- HEAD -->
             <g id="av-head">
-              <rect x="92" y="48" width="136" height="124" rx="36"
+              <rect x="92" y="48" width="136" height="124" rx="12"
                 fill="url(#av-body)"/>
-              <rect x="92" y="48" width="136" height="124" rx="36"
+              <rect x="92" y="48" width="136" height="124" rx="12"
                 fill="url(#av-rim-l)"/>
-              <rect x="92" y="48" width="136" height="124" rx="36"
+              <rect x="92" y="48" width="136" height="124" rx="12"
                 fill="url(#av-rim-r)"/>
-              <rect x="92" y="48" width="136" height="124" rx="36"
-                fill="none" stroke="#e8a0b4" stroke-width="0.8" opacity="0.16"/>
+              <!-- Terminal scanline border -->
+              <rect x="92" y="48" width="136" height="124" rx="12"
+                fill="none" stroke="#005f87" stroke-width="1.2" opacity="0.60"/>
 
-              <!-- Ear nubs -->
-              <rect x="82"  y="82" width="14" height="38" rx="7"
-                fill="url(#av-body)" stroke="#c4aee8" stroke-width="0.6" opacity="0.5"/>
-              <rect x="224" y="82" width="14" height="38" rx="7"
-                fill="url(#av-body)" stroke="#c4aee8" stroke-width="0.6" opacity="0.5"/>
-              <circle cx="89"  cy="101" r="3" fill="#e8a0b4" opacity="0.7">
-                <animate attributeName="opacity" values="0.45;1;0.45" dur="3.4s" repeatCount="indefinite"/>
-              </circle>
-              <circle cx="231" cy="101" r="3" fill="#c4aee8" opacity="0.7">
-                <animate attributeName="opacity" values="0.45;1;0.45" dur="3.4s" begin="1.7s" repeatCount="indefinite"/>
-              </circle>
-
-              <!-- Visor -->
-              <rect x="104" y="88" width="112" height="34" rx="10"
-                fill="#080512" opacity="0.92"/>
-              <rect x="106" y="90" width="108" height="30" rx="9"
-                fill="url(#av-visor)" opacity="0.16"/>
-              <rect id="av-scan" x="112" y="93" width="16" height="24" rx="5"
-                fill="#e8a0b4" opacity="0.88" filter="url(#av-glow)">
-                <animate attributeName="x"
-                  values="112;185;112" dur="2.9s" repeatCount="indefinite"
-                  calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1"/>
-                <animate attributeName="opacity"
-                  values="0.88;0.48;0.88" dur="2.9s" repeatCount="indefinite"/>
+              <!-- Ear nubs — angular, terminal style -->
+              <rect x="82"  y="86" width="12" height="34" rx="2"
+                fill="url(#av-body)" stroke="#005f87" stroke-width="0.8" opacity="0.7"/>
+              <rect x="226" y="86" width="12" height="34" rx="2"
+                fill="url(#av-body)" stroke="#005f87" stroke-width="0.8" opacity="0.7"/>
+              <rect cx="89"  cy="101" width="4" height="4" rx="0"
+                x="86" y="99" fill="#00ff87" opacity="0.8">
+                <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
               </rect>
-              <rect x="104" y="88" width="112" height="34" rx="10"
-                fill="none" stroke="#e8a0b4" stroke-width="1.2" opacity="0.32"/>
+              <rect x="230" y="99" width="4" height="4" rx="0" fill="#00afff" opacity="0.8">
+                <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+              </rect>
 
-              <!-- Eyes -->
-              <circle cx="136" cy="146" r="14" fill="#070410"/>
-              <circle cx="136" cy="146" r="11" fill="url(#av-eye-l)" filter="url(#av-glow)">
-                <animate attributeName="r" values="10;12;10" dur="2.1s" repeatCount="indefinite"/>
+              <!-- Visor — terminal green/cyan scan bar -->
+              <rect x="104" y="88" width="112" height="34" rx="2"
+                fill="#000c14" opacity="0.96"/>
+              <rect x="106" y="90" width="108" height="30" rx="2"
+                fill="url(#av-visor)" opacity="0.12"/>
+              <!-- Scan line -->
+              <rect id="av-scan" x="112" y="93" width="14" height="24" rx="0"
+                fill="#00afff" opacity="0.90" filter="url(#av-glow)">
+                <animate attributeName="x"
+                  values="112;186;112" dur="2.6s" repeatCount="indefinite"
+                  calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+                <animate attributeName="opacity"
+                  values="0.90;0.45;0.90" dur="2.6s" repeatCount="indefinite"/>
+              </rect>
+              <!-- Visor border -->
+              <rect x="104" y="88" width="112" height="34" rx="2"
+                fill="none" stroke="#00afff" stroke-width="1" opacity="0.45"/>
+              <!-- Corner marks — terminal UI detail -->
+              <rect x="104" y="88" width="6" height="6" fill="#00afff" opacity="0.7"/>
+              <rect x="210" y="88" width="6" height="6" fill="#00afff" opacity="0.7"/>
+              <rect x="104" y="116" width="6" height="6" fill="#00afff" opacity="0.7"/>
+              <rect x="210" y="116" width="6" height="6" fill="#00afff" opacity="0.7"/>
+
+              <!-- Eyes — more angular/terminal -->
+              <rect x="122" y="133" width="28" height="28" rx="2" fill="#000c14"/>
+              <circle cx="136" cy="147" r="11" fill="url(#av-eye-l)" filter="url(#av-glow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite"/>
               </circle>
-              <circle cx="136" cy="146" r="4.5" fill="#fce8ef">
-                <animate attributeName="opacity" values="0.72;1;0.72" dur="2.1s" repeatCount="indefinite"/>
-              </circle>
-              <circle cx="136" cy="146" r="13" fill="none"
-                stroke="#e8a0b4" stroke-width="1.2" opacity="0.4">
-                <animate attributeName="opacity" values="0.18;0.58;0.18" dur="2.1s" repeatCount="indefinite"/>
+              <rect x="122" y="133" width="28" height="28" rx="2"
+                fill="none" stroke="#00afff" stroke-width="0.8" opacity="0.5">
+                <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" repeatCount="indefinite"/>
+              </rect>
+              <circle cx="136" cy="147" r="4" fill="#ffffff">
+                <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
               </circle>
 
-              <circle cx="184" cy="146" r="14" fill="#070410"/>
-              <circle cx="184" cy="146" r="11" fill="url(#av-eye-r)" filter="url(#av-glow)">
-                <animate attributeName="r" values="10;12;10" dur="2.1s" begin="0.13s" repeatCount="indefinite"/>
+              <rect x="170" y="133" width="28" height="28" rx="2" fill="#000c14"/>
+              <circle cx="184" cy="147" r="11" fill="url(#av-eye-r)" filter="url(#av-glow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" begin="0.15s" repeatCount="indefinite"/>
               </circle>
-              <circle cx="184" cy="146" r="4.5" fill="#ede8ff">
-                <animate attributeName="opacity" values="0.72;1;0.72" dur="2.1s" begin="0.13s" repeatCount="indefinite"/>
-              </circle>
-              <circle cx="184" cy="146" r="13" fill="none"
-                stroke="#c4aee8" stroke-width="1.2" opacity="0.4">
-                <animate attributeName="opacity" values="0.18;0.58;0.18" dur="2.1s" begin="0.13s" repeatCount="indefinite"/>
+              <rect x="170" y="133" width="28" height="28" rx="2"
+                fill="none" stroke="#5faf5f" stroke-width="0.8" opacity="0.5">
+                <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" begin="0.15s" repeatCount="indefinite"/>
+              </rect>
+              <circle cx="184" cy="147" r="4" fill="#ffffff">
+                <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="0.15s" repeatCount="indefinite"/>
               </circle>
 
-              <!-- Mouth grill — avatar.js animates y1/y2 when talking -->
+              <!-- Mouth grill — avatar.js animates these -->
               <g id="av-mouth">
                 <line x1="135" y1="172" x2="185" y2="172"
-                  stroke="#e8a0b4" stroke-width="2"   opacity="0.35" stroke-linecap="round"/>
+                  stroke="#00afff" stroke-width="1.8" opacity="0.40" stroke-linecap="square"/>
                 <line x1="138" y1="179" x2="182" y2="179"
-                  stroke="#c4aee8" stroke-width="1.6" opacity="0.35" stroke-linecap="round"/>
+                  stroke="#5faf5f" stroke-width="1.4" opacity="0.40" stroke-linecap="square"/>
                 <line x1="135" y1="186" x2="185" y2="186"
-                  stroke="#e8a0b4" stroke-width="2"   opacity="0.35" stroke-linecap="round"/>
+                  stroke="#00afff" stroke-width="1.8" opacity="0.40" stroke-linecap="square"/>
               </g>
-            </g><!-- /av-head -->
+            </g>
 
             <!-- NECK -->
-            <rect x="146" y="174" width="28" height="26" rx="9"
-              fill="url(#av-body)" stroke="#c4aee8" stroke-width="0.6" opacity="0.5"/>
-            <circle cx="155" cy="184" r="2.5" fill="#c4aee8" opacity="0.50"/>
-            <circle cx="165" cy="184" r="2.5" fill="#e8a0b4" opacity="0.50"/>
+            <rect x="148" y="174" width="24" height="26" rx="2"
+              fill="url(#av-body)" stroke="#005f87" stroke-width="0.8" opacity="0.6"/>
+            <rect x="153" y="180" width="5" height="5" fill="#00afff" opacity="0.50"/>
+            <rect x="162" y="180" width="5" height="5" fill="#5faf5f" opacity="0.50"/>
 
             <!-- TORSO -->
             <g id="av-torso">
-              <rect x="94" y="198" width="132" height="108" rx="28" fill="url(#av-body)"/>
-              <rect x="94" y="198" width="132" height="108" rx="28" fill="url(#av-rim-l)"/>
-              <rect x="94" y="198" width="132" height="108" rx="28" fill="url(#av-rim-r)"/>
-              <rect x="94" y="198" width="132" height="108" rx="28"
-                fill="none" stroke="#e8a0b4" stroke-width="0.7" opacity="0.13"/>
+              <rect x="94" y="198" width="132" height="108" rx="8"
+                fill="url(#av-body)"/>
+              <rect x="94" y="198" width="132" height="108" rx="8"
+                fill="url(#av-rim-l)"/>
+              <rect x="94" y="198" width="132" height="108" rx="8"
+                fill="url(#av-rim-r)"/>
+              <rect x="94" y="198" width="132" height="108" rx="8"
+                fill="none" stroke="#005f87" stroke-width="1.2" opacity="0.55"/>
+              <!-- Corner marks -->
+              <rect x="94" y="198" width="7" height="7" fill="#005f87" opacity="0.8"/>
+              <rect x="219" y="198" width="7" height="7" fill="#005f87" opacity="0.8"/>
+              <rect x="94" y="299" width="7" height="7" fill="#005f87" opacity="0.8"/>
+              <rect x="219" y="299" width="7" height="7" fill="#005f87" opacity="0.8"/>
 
-              <!-- Shoulder joints -->
-              <circle cx="94"  cy="218" r="16" fill="url(#av-body)"
-                stroke="#c4aee8" stroke-width="1" opacity="0.6"/>
-              <circle cx="226" cy="218" r="16" fill="url(#av-body)"
-                stroke="#e8a0b4" stroke-width="1" opacity="0.6"/>
-              <circle cx="94"  cy="218" r="7" fill="#0a0616" opacity="0.85"/>
-              <circle cx="226" cy="218" r="7" fill="#0a0616" opacity="0.85"/>
-              <circle cx="94"  cy="218" r="4" fill="#c4aee8" opacity="0.6">
-                <animate attributeName="opacity" values="0.4;0.92;0.4" dur="2.7s" repeatCount="indefinite"/>
-              </circle>
-              <circle cx="226" cy="218" r="4" fill="#e8a0b4" opacity="0.6">
-                <animate attributeName="opacity" values="0.4;0.92;0.4" dur="2.7s" begin="1.35s" repeatCount="indefinite"/>
-              </circle>
+              <!-- Shoulder joints — square terminals -->
+              <rect x="79" y="205" width="18" height="26" rx="2"
+                fill="url(#av-body)" stroke="#005f87" stroke-width="1" opacity="0.7"/>
+              <rect x="223" y="205" width="18" height="26" rx="2"
+                fill="url(#av-body)" stroke="#005f87" stroke-width="1" opacity="0.7"/>
+              <rect x="83" y="215" width="6" height="6" fill="#00afff" opacity="0.6">
+                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.5s" repeatCount="indefinite"/>
+              </rect>
+              <rect x="231" y="215" width="6" height="6" fill="#5faf5f" opacity="0.6">
+                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.5s" begin="1.25s" repeatCount="indefinite"/>
+              </rect>
 
               <!-- Chest panel -->
-              <rect x="116" y="210" width="88" height="76" rx="14"
-                fill="#080512" opacity="0.55"/>
-              <rect x="116" y="210" width="88" height="76" rx="14"
-                fill="none" stroke="#c4aee8" stroke-width="0.7" opacity="0.22"/>
+              <rect x="116" y="210" width="88" height="76" rx="4"
+                fill="#00050f" opacity="0.70"/>
+              <rect x="116" y="210" width="88" height="76" rx="4"
+                fill="none" stroke="#00afff" stroke-width="0.7" opacity="0.30"/>
 
-              <!-- Grill lines -->
+              <!-- Grill lines — terminal scanlines -->
               <line x1="126" y1="232" x2="194" y2="232"
-                stroke="#e8a0b4" stroke-width="1.4" opacity="0.26" stroke-linecap="round"/>
+                stroke="#00afff" stroke-width="1.2" opacity="0.28" stroke-linecap="square"/>
               <line x1="122" y1="244" x2="198" y2="244"
-                stroke="#e8a0b4" stroke-width="1.4" opacity="0.26" stroke-linecap="round"/>
+                stroke="#00afff" stroke-width="1.2" opacity="0.28" stroke-linecap="square"/>
               <line x1="126" y1="256" x2="194" y2="256"
-                stroke="#e8a0b4" stroke-width="1.4" opacity="0.26" stroke-linecap="round"/>
+                stroke="#00afff" stroke-width="1.2" opacity="0.28" stroke-linecap="square"/>
 
               <!-- Core glow -->
-              <circle cx="160" cy="244" r="16" fill="url(#av-core)"
+              <circle cx="160" cy="244" r="15" fill="url(#av-core)"
                 opacity="0.70" filter="url(#av-glow-soft)">
-                <animate attributeName="opacity" values="0.52;0.92;0.52" dur="2.5s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.50;0.90;0.50" dur="2.4s" repeatCount="indefinite"/>
               </circle>
-              <circle cx="160" cy="244" r="7" fill="#fce8ef">
-                <animate attributeName="r"       values="5.5;8;5.5"   dur="2.5s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" values="0.78;1;0.78"  dur="2.5s" repeatCount="indefinite"/>
+              <circle cx="160" cy="244" r="7" fill="#00afff">
+                <animate attributeName="r"       values="5.5;8;5.5"   dur="2.4s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.75;1;0.75" dur="2.4s" repeatCount="indefinite"/>
               </circle>
-              <circle cx="160" cy="244" r="3.5" fill="#fff" opacity="0.92"/>
+              <circle cx="160" cy="244" r="3.5" fill="#ffffff" opacity="0.90"/>
 
-              <!-- Side indicators -->
-              <rect x="100" y="234" width="10" height="4" rx="2" fill="#e8a0b4" opacity="0.5">
-                <animate attributeName="opacity" values="0.28;0.82;0.28" dur="2.0s" repeatCount="indefinite"/>
+              <!-- Side indicator blocks -->
+              <rect x="100" y="232" width="10" height="3" rx="0" fill="#00afff" opacity="0.5">
+                <animate attributeName="opacity" values="0.2;0.8;0.2" dur="1.9s" repeatCount="indefinite"/>
               </rect>
-              <rect x="210" y="234" width="10" height="4" rx="2" fill="#c4aee8" opacity="0.5">
-                <animate attributeName="opacity" values="0.28;0.82;0.28" dur="2.0s" begin="1.0s" repeatCount="indefinite"/>
+              <rect x="210" y="232" width="10" height="3" rx="0" fill="#5faf5f" opacity="0.5">
+                <animate attributeName="opacity" values="0.2;0.8;0.2" dur="1.9s" begin="0.95s" repeatCount="indefinite"/>
               </rect>
-              <rect x="100" y="244" width="10" height="4" rx="2" fill="#e8a0b4" opacity="0.35">
-                <animate attributeName="opacity" values="0.18;0.62;0.18" dur="2.4s" begin="0.4s" repeatCount="indefinite"/>
+              <rect x="100" y="242" width="10" height="3" rx="0" fill="#ffaf00" opacity="0.4">
+                <animate attributeName="opacity" values="0.15;0.6;0.15" dur="2.3s" begin="0.4s" repeatCount="indefinite"/>
               </rect>
-              <rect x="210" y="244" width="10" height="4" rx="2" fill="#c4aee8" opacity="0.35">
-                <animate attributeName="opacity" values="0.18;0.62;0.18" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
+              <rect x="210" y="242" width="10" height="3" rx="0" fill="#ffaf00" opacity="0.4">
+                <animate attributeName="opacity" values="0.15;0.6;0.15" dur="2.3s" begin="1.15s" repeatCount="indefinite"/>
               </rect>
-            </g><!-- /av-torso -->
+            </g>
 
-            <!-- ARMS -->
+            <!-- ARMS — angular, no ellipses -->
             <g id="av-arm-l">
-              <rect x="62" y="228" width="22" height="64" rx="11"
-                fill="url(#av-body)" stroke="#c4aee8" stroke-width="0.6" opacity="0.5"/>
-              <circle cx="73" cy="268" r="9" fill="#0a0616"
-                stroke="#c4aee8" stroke-width="0.8" opacity="0.6"/>
-              <ellipse cx="73" cy="300" rx="13" ry="10"
-                fill="url(#av-body)" stroke="#c4aee8" stroke-width="0.6" opacity="0.5"/>
+              <rect x="62" y="228" width="20" height="64" rx="2"
+                fill="url(#av-body)" stroke="#005f87" stroke-width="0.8" opacity="0.6"/>
+              <rect x="64" y="268" width="16" height="16" rx="2"
+                fill="#000c14" stroke="#00afff" stroke-width="0.8" opacity="0.6"/>
+              <rect x="60" y="290" width="24" height="18" rx="2"
+                fill="url(#av-body)" stroke="#005f87" stroke-width="0.7" opacity="0.5"/>
             </g>
             <g id="av-arm-r">
-              <rect x="236" y="228" width="22" height="64" rx="11"
-                fill="url(#av-body)" stroke="#e8a0b4" stroke-width="0.6" opacity="0.5"/>
-              <circle cx="247" cy="268" r="9" fill="#0a0616"
-                stroke="#e8a0b4" stroke-width="0.8" opacity="0.6"/>
-              <ellipse cx="247" cy="300" rx="13" ry="10"
-                fill="url(#av-body)" stroke="#e8a0b4" stroke-width="0.6" opacity="0.5"/>
+              <rect x="238" y="228" width="20" height="64" rx="2"
+                fill="url(#av-body)" stroke="#005f87" stroke-width="0.8" opacity="0.6"/>
+              <rect x="240" y="268" width="16" height="16" rx="2"
+                fill="#000c14" stroke="#5faf5f" stroke-width="0.8" opacity="0.6"/>
+              <rect x="236" y="290" width="24" height="18" rx="2"
+                fill="url(#av-body)" stroke="#005f87" stroke-width="0.7" opacity="0.5"/>
             </g>
 
           </g><!-- /av-robot -->
 
-          <!-- Idle float animation on whole robot -->
+          <!-- Idle float -->
           <animateTransform
             xlink:href="#av-robot"
             attributeName="transform"
             type="translate"
-            values="0,0; 0,-6; 0,0"
+            values="0,0; 0,-5; 0,0"
             dur="4s"
             repeatCount="indefinite"
             additive="sum"
@@ -432,44 +369,40 @@
             keySplines="0.45 0 0.55 1;0.45 0 0.55 1"/>
 
         </svg><!-- /avatar-canvas -->
-
       </div><!-- /#avatar-wrap -->
 
-      <!-- Identity -->
+      <!-- Name + status below robot -->
       <div id="avatar-name">Eduardo.AI</div>
       <div id="status-row">
         <svg width="7" height="7" viewBox="0 0 7 7" aria-hidden="true">
-          <circle cx="3.5" cy="3.5" r="3.5" fill="#52d9a0" id="status-dot-shape"/>
+          <circle cx="3.5" cy="3.5" r="3.5" fill="#00ff87" id="status-dot-shape-2"/>
         </svg>
-        <span id="status-text">Inicializando…</span>
+        <span id="status-text-2">Inicializando…</span>
       </div>
 
-    </header><!-- /#header -->
+    </section><!-- /#avatar-section -->
 
-    <!-- Gradient divider -->
-    <div class="header-divider" aria-hidden="true"></div>
-
-    <!-- ╔════════════════════╗
-         ║  MESSAGES          ║
-         ╚════════════════════╝ -->
+    <!-- ══════════════════════════════════════════════════
+         MESSAGE SCROLLBACK  (terminal chat log)
+    ══════════════════════════════════════════════════ -->
     <div id="messages-wrap"
       role="log"
       aria-live="polite"
-      aria-label="Conversa com Eduardo.AI">
+      aria-label="Chat log">
       <div id="messages"></div>
     </div>
 
-    <!-- ╔════════════════════╗
-         ║  SUGGESTION CHIPS  ║
-         ╚════════════════════╝ -->
+    <!-- ══════════════════════════════════════════════════
+         SUGGESTION CHIPS  (kept per request)
+    ══════════════════════════════════════════════════ -->
     <nav id="suggestions"
       role="navigation"
-      aria-label="Sugestões de perguntas">
+      aria-label="Sugestões">
     </nav>
 
-    <!-- ╔════════════════════╗
-         ║  LLM LOADER        ║
-         ╚════════════════════╝ -->
+    <!-- ══════════════════════════════════════════════════
+         LLM LOADER
+    ══════════════════════════════════════════════════ -->
     <div id="llm-loader" role="status" aria-live="polite" aria-atomic="true">
       <div id="llm-loader-track" aria-hidden="true">
         <div id="llm-loader-fill"></div>
@@ -477,14 +410,17 @@
       <span id="llm-loader-label">Carregando IA local…</span>
     </div>
 
-    <!-- ╔════════════════════╗
-         ║  INPUT ROW         ║
-         ╚════════════════════╝ -->
+    <!-- ══════════════════════════════════════════════════
+         INPUT ROW  (Profanity bottom input bar)
+         "[>] [mic] message text ____________ [SEND]"
+    ══════════════════════════════════════════════════ -->
     <div id="input-row" role="group" aria-label="Enviar mensagem">
 
-      <!-- Voice / mic button -->
+      <!-- Prompt symbol -->
+      <span id="tui-prompt" aria-hidden="true">&gt;</span>
+
+      <!-- Mic -->
       <button id="mic-btn" type="button" aria-label="Gravar voz">
-        <!-- Idle -->
         <svg id="mic-icon-idle" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <rect x="9" y="2" width="6" height="12" rx="3"
             stroke="currentColor" stroke-width="1.6"/>
@@ -493,7 +429,6 @@
           <line x1="12" y1="17" x2="12" y2="21"
             stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         </svg>
-        <!-- Listening (filled) -->
         <svg id="mic-icon-active" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="display:none">
           <rect x="9" y="2" width="6" height="12" rx="3"
             fill="currentColor" stroke="currentColor" stroke-width="1.6"/>
@@ -502,7 +437,6 @@
           <line x1="12" y1="17" x2="12" y2="21"
             stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         </svg>
-        <!-- Locked -->
         <svg id="mic-icon-locked" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="display:none">
           <rect x="9" y="2" width="6" height="10" rx="3"
             stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
@@ -517,49 +451,56 @@
         <span id="mic-tooltip" role="tooltip" aria-live="polite"></span>
       </button>
 
-      <!-- Text input pill -->
+      <!-- Text input -->
       <div id="input-wrap">
         <input
           id="chat-input"
           type="text"
           inputmode="text"
-          placeholder="Enviar mensagem…"
+          placeholder="message…"
           maxlength="300"
           autocomplete="off"
           autocorrect="off"
           autocapitalize="sentences"
           spellcheck="true"
-          aria-label="Mensagem para Eduardo.AI"
+          aria-label="Mensagem"
           disabled
         />
-        <!-- Type-ahead ghost text -->
         <span id="input-ghost" aria-hidden="true"></span>
       </div>
 
-      <!-- Send / Stop -->
+      <!-- Send -->
       <button id="send-btn" type="button" aria-label="Enviar" disabled>
+        <!-- In TUI mode we show the SVG icon; CSS can swap to text if preferred -->
         <svg id="send-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M22 2L11 13" stroke="currentColor" stroke-width="2.2"
+          <path d="M22 2L11 13" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2.2"
+          <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <svg id="stop-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="display:none">
-          <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>
+          <rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor"/>
         </svg>
       </button>
 
     </div><!-- /#input-row -->
 
+    <!-- ══════════════════════════════════════════════════
+         BOTTOM STATUS BAR  (Profanity bottom bar)
+         "[17:55]  eduardo.ai  [ ][ ][ ][ ]..."
+    ══════════════════════════════════════════════════ -->
+    <div id="tui-bottom-bar" aria-hidden="true">
+      <span id="tui-bottom-left">eduardo.ai — portfólio interativo</span>
+      <span id="tui-bottom-right">[ ][ ][ ][ ][ ][ ][ ][ ][ ][ ]</span>
+    </div>
+
   </div><!-- /#app -->
 
-  <!-- Disclaimer — updated by chat.js on boot + language switch -->
-  <p id="disclaimer">Eduardo.AI pode cometer erros. Verifique as respostas.</p>
-  <div id="disclaimer-bar" aria-hidden="true">
-    Eduardo.AI pode cometer erros. Verifique as respostas.
-  </div>
+  <!-- disclaimer kept in DOM for chat.js, hidden visually -->
+  <p id="disclaimer" style="display:none">Eduardo.AI pode cometer erros.</p>
+  <div id="disclaimer-bar" style="display:none"></div>
 
-  <!-- iOS "Add to Home Screen" banner — shown by pwa-install.js -->
+  <!-- iOS install banner -->
   <div id="ios-install-banner" role="dialog" aria-modal="true"
     aria-label="Instalar Eduardo.AI">
     <div class="banner-icon" aria-hidden="true">🤖</div>
@@ -567,45 +508,45 @@
       <div class="banner-title">Instalar Eduardo.AI</div>
       <div class="banner-sub">
         Toque em
-        <svg style="display:inline-block;width:13px;height:13px;vertical-align:middle;margin:0 2px;"
-          viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg style="display:inline-block;width:12px;height:12px;vertical-align:middle;margin:0 2px;"
+          viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M12 2v13M8 6l4-4 4 4M3 16v4a1 1 0 001 1h16a1 1 0 001-1v-4"
-            stroke="#e8a0b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            stroke="#00afff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         e depois <strong>Adicionar à Tela de Início</strong>
       </div>
     </div>
-    <button class="banner-close" id="ios-banner-close"
-      type="button" aria-label="Fechar">✕</button>
+    <button class="banner-close" id="ios-banner-close" type="button" aria-label="Fechar">✕</button>
   </div>
 
-  <!-- ══ SCRIPTS ══ -->
-
-  <!--
-    WebLLM loader — ES module syntax, so browsers without module support
-    (old Safari, all TV browsers) silently ignore it. The keyboard fallback
-    in chat.js activates automatically in those cases.
-  -->
+  <!-- Scripts -->
   <script type="module" src="js/webllm-loader.js"></script>
-
-  <!--
-    ES5 scripts — loaded in strict dependency order.
-    All run in every browser from IE9+ through Apple TV Safari.
-  -->
   <script src="js/knowledge.js"></script>
   <script src="js/db.js"></script>
   <script src="js/avatar.js"></script>
   <script src="js/voice.js"></script>
   <script src="js/chat.js"></script>
-
-  <!-- Syncs .talking class from #avatar-halo SVG to #avatar-glow div -->
   <script src="js/glow-sync.js"></script>
-
-  <!-- iOS install banner + Chrome beforeinstallprompt handler -->
   <script src="js/pwa-install.js"></script>
-
-  <!-- Service Worker registration -->
   <script src="js/sw-register.js"></script>
+
+  <!-- Sync the second status dot in avatar-section with chat.js status -->
+  <script>
+    (function(){
+      var dot2 = document.getElementById('status-dot-shape-2');
+      var txt2 = document.getElementById('status-text-2');
+      var dot1 = document.getElementById('status-dot-shape');
+      var txt1 = document.getElementById('status-text');
+      if(!dot1||!dot2) return;
+      var MO = window.MutationObserver||window.WebKitMutationObserver;
+      if(!MO) return;
+      new MO(function(){
+        dot2.setAttribute('fill', dot1.getAttribute('fill')||'#00ff87');
+        dot2.style.fill = dot1.style.fill||'';
+        if(txt2&&txt1) txt2.textContent = txt1.textContent;
+      }).observe(dot1, {attributes:true, characterData:true, subtree:true});
+    }());
+  </script>
 
 </body>
 </html>

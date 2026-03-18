@@ -237,19 +237,40 @@
     return processed;
   }
 
+  /* TUI timestamp */
+  function nowHHMMSS() {
+    var d = new Date();
+    return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
+  }
+
   function appendMsg(text, role, isError) {
     var wrap = doc.createElement('div');
     wrap.className = 'msg ' + role;
 
-    var lbl = doc.createElement('div');
-    lbl.className = 'msg-sender';
-    lbl.innerHTML = escapeHtml((SENDER[role] && SENDER[role][lang]) || role);
+    var time = doc.createElement('span');
+    time.className = 'msg-time';
+    time.textContent = nowHHMMSS();
 
-    var bub = doc.createElement('div');
+    var sep = doc.createElement('span');
+    sep.className = 'msg-sep';
+    sep.textContent = '\u00a0-\u00a0';
+
+    var lbl = doc.createElement('span');
+    lbl.className = 'msg-sender';
+    lbl.textContent = (SENDER[role] && SENDER[role][lang]) || role;
+
+    var colon = doc.createElement('span');
+    colon.className = 'msg-colon';
+    colon.textContent = ':\u00a0';
+
+    var bub = doc.createElement('span');
     bub.className = 'msg-bubble' + (isError ? ' error' : '');
     bub.innerHTML = (role === 'bot' && !isError) ? renderMsgContent(text) : escapeHtml(text);
 
+    wrap.appendChild(time);
+    wrap.appendChild(sep);
     wrap.appendChild(lbl);
+    wrap.appendChild(colon);
     wrap.appendChild(bub);
     if ($msgs) $msgs.appendChild(wrap);
     scrollBottom();
@@ -260,13 +281,17 @@
     var wrap = doc.createElement('div');
     wrap.className = 'msg bot';
     wrap.id = 'typing-wrap';
-    var lbl = doc.createElement('div');
-    lbl.className = 'msg-sender';
-    lbl.innerHTML = escapeHtml((SENDER.bot && SENDER.bot[lang]) || 'Eduardo.AI');
-    var bub = doc.createElement('div');
+    var time = doc.createElement('span');
+    time.className = 'msg-time';
+    time.textContent = nowHHMMSS();
+    var sep = doc.createElement('span');
+    sep.className = 'msg-sep';
+    sep.textContent = '\u00a0-\u00a0';
+    var bub = doc.createElement('span');
     bub.className = 'typing-bubble';
     bub.innerHTML = '<span></span><span></span><span></span>';
-    wrap.appendChild(lbl);
+    wrap.appendChild(time);
+    wrap.appendChild(sep);
     wrap.appendChild(bub);
     if ($msgs) $msgs.appendChild(wrap);
     scrollBottom();
