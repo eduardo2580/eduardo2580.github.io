@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"/>
   <title>Eduardo.AI</title>
 
   <link rel="manifest" href="manifest.json"/>
@@ -529,6 +529,8 @@
   <script src="js/glow-sync.js"></script>
   <script src="js/pwa-install.js"></script>
   <script src="js/sw-register.js"></script>
+  <!-- Visual Viewport API — fixes Safari chrome + keyboard height -->
+  <script src="js/viewport.js"></script>
 
   <!-- Sync the second status dot in avatar-section with chat.js status -->
   <script>

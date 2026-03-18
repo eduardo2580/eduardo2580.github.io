@@ -77,7 +77,16 @@ html {
 }
 
 body {
-  width: 100%; height: 100dvh; height: 100vh;
+  width: 100%;
+  /*
+   * Height cascade — each line overrides the previous in capable browsers.
+   * viewport.js sets --vvh via the Visual Viewport API at runtime,
+   * which correctly accounts for Safari chrome AND the software keyboard.
+   */
+  height: 100vh;         /* baseline — all browsers         */
+  height: 100dvh;        /* dynamic vh — Chrome/FF/Safari   */
+  height: 100svh;        /* small vh — always within chrome */
+  height: var(--vvh, 100svh); /* JS visual viewport — most accurate */
   background: var(--bg);
   font-family: var(--mono);
   font-size: var(--tty-size);
@@ -102,7 +111,11 @@ body {
   position: relative;
   z-index: 1;
   width: 100%;
-  height: 100%;
+  /* Match body height — viewport.js overrides this inline at runtime */
+  height: 100vh;
+  height: 100dvh;
+  height: 100svh;
+  height: var(--vvh, 100svh);
   display: flex;
   flex-direction: column;
   /* Side safe areas for landscape phone/iPad */
@@ -563,11 +576,22 @@ body {
   align-items: center;
   gap: 0;
   background: var(--bar-bg);
-  /* HOME INDICATOR FIX */
+  /*
+   * HOME INDICATOR + KEYBOARD FIX:
+   * padding-bottom clears the home indicator.
+   * position:sticky bottom:0 means if viewport.js hasn't fired yet,
+   * the bar is still visible above the keyboard / browser chrome.
+   * It's a belt-and-braces safety net.
+   */
   padding-bottom: max(2px, calc(var(--sab) + 2px));
   padding-top: 2px;
   min-height: calc(var(--bar-h) + 4px);
   border-top: 1px solid #003f5f;
+  /* Sticky fallback — keeps bar visible even when height calc is late */
+  position: -webkit-sticky;
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
 }
 
 /* Prompt prefix — ">" */
@@ -747,6 +771,8 @@ body {
   color: var(--bar-text);
   white-space: nowrap;
   overflow: hidden;
+  /* Sticky so it stays at bottom of visible viewport regardless of height calc */
+  position: -webkit-sticky;
   position: sticky;
   bottom: 0;
   z-index: 100;
@@ -798,7 +824,13 @@ body {
    11. STANDALONE PWA
 ═══════════════════════════════════════════════ */
 @media (display-mode: standalone) {
-  body { height: 100svh; }
+  /* In standalone: no browser chrome at all.
+     svh == dvh == lvh in this mode, but --vvh is still the most precise
+     because it accounts for the keyboard. */
+  body, #app {
+    height: 100svh;
+    height: var(--vvh, 100svh);
+  }
   #header { padding-top: max(var(--bar-h), calc(var(--sat) + 4px)); }
 }
 
