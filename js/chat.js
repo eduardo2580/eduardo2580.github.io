@@ -660,10 +660,21 @@
 
   function onWebLLMFailed(reason) {
     if (win.console) win.console.info('[Chat] WebLLM not available:', reason);
+    /* For quota errors, show immediately — no need to wait */
+    var delay = (reason === 'quota-exceeded' || reason === 'quota-insufficient') ? 600 : 2000;
     later(function () {
       hideLoader();
-      setAvatarState('fallback');
-    }, 2000);
+      /* Use a specific status label for quota issues */
+      if (reason === 'quota-exceeded' || reason === 'quota-insufficient') {
+        if ($statusDot) { $statusDot.setAttribute('fill', '#ffaf00'); $statusDot.style.fill = '#ffaf00'; }
+        if ($status) {
+          var labels = { pt: 'Modo teclado', en: 'Keyword mode', es: 'Modo teclado' };
+          $status.innerHTML = escapeHtml(labels[lang] || 'Keyword mode');
+        }
+      } else {
+        setAvatarState('fallback');
+      }
+    }, delay);
   }
 
   /* ════════════════════════════════════════════════════════════════════════
