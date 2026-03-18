@@ -1,4 +1,4 @@
-var CACHE_VERSION = '1.0.106';
+var CACHE_VERSION = '1.0.107';
 
 /* ── Files to pre-cache on install (app shell) ── */
 var PRECACHE_URLS = [
