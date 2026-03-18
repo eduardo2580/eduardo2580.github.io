@@ -1,4 +1,4 @@
-var CACHE_VERSION = '1.0.110';
+var CACHE_VERSION = '1.0.111';
 
 /* ── Files to pre-cache on install (app shell) ── */
 var PRECACHE_URLS = [
@@ -14,6 +14,7 @@ var PRECACHE_URLS = [
   './js/chat.js',
   './js/glow-sync.js',
   './js/sw-register.js',
+  './js/pwa-install.js',
   './favicon.ico',
   './favicon-16x16.png',
   './favicon-32x32.png',

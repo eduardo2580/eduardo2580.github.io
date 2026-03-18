@@ -1,297 +1,433 @@
 /*
- * style.css — Eduardo.AI  (Replika-style redesign)
- * Warm companion palette, fluid sizing from 200px smartwatch to 4K TV.
- * No framework dependencies. LibreWolf-safe (Google Fonts with fallback stack).
+ * style.css — Eduardo.AI
+ *
+ * Design language: "Warm Glass" — a premium companion interface that feels
+ * like it was designed in Figma for Apple's ecosystem. Frosted glass surfaces,
+ * warm rose-lavender accents, precise typography, and meticulous safe-area
+ * handling for every Apple screen (Watch 38mm → Apple TV 4K).
+ *
+ * Safe-area strategy:
+ *   - viewport-fit=cover in HTML lets us paint under notch/Dynamic Island
+ *   - env(safe-area-inset-*) values stored as CSS vars (--sat/sar/sab/sal)
+ *   - Every edge-touching element uses those vars — header, input, disclaimer
+ *   - background bleeds into notch area; content never does
+ *
+ * Breakpoints (min-width unless noted):
+ *   Watch   : ≤ 180px  (Apple Watch Ultra 49mm = 184×224pt)
+ *   Phone   : 181px–430px  (iPhone SE → iPhone 15 Pro Max)
+ *   iPad    : 768px–1024px
+ *   Desktop : 1025px–1799px
+ *   TV      : 1800px+
+ *   4K      : 3000px+
  */
 
-/* ============================================================
-   DESIGN TOKENS
-============================================================ */
+/* ══════════════════════════════════════════════════════
+   1. DESIGN TOKENS
+══════════════════════════════════════════════════════ */
 :root {
-  /* Warm companion palette */
-  --bg:          #13101a;
-  --bg2:         #1c1725;
-  --surface:     rgba(255,245,250,0.055);
-  --surface2:    rgba(255,245,250,0.09);
-  --border:      rgba(255,220,230,0.10);
-  --border2:     rgba(230,180,210,0.22);
+  /* ── Palette ── */
+  --bg:           #0e0b16;
+  --bg-blur:      rgba(14,11,22,0.82);
+  --surface:      rgba(255,240,248,0.055);
+  --surface-mid:  rgba(255,240,248,0.085);
+  --surface-high: rgba(255,240,248,0.11);
+  --border:       rgba(255,210,230,0.09);
+  --border-rose:  rgba(232,160,180,0.28);
+  --border-lav:   rgba(196,174,232,0.22);
 
-  /* Accents */
-  --rose:        #e8a0b4;
-  --rose-d:      #c0607a;
-  --rose-glow:   rgba(232,160,180,0.18);
-  --lavender:    #c4aee8;
-  --cream:       #f5ede8;
+  /* ── Accents ── */
+  --rose:         #e8a0b4;
+  --rose-d:       #c0607a;
+  --rose-deep:    #8a3050;
+  --rose-glow:    rgba(232,160,180,0.16);
+  --lavender:     #c4aee8;
+  --lavender-d:   #8060c0;
+  --cream:        #f7eeec;
+  --green:        #52d9a0;
 
-  /* Text */
-  --text:        #f0e8f0;
-  --text-dim:    rgba(240,232,240,0.58);
-  --text-mut:    rgba(240,232,240,0.32);
+  /* ── Text ── */
+  --text:         #f2e8f4;
+  --text-dim:     rgba(242,232,244,0.56);
+  --text-mut:     rgba(242,232,244,0.30);
 
-  /* Bubbles */
-  --user-bg:     rgba(192,96,122,0.22);
-  --user-border: rgba(232,160,180,0.30);
-  --user-text:   #fce8ef;
-  --bot-bg:      rgba(196,174,232,0.12);
-  --bot-border:  rgba(196,174,232,0.22);
+  /* ── Bubbles ── */
+  --user-bg:      rgba(192,96,122,0.20);
+  --user-border:  rgba(232,160,180,0.28);
+  --user-text:    #fdedf3;
+  --bot-bg:       rgba(196,174,232,0.10);
+  --bot-border:   rgba(196,174,232,0.20);
 
-  /* Typography — Google Fonts with LibreWolf-safe system fallbacks */
-  --sans:  'Nunito', 'Cantarell', 'Segoe UI', system-ui, sans-serif;
-  --serif: 'Playfair Display', 'Georgia', serif;
+  /* ── Typography ── */
+  --sans:   'Nunito', 'SF Pro Text', 'Cantarell', 'Segoe UI', system-ui, sans-serif;
+  --serif:  'Playfair Display', 'New York', 'Georgia', serif;
+  --mono:   'SF Mono', 'Fira Code', monospace;
 
-  /* Fluid sizing — clamp(min, fluid, max) */
-  --avatar-size: clamp(72px, 20vmin, 190px);
-  --msg-font:    clamp(0.82rem, 2.2vmin, 1.05rem);
-  --label-font:  clamp(0.58rem, 1.4vmin, 0.70rem);
-  --chip-font:   clamp(0.60rem, 1.5vmin, 0.74rem);
-  --input-font:  clamp(0.82rem, 2vmin, 0.95rem);
-  --name-font:   clamp(1rem, 3.5vmin, 1.75rem);
-  --status-font: clamp(0.60rem, 1.5vmin, 0.76rem);
+  /* ── Fluid type scale ── */
+  --fs-xs:    clamp(0.56rem, 1.2vmin + 0.1rem, 0.68rem);
+  --fs-sm:    clamp(0.68rem, 1.5vmin + 0.1rem, 0.80rem);
+  --fs-base:  clamp(0.82rem, 2vmin   + 0.1rem, 1.00rem);
+  --fs-md:    clamp(0.88rem, 2.2vmin + 0.1rem, 1.06rem);
+  --fs-lg:    clamp(1.00rem, 3vmin   + 0.1rem, 1.60rem);
+  --fs-xl:    clamp(1.10rem, 3.5vmin + 0.1rem, 1.80rem);
 
-  /* Fluid spacing */
-  --gap-xs: clamp(3px,  0.8vmin,  7px);
-  --gap-sm: clamp(6px,  1.4vmin, 12px);
-  --gap-md: clamp(10px, 2vmin,   20px);
-  --pad-h:  clamp(10px, 3vw,     28px);
+  /* ── Fluid space ── */
+  --sp-1: clamp(2px,  0.5vmin, 5px);
+  --sp-2: clamp(4px,  0.9vmin, 8px);
+  --sp-3: clamp(7px,  1.4vmin, 12px);
+  --sp-4: clamp(10px, 2vmin,   18px);
+  --sp-5: clamp(14px, 2.8vmin, 24px);
+  --sp-6: clamp(18px, 3.5vmin, 32px);
 
+  /* ── Horizontal page padding ── */
+  --ph: clamp(14px, 4vw, 32px);
+
+  /* ── Avatar ── */
+  --av: clamp(80px, 22vmin, 200px);
+
+  /* ── Radii ── */
+  --r-xs:   6px;
+  --r-sm:   10px;
+  --r-md:   16px;
+  --r-lg:   24px;
   --r-pill: 9999px;
-  --r-msg:  clamp(14px, 3vmin, 22px);
+  --r-msg:  clamp(14px, 2.5vmin, 20px);
+
+  /* ── Safe area insets (env() with 0px fallback) ── */
+  --sat: env(safe-area-inset-top,    0px);
+  --sar: env(safe-area-inset-right,  0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left,   0px);
+
+  /* ── Transitions ── */
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4,  0,   0.2,  1);
+  --t-fast:  0.15s;
+  --t-base:  0.25s;
+  --t-slow:  0.4s;
 }
 
-/* ============================================================
-   RESET & BASE
-============================================================ */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+/* ══════════════════════════════════════════════════════
+   2. RESET
+══════════════════════════════════════════════════════ */
+*, *::before, *::after {
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+  /* Prevent tap flash on iOS */
+  -webkit-tap-highlight-color: transparent;
+}
 
-html { height: 100%; }
+/* ══════════════════════════════════════════════════════
+   3. ROOT — fills the full screen including notch area
+══════════════════════════════════════════════════════ */
+html {
+  /* Paint the app background into the notch/home-bar areas */
+  background: var(--bg);
+  /* Prevent rubber-band scrolling from revealing white behind bg */
+  overscroll-behavior: none;
+}
 
 body {
-  width: 100%; height: 100%;
+  width:  100%;
+  /* 100dvh = dynamic viewport height (collapses with iOS URL bar).
+     Falls back to 100vh / 100% for older browsers and TV.           */
+  height: 100dvh;
+  height: 100vh;
   background: var(--bg);
   font-family: var(--sans);
   color: var(--text);
+  overflow: hidden;
+  overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
+  /* Prevent font scaling on rotation (iOS) */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Prevent callout on long-press (iOS) */
+  -webkit-touch-callout: none;
 }
 
-/* ============================================================
-   BACKGROUND — layered warm gradient mesh
-============================================================ */
+/* ══════════════════════════════════════════════════════
+   4. BACKGROUND MESH
+   Extends under the notch — intentional, looks premium.
+══════════════════════════════════════════════════════ */
 #bg-layer {
-  position: fixed; inset: 0;
-  z-index: 0; pointer-events: none;
+  position: fixed;
+  /* inset: 0 does NOT account for safe areas — we WANT it to bleed */
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 60% at 20% 10%,  rgba(140,70,100,0.28) 0%, transparent 65%),
-    radial-gradient(ellipse 60% 50% at 80% 80%,  rgba(100,60,140,0.22) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 55% 45%,  rgba(80,40,80,0.14)   0%, transparent 70%),
-    #13101a;
+    radial-gradient(ellipse 90% 65% at 15%  8%,  rgba(150,60,100,0.30) 0%, transparent 65%),
+    radial-gradient(ellipse 65% 55% at 85% 85%,  rgba(90, 50,150,0.24) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 52% 42%,  rgba(70, 30, 80,0.15) 0%, transparent 70%),
+    var(--bg);
 }
 
-/* ============================================================
-   APP SHELL — centred single column
-============================================================ */
+/* Subtle noise grain overlay — makes it look textured / Figma-quality */
+#bg-layer::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════════
+   5. APP SHELL
+══════════════════════════════════════════════════════ */
 #app {
-  position: relative; z-index: 10;
-  width: 100%; height: 100%;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  /* On phones with notch we want the column centred within safe area */
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: min(520px, 100%);
+  /* Cap width for readability — fluid from phone to TV */
+  max-width: min(500px, 100%);
   margin: 0 auto;
   overflow: hidden;
+  /* Respect side safe areas (landscape iPhone, landscape iPad) */
+  padding-left:  max(0px, var(--sal));
+  padding-right: max(0px, var(--sar));
 }
 
-/* ============================================================
-   HEADER
-============================================================ */
+/* ══════════════════════════════════════════════════════
+   6. HEADER
+   KEY FIX: padding-top = safe-area-inset-top + design gap
+   This pushes content BELOW the notch / Dynamic Island.
+══════════════════════════════════════════════════════ */
 #header {
   flex-shrink: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--gap-md) var(--pad-h) var(--gap-sm);
-  gap: var(--gap-xs);
+  gap: var(--sp-1);
   position: relative;
+  /* ▼ THE CRITICAL NOTCH FIX ▼
+     max() ensures we always have at least --sp-4 of breathing room,
+     AND that we always clear the safe area (notch / Dynamic Island).
+     On iPhone 15 Pro: --sat ≈ 59px, so top padding = 59 + 10 = 69px.
+     On iPad (no notch): --sat = 0, so top padding = max(18px, 10px) = 18px.
+     On TV: --sat = 0, we fall back to --sp-5.                              */
+  padding-top:    max(var(--sp-5), calc(var(--sat) + var(--sp-3)));
+  padding-bottom: var(--sp-3);
+  padding-left:   var(--ph);
+  padding-right:  var(--ph);
 }
 
-/* Breathing glow behind avatar */
+/* ── Breathing glow behind avatar ── */
 #avatar-glow {
   position: absolute;
   top: 0; left: 50%;
   transform: translateX(-50%);
-  width: calc(var(--avatar-size) * 2.6);
-  height: calc(var(--avatar-size) * 2.6);
+  width: calc(var(--av) * 2.8);
+  height: calc(var(--av) * 2.8);
   border-radius: 50%;
   background: radial-gradient(circle,
-    rgba(232,160,180,0.20) 0%,
-    rgba(196,174,232,0.08) 45%,
-    transparent 70%
+    rgba(232,160,180,0.22) 0%,
+    rgba(196,174,232,0.08) 42%,
+    transparent 68%
   );
   pointer-events: none;
-  animation: glowBreath 4s ease-in-out infinite;
+  animation: glowBreathe 4s ease-in-out infinite;
   z-index: 0;
 }
-@keyframes glowBreath {
-  0%, 100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
-  50%       { opacity: 1;   transform: translateX(-50%) scale(1.14); }
+@keyframes glowBreathe {
+  0%, 100% { opacity: 0.65; transform: translateX(-50%) scale(1); }
+  50%       { opacity: 1;   transform: translateX(-50%) scale(1.16); }
 }
 #avatar-glow.talking {
-  animation: glowTalk 0.65s ease-in-out infinite alternate;
+  animation: glowTalk 0.6s ease-in-out infinite alternate;
 }
 @keyframes glowTalk {
-  from { opacity: 0.85; transform: translateX(-50%) scale(1.06); }
-  to   { opacity: 1;    transform: translateX(-50%) scale(1.22); }
+  from { opacity: 0.8;  transform: translateX(-50%) scale(1.08); }
+  to   { opacity: 1;    transform: translateX(-50%) scale(1.24); }
 }
 
-/* Avatar container — position:relative so it occupies real flex space */
+/* ── Avatar wrap ── */
 #avatar-wrap {
   position: relative;
-  z-index: 1;
-  width:  var(--avatar-size);
-  height: var(--avatar-size);
+  z-index: 2;
+  width:  var(--av);
+  height: var(--av);
   flex-shrink: 0;
-  animation: avatarFloat 5s ease-in-out infinite;
   border-radius: 50%;
+  animation: avatarFloat 5s ease-in-out infinite;
+  /* Frosted glass ring */
   box-shadow:
-    0 0 clamp(16px, 5vmin, 40px) rgba(196,174,232,0.18),
-    0 clamp(4px,1vmin,8px) clamp(16px,4vmin,32px) rgba(0,0,0,0.5);
+    0 0 0 1.5px rgba(232,160,180,0.22),
+    0 0 clamp(14px,4vmin,36px) rgba(196,174,232,0.18),
+    0 clamp(4px,1vmin,8px) clamp(14px,3vmin,28px) rgba(0,0,0,0.55);
 }
 @keyframes avatarFloat {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(calc(var(--avatar-size) * -0.04)); }
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(calc(var(--av) * -0.04)); }
 }
 
-/* Halo SVG — absolute inside #avatar-wrap, slightly oversized */
+/* ── Halo ring SVG ── */
 #avatar-halo {
   position: absolute;
-  top: -8%; left: -8%;
-  width: 116%; height: 116%;
+  top: -9%; left: -9%;
+  width: 118%; height: 118%;
   pointer-events: none;
-  animation: haloSpin 30s linear infinite;
-  z-index: 2;
+  z-index: 3;
+  animation: haloSpin 28s linear infinite;
 }
 @keyframes haloSpin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
-#avatar-halo.talking { animation-duration: 5s; }
+#avatar-halo.talking { animation-duration: 4.5s; }
 
-/* Avatar SVG robot — fills the wrap, clips to circle via border-radius on wrap */
+/* ── Robot SVG canvas ── */
 #avatar-canvas {
   display: block;
   width: 100%; height: 100%;
   position: relative; z-index: 1;
-  border-radius: 50%;
-  overflow: visible; /* let glow filters bleed outside */
+  overflow: visible;
 }
 
-/* Name */
+/* ── Name ── */
 #avatar-name {
   font-family: var(--serif);
-  font-size: var(--name-font);
+  font-size: var(--fs-xl);
   font-weight: 400;
   color: var(--cream);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.018em;
   text-align: center;
-  z-index: 1; position: relative;
+  position: relative; z-index: 1;
   line-height: 1.1;
+  /* Subtle text shadow for depth */
+  text-shadow: 0 2px 24px rgba(232,160,180,0.35);
+  margin-top: var(--sp-2);
 }
 
-/* Status row */
+/* ── Status row ── */
 #status-row {
-  display: flex; align-items: center; gap: 5px;
-  z-index: 1; position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative; z-index: 1;
+  margin-top: var(--sp-1);
 }
-#status-dot-shape { transition: fill 0.5s; }
+#status-dot-shape { transition: fill var(--t-slow) var(--ease-smooth); }
 #status-text {
-  font-size: var(--status-font);
-  font-weight: 400;
+  font-size: var(--fs-xs);
+  font-weight: 500;
   color: var(--text-dim);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-/* Lang pills — absolute top-right corner of header */
+/* ── Lang pills — top-right, BELOW notch ── */
 #lang-bar {
   position: absolute;
-  top: var(--gap-sm); right: var(--pad-h);
-  display: flex; gap: var(--gap-xs);
-  z-index: 5;
+  /* sits below the notch — uses same safe-area calc as header padding-top */
+  top:   max(var(--sp-3), calc(var(--sat) + var(--sp-2)));
+  right: var(--ph);
+  display: flex;
+  gap: var(--sp-1);
+  z-index: 10;
 }
 .lang-pill {
   font-family: var(--sans);
-  font-size: clamp(0.52rem, 1.2vmin, 0.66rem);
-  font-weight: 600;
-  padding: clamp(3px, 0.6vmin, 5px) clamp(7px, 1.4vmin, 11px);
+  font-size: clamp(0.50rem, 1.1vmin, 0.62rem);
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  padding: clamp(3px,0.5vmin,5px) clamp(8px,1.4vmin,12px);
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
-  background: transparent;
+  background: var(--surface);
   color: var(--text-mut);
   cursor: pointer;
-  letter-spacing: 0.10em;
-  transition: all 0.2s;
+  transition: all var(--t-base) var(--ease-smooth);
+  /* Frosted glass */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
-.lang-pill:hover  { border-color: var(--rose); color: var(--rose); }
-.lang-pill.active { border-color: var(--rose); color: var(--bg); background: var(--rose); }
+.lang-pill:hover { border-color: var(--rose); color: var(--rose); }
+.lang-pill.active {
+  border-color: transparent;
+  color: #1a0a14;
+  background: var(--rose);
+  box-shadow: 0 2px 10px rgba(192,96,122,0.40);
+}
 
-/* Divider between header and messages */
+/* ── Header / messages divider ── */
 .header-divider {
   flex-shrink: 0;
-  width: calc(100% - var(--pad-h) * 2);
+  width: calc(100% - var(--ph) * 2);
   height: 1px;
+  margin: 0 var(--ph);
   background: linear-gradient(90deg,
-    transparent,
-    rgba(232,160,180,0.22) 30%,
-    rgba(196,174,232,0.18) 70%,
-    transparent
+    transparent 0%,
+    rgba(232,160,180,0.20) 25%,
+    rgba(196,174,232,0.16) 75%,
+    transparent 100%
   );
-  margin: 0 var(--pad-h);
 }
 
-/* ============================================================
-   MESSAGES
-============================================================ */
+/* ══════════════════════════════════════════════════════
+   7. MESSAGES
+══════════════════════════════════════════════════════ */
 #messages-wrap {
-  flex: 1; min-height: 0;
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  overflow-y: auto; overflow-x: hidden;
-  padding: var(--gap-md) var(--pad-h) var(--gap-sm);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--sp-4) var(--ph) var(--sp-3);
+  /* Smooth momentum scroll (iOS) */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   scrollbar-width: thin;
-  scrollbar-color: rgba(232,160,180,0.18) transparent;
+  scrollbar-color: rgba(232,160,180,0.16) transparent;
 }
 #messages-wrap::-webkit-scrollbar { width: 3px; }
 #messages-wrap::-webkit-scrollbar-thumb {
-  background: rgba(232,160,180,0.18); border-radius: 3px;
+  background: rgba(232,160,180,0.16);
+  border-radius: 3px;
 }
 
-#messages { display: flex; flex-direction: column; gap: var(--gap-sm); }
+#messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
 
+/* Message row */
 .msg {
-  display: flex; flex-direction: column;
-  animation: msgIn 0.28s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  display: flex;
+  flex-direction: column;
+  animation: msgIn 0.30s var(--ease-spring) both;
 }
 @keyframes msgIn {
-  from { opacity: 0; transform: translateY(10px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)    scale(1); }
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
 }
 .msg.user { align-items: flex-end; }
 .msg.bot  { align-items: flex-start; }
 
+/* Sender label */
 .msg-sender {
-  font-size: var(--label-font);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  margin-bottom: var(--gap-xs);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
+  margin-bottom: var(--sp-1);
 }
-.msg.user .msg-sender { color: rgba(232,160,180,0.50); }
-.msg.bot  .msg-sender { color: rgba(196,174,232,0.50); }
+.msg.user .msg-sender { color: rgba(232,160,180,0.48); }
+.msg.bot  .msg-sender { color: rgba(196,174,232,0.48); }
 
+/* Bubble */
 .msg-bubble {
-  max-width: 86%;
-  padding: clamp(9px, 2vmin, 14px) clamp(13px, 3vmin, 20px);
-  font-size: var(--msg-font);
+  max-width: 84%;
+  padding: clamp(9px,1.8vmin,13px) clamp(13px,2.8vmin,19px);
+  font-size: var(--fs-md);
   line-height: 1.65;
   font-weight: 400;
   word-break: break-word;
@@ -299,109 +435,130 @@ body {
 .msg.user .msg-bubble {
   background: var(--user-bg);
   border: 1px solid var(--user-border);
-  border-radius: var(--r-msg) var(--r-msg) clamp(4px, 1vmin, 6px) var(--r-msg);
+  border-radius: var(--r-msg) var(--r-msg) clamp(4px,0.8vmin,6px) var(--r-msg);
   color: var(--user-text);
+  /* Subtle inner glow */
+  box-shadow: inset 0 1px 0 rgba(232,160,180,0.14);
 }
 .msg.bot .msg-bubble {
   background: var(--bot-bg);
   border: 1px solid var(--bot-border);
-  border-radius: var(--r-msg) var(--r-msg) var(--r-msg) clamp(4px, 1vmin, 6px);
+  border-radius: var(--r-msg) var(--r-msg) var(--r-msg) clamp(4px,0.8vmin,6px);
   color: var(--text);
+  box-shadow: inset 0 1px 0 rgba(196,174,232,0.10);
 }
 .msg-bubble.error {
-  background: rgba(220,80,80,0.12);
-  border-color: rgba(220,80,80,0.30);
-  color: #ffc8c8;
+  background: rgba(220,60,60,0.12);
+  border-color: rgba(220,60,60,0.28);
+  color: #ffbebe;
 }
-.msg.bot .msg-bubble strong { font-weight: 600; color: var(--cream); }
+.msg.bot .msg-bubble strong {
+  font-weight: 600;
+  color: var(--cream);
+}
 
-/* Links inside bot bubbles */
+/* Links */
 .msg-link {
   color: var(--lavender);
   text-decoration: none;
-  border-bottom: 1px solid rgba(196,174,232,0.35);
+  border-bottom: 1px solid rgba(196,174,232,0.32);
   word-break: break-all;
-  transition: color 0.2s, border-color 0.2s;
+  transition: color var(--t-fast), border-color var(--t-fast);
 }
 .msg-link:hover { color: var(--cream); border-bottom-color: var(--lavender); }
-
 .msg.bot .msg-bubble br + .msg-link,
 .msg.bot .msg-bubble .msg-link:first-child {
   display: block;
-  margin-top: var(--gap-xs);
-  padding: clamp(5px, 1vmin, 8px) clamp(9px, 2vmin, 13px);
+  margin-top: var(--sp-2);
+  padding: clamp(5px,1vmin,8px) clamp(9px,2vmin,12px);
   border-bottom: none;
-  border-radius: clamp(7px, 1.5vmin, 10px);
-  background: rgba(196,174,232,0.10);
-  border: 1px solid rgba(196,174,232,0.20);
-  font-size: clamp(0.74rem, 1.8vmin, 0.87rem);
+  border-radius: var(--r-sm);
+  background: rgba(196,174,232,0.09);
+  border: 1px solid rgba(196,174,232,0.18);
+  font-size: var(--fs-sm);
 }
 .msg.bot .msg-bubble br + .msg-link:hover,
 .msg.bot .msg-bubble .msg-link:first-child:hover {
-  background: rgba(196,174,232,0.20);
-  border-color: rgba(196,174,232,0.40);
+  background: rgba(196,174,232,0.18);
+  border-color: rgba(196,174,232,0.38);
   color: var(--cream);
 }
 
-/* Typing indicator */
+/* Typing dots */
 .typing-bubble {
   background: var(--bot-bg);
   border: 1px solid var(--bot-border);
-  border-radius: var(--r-msg) var(--r-msg) var(--r-msg) clamp(4px, 1vmin, 6px);
-  padding: clamp(10px, 2.2vmin, 15px) clamp(14px, 3vmin, 20px);
-  display: inline-flex; gap: clamp(4px, 1vmin, 7px); align-items: center;
+  border-radius: var(--r-msg) var(--r-msg) var(--r-msg) clamp(4px,0.8vmin,6px);
+  padding: clamp(10px,2vmin,14px) clamp(14px,2.8vmin,19px);
+  display: inline-flex;
+  gap: clamp(4px,0.9vmin,7px);
+  align-items: center;
 }
 .typing-bubble span {
-  width:  clamp(5px, 1.2vmin, 7px);
-  height: clamp(5px, 1.2vmin, 7px);
+  width:  clamp(5px,1.1vmin,7px);
+  height: clamp(5px,1.1vmin,7px);
   border-radius: 50%;
   background: var(--lavender);
-  opacity: 0.5;
-  animation: typeDot 1.2s ease-in-out infinite;
+  opacity: 0.45;
+  animation: typeBounce 1.2s ease-in-out infinite;
 }
-.typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
-.typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes typeDot {
+.typing-bubble span:nth-child(2) { animation-delay: 0.18s; }
+.typing-bubble span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes typeBounce {
   0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
-  40%            { transform: translateY(clamp(-4px, -1vmin, -6px)); opacity: 1; }
+  40%            { transform: translateY(-5px); opacity: 1; }
 }
 
-/* ============================================================
-   SUGGESTION CHIPS
-============================================================ */
+/* ══════════════════════════════════════════════════════
+   8. SUGGESTION CHIPS
+══════════════════════════════════════════════════════ */
 #suggestions {
-  flex-shrink: 0; width: 100%;
-  display: flex; flex-wrap: wrap; gap: var(--gap-xs);
-  padding: var(--gap-xs) var(--pad-h) var(--gap-sm);
+  flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--ph) var(--sp-3);
   overflow: hidden;
-  max-height: clamp(56px, 12vmin, 88px);
+  max-height: clamp(52px,11vmin,84px);
 }
 .sug-chip {
   font-family: var(--sans);
-  font-size: var(--chip-font);
+  font-size: var(--fs-sm);
   font-weight: 500;
-  padding: clamp(4px, 0.9vmin, 7px) clamp(9px, 2vmin, 14px);
+  padding: clamp(4px,0.8vmin,7px) clamp(10px,2vmin,15px);
   border-radius: var(--r-pill);
-  border: 1px solid rgba(232,160,180,0.26);
+  border: 1px solid rgba(232,160,180,0.24);
   background: rgba(232,160,180,0.07);
-  color: rgba(232,160,180,0.72);
-  cursor: pointer; white-space: nowrap;
-  transition: all 0.2s;
+  color: rgba(232,160,180,0.70);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--t-base) var(--ease-smooth);
+  /* Frosted glass */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .sug-chip:hover {
-  background: rgba(232,160,180,0.18);
-  border-color: rgba(232,160,180,0.52);
+  background: rgba(232,160,180,0.16);
+  border-color: rgba(232,160,180,0.50);
   color: var(--cream);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(192,96,122,0.20);
 }
+.sug-chip:active { transform: scale(0.96); }
 
-/* ============================================================
-   LLM LOADER
-============================================================ */
+/* ══════════════════════════════════════════════════════
+   9. LLM LOADER
+══════════════════════════════════════════════════════ */
 #llm-loader {
-  flex-shrink: 0; width: 100%;
-  display: flex; flex-direction: column; align-items: center; gap: 5px;
-  padding: 0 var(--pad-h) var(--gap-xs);
-  transition: opacity 0.4s;
+  flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0 var(--ph) var(--sp-2);
+  transition: opacity var(--t-slow), height var(--t-slow);
 }
 #llm-loader.hidden {
   opacity: 0; pointer-events: none;
@@ -410,219 +567,449 @@ body {
 #llm-loader-track {
   width: 100%; height: 2px;
   background: rgba(255,255,255,0.06);
-  border-radius: 2px; overflow: hidden;
+  border-radius: 2px;
+  overflow: hidden;
 }
 #llm-loader-fill {
   height: 100%; width: 0%;
   background: linear-gradient(90deg, var(--rose), var(--lavender));
-  border-radius: 2px; transition: width 0.4s ease;
+  border-radius: 2px;
+  transition: width 0.45s var(--ease-smooth);
+  box-shadow: 0 0 8px rgba(232,160,180,0.5);
 }
 #llm-loader-label {
-  font-size: clamp(0.58rem, 1.2vmin, 0.66rem);
-  color: var(--text-mut); letter-spacing: 0.04em;
+  font-size: var(--fs-xs);
+  color: var(--text-mut);
+  letter-spacing: 0.05em;
 }
 
-/* ============================================================
-   INPUT ROW
-============================================================ */
+/* ══════════════════════════════════════════════════════
+   10. INPUT ROW
+   KEY FIX: padding-bottom must clear the home indicator.
+   max() ensures we always have at least --sp-4 of gap
+   AND always clear env(safe-area-inset-bottom).
+══════════════════════════════════════════════════════ */
 #input-row {
-  flex-shrink: 0; width: 100%;
-  display: flex; align-items: center; gap: var(--gap-sm);
-  padding: var(--gap-sm) var(--pad-h) clamp(12px, 4vmin, 28px);
-  /* safe-area for phones with home indicator */
-  padding-bottom: max(clamp(12px, 4vmin, 28px), env(safe-area-inset-bottom, 0px));
+  flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--ph);
+  /* ▼ HOME INDICATOR FIX ▼
+     On iPhone X+ and newer iPads, sab ≈ 34px.
+     max(20px, 34px) = 34px — sits above the indicator.
+     On iPad without home indicator: sab = 0, padding = 20px.       */
+  padding-bottom: max(var(--sp-5), calc(var(--sab) + var(--sp-3)));
 }
 
-/* Mic button */
+/* ── Mic button ── */
 #mic-btn {
-  position: relative; flex-shrink: 0;
-  width:  clamp(32px, 7vmin, 42px);
-  height: clamp(32px, 7vmin, 42px);
+  position: relative;
+  flex-shrink: 0;
+  width:  clamp(36px, 8vmin, 46px);
+  height: clamp(36px, 8vmin, 46px);
   border-radius: 50%;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--surface-mid);
   color: var(--text-dim);
-  cursor: pointer; outline: none;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--t-base) var(--ease-smooth);
+  /* Frosted glass */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 #mic-btn svg {
-  width:  clamp(13px, 3.2vmin, 17px);
-  height: clamp(13px, 3.2vmin, 17px);
-  pointer-events: none; flex-shrink: 0;
+  width:  clamp(14px,3.2vmin,18px);
+  height: clamp(14px,3.2vmin,18px);
+  pointer-events: none;
 }
 #mic-btn:hover:not(.mic-locked) {
-  border-color: var(--rose); color: var(--rose); background: var(--rose-glow);
+  border-color: var(--rose);
+  color: var(--rose);
+  background: var(--rose-glow);
+  box-shadow: 0 0 0 3px rgba(232,160,180,0.10);
 }
+#mic-btn:active:not(.mic-locked) { transform: scale(0.93); }
 #mic-btn.mic-listening {
-  border-color: #f87171; color: #f87171; background: rgba(248,113,113,0.12);
-  animation: micPulse 1s ease-in-out infinite alternate;
+  border-color: #ff7070;
+  color: #ff7070;
+  background: rgba(255,112,112,0.10);
+  animation: micRing 1s ease-in-out infinite alternate;
 }
-@keyframes micPulse {
-  from { box-shadow: 0 0 0 0   rgba(248,113,113,0.45); }
-  to   { box-shadow: 0 0 0 7px rgba(248,113,113,0); }
+@keyframes micRing {
+  from { box-shadow: 0 0 0 0   rgba(255,112,112,0.45); }
+  to   { box-shadow: 0 0 0 8px rgba(255,112,112,0); }
 }
-#mic-btn.mic-locked { opacity: 0.45; cursor: not-allowed; }
+#mic-btn.mic-locked { opacity: 0.42; cursor: not-allowed; }
 
-/* Mic tooltip */
+/* Tooltip */
 #mic-tooltip {
   position: absolute;
-  bottom: calc(100% + 8px); left: 50%;
+  bottom: calc(100% + 10px);
+  left: 50%;
   transform: translateX(-50%);
-  background: rgba(20,16,30,0.96);
-  border: 1px solid var(--border2);
+  background: rgba(22,14,36,0.96);
+  border: 1px solid var(--border-rose);
   color: var(--text-dim);
-  font-family: var(--sans);
-  font-size: clamp(0.58rem, 1.2vmin, 0.66rem);
-  padding: 5px 10px; border-radius: 8px;
-  white-space: normal; pointer-events: none;
-  opacity: 0; transition: opacity 0.2s;
-  z-index: 100; max-width: 200px; text-align: center;
+  font-size: var(--fs-xs);
+  padding: 6px 11px;
+  border-radius: var(--r-sm);
+  white-space: normal;
+  max-width: 210px;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-base);
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 #mic-btn:hover #mic-tooltip,
 #mic-btn.mic-listening #mic-tooltip,
 #mic-tooltip.tooltip-flash { opacity: 1; }
 
-/* Input pill wrapper */
-#input-wrap { flex: 1; position: relative; min-width: 0; display: flex; }
+/* ── Input pill ── */
+#input-wrap {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  display: flex;
+}
+/* Glass pill background */
 #input-wrap::before {
-  content: ''; position: absolute; inset: 0;
+  content: '';
+  position: absolute; inset: 0;
   border-radius: var(--r-pill);
-  background: var(--surface2);
+  background: var(--surface-mid);
   border: 1px solid var(--border);
-  pointer-events: none; z-index: 0;
-  transition: border-color 0.25s, box-shadow 0.25s;
+  pointer-events: none;
+  z-index: 0;
+  transition: border-color var(--t-base), box-shadow var(--t-base);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 #input-wrap:focus-within::before {
-  border-color: rgba(232,160,180,0.40);
-  box-shadow: 0 0 0 3px rgba(232,160,180,0.10);
+  border-color: rgba(232,160,180,0.38);
+  box-shadow: 0 0 0 3px rgba(232,160,180,0.09),
+              inset 0 1px 0 rgba(232,160,180,0.10);
 }
-
 #chat-input {
-  width: 100%; background: transparent;
-  border: 1px solid transparent; border-radius: var(--r-pill);
-  padding: clamp(9px, 2vmin, 13px) clamp(14px, 3vmin, 20px);
-  color: var(--text); font-family: var(--sans);
-  font-size: var(--input-font); font-weight: 400;
-  outline: none; position: relative; z-index: 2; min-width: 0;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  padding: clamp(10px,2vmin,13px) clamp(16px,3vmin,22px);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: var(--fs-md);
+  font-weight: 400;
+  outline: none;
+  position: relative; z-index: 2;
+  min-width: 0;
 }
 #chat-input::placeholder { color: var(--text-mut); }
 #chat-input:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* Ghost prediction text */
+/* Ghost prediction */
 #input-ghost {
-  position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-  padding: clamp(9px, 2vmin, 13px) clamp(14px, 3vmin, 20px);
-  font-family: var(--sans); font-size: var(--input-font); font-weight: 400;
-  color: transparent; border: 1px solid transparent; border-radius: var(--r-pill);
-  pointer-events: none; white-space: pre; overflow: hidden; z-index: 1;
+  position: absolute; inset: 0;
+  padding: clamp(10px,2vmin,13px) clamp(16px,3vmin,22px);
+  font-family: var(--sans);
+  font-size: var(--fs-md);
+  font-weight: 400;
+  color: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  pointer-events: none;
+  white-space: pre;
+  overflow: hidden;
+  z-index: 1;
 }
-#input-ghost.visible { color: rgba(232,160,180,0.35); }
+#input-ghost.visible { color: rgba(232,160,180,0.32); }
 
-/* Send button */
+/* ── Send button ── */
 #send-btn {
   flex-shrink: 0;
-  width:  clamp(34px, 8vmin, 44px);
-  height: clamp(34px, 8vmin, 44px);
-  border-radius: 50%; border: none;
-  background: linear-gradient(135deg, var(--rose-d), var(--rose));
-  color: #fff; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-  box-shadow: 0 4px clamp(10px, 3vmin, 18px) rgba(192,96,122,0.45);
+  width:  clamp(38px,8.5vmin,46px);
+  height: clamp(38px,8.5vmin,46px);
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(145deg, var(--rose-d), var(--rose));
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--t-base) var(--ease-smooth);
+  box-shadow:
+    0 4px clamp(10px,2.5vmin,18px) rgba(192,96,122,0.48),
+    inset 0 1px 0 rgba(255,255,255,0.18);
 }
 #send-btn svg {
-  width:  clamp(13px, 3vmin, 16px);
-  height: clamp(13px, 3vmin, 16px);
+  width:  clamp(14px,3vmin,17px);
+  height: clamp(14px,3vmin,17px);
   flex-shrink: 0;
 }
 #send-btn:hover:not(:disabled):not(.is-stopping) {
-  transform: scale(1.08);
-  box-shadow: 0 6px clamp(14px, 4vmin, 22px) rgba(192,96,122,0.65);
+  transform: scale(1.08) translateY(-1px);
+  box-shadow:
+    0 7px clamp(14px,3.5vmin,22px) rgba(192,96,122,0.65),
+    inset 0 1px 0 rgba(255,255,255,0.22);
 }
-#send-btn:active:not(:disabled) { transform: scale(0.93); }
+#send-btn:active:not(:disabled) { transform: scale(0.92); }
 #send-btn:disabled {
   opacity: 0.35; cursor: not-allowed;
-  background: rgba(232,160,180,0.25); box-shadow: none;
+  background: rgba(232,160,180,0.22);
+  box-shadow: none;
 }
 #send-btn.is-stopping {
-  background: linear-gradient(135deg, #c02020, #e44);
-  box-shadow: 0 4px 14px rgba(220,40,40,0.50);
-  animation: stopPulse 1.2s ease-out infinite;
+  background: linear-gradient(145deg, #b01818, #e03030);
+  box-shadow: 0 4px 14px rgba(220,30,30,0.55);
+  animation: stopRing 1.1s ease-out infinite;
 }
-@keyframes stopPulse {
-  0%   { box-shadow: 0 0 0  0   rgba(220,40,40,0.50); }
-  100% { box-shadow: 0 0 0 10px rgba(220,40,40,0); }
+@keyframes stopRing {
+  0%   { box-shadow: 0 0 0  0   rgba(220,30,30,0.55); }
+  100% { box-shadow: 0 0 0 10px rgba(220,30,30,0); }
 }
 #send-btn.is-stopping:hover { transform: scale(1.08); }
 
-/* ============================================================
-   DISCLAIMER
-============================================================ */
-#disclaimer { display: none; } /* hidden — #disclaimer-bar is the visual */
+/* ══════════════════════════════════════════════════════
+   11. DISCLAIMER
+══════════════════════════════════════════════════════ */
+#disclaimer { display: none; }
 
 #disclaimer-bar {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  text-align: center; font-family: var(--sans);
-  font-size: clamp(0.52rem, 1.1vmin, 0.63rem);
-  color: var(--text-mut); letter-spacing: 0.03em;
-  padding: 4px 12px 6px;
-  background: linear-gradient(0deg, rgba(19,16,26,0.95) 0%, transparent 100%);
-  pointer-events: none; z-index: 9999;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 9998;
+  pointer-events: none;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: clamp(0.50rem,1vmin,0.60rem);
+  color: var(--text-mut);
+  letter-spacing: 0.04em;
+  /* Gradient fades into background */
+  background: linear-gradient(0deg,
+    rgba(14,11,22,0.96) 0%,
+    rgba(14,11,22,0.60) 60%,
+    transparent 100%
+  );
+  /* Extends into home indicator area */
+  padding: 10px var(--ph) max(var(--sp-3), calc(var(--sab) + var(--sp-2)));
 }
 
-/* ============================================================
-   SMARTWATCH  ≤240px
-============================================================ */
-@media (max-width: 240px) {
-  #lang-bar, #suggestions, #avatar-name, #status-row, #avatar-glow { display: none; }
-  #header {
-    flex-direction: row; justify-content: center;
-    padding: 6px 8px 4px; gap: 8px;
+/* ══════════════════════════════════════════════════════
+   12. iOS INSTALL BANNER
+══════════════════════════════════════════════════════ */
+#ios-install-banner {
+  display: none;
+  position: fixed;
+  /* Above home indicator */
+  bottom: max(20px, calc(var(--sab) + 10px));
+  left:   max(16px, calc(var(--sal) + 12px));
+  right:  max(16px, calc(var(--sar) + 12px));
+  z-index: 10000;
+  background: rgba(28,18,40,0.96);
+  border: 1px solid var(--border-rose);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(232,160,180,0.10);
+  animation: bannerUp 0.35s var(--ease-spring) both;
+}
+@keyframes bannerUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+#ios-install-banner.visible { display: flex; }
+#ios-install-banner .banner-icon { font-size: 1.6rem; flex-shrink: 0; }
+#ios-install-banner .banner-text { flex: 1; min-width: 0; }
+#ios-install-banner .banner-title {
+  font-family: var(--sans); font-size: 0.85rem; font-weight: 700;
+  color: var(--cream); margin-bottom: 3px;
+}
+#ios-install-banner .banner-sub {
+  font-family: var(--sans); font-size: 0.74rem;
+  color: var(--text-dim); line-height: 1.45;
+}
+#ios-install-banner .banner-sub strong { color: var(--rose); font-weight: 600; }
+#ios-install-banner .banner-close {
+  flex-shrink: 0; background: none; border: none;
+  color: var(--text-mut); cursor: pointer;
+  font-size: 1.1rem; padding: 4px; line-height: 1;
+  border-radius: 50%;
+  transition: color var(--t-fast), background var(--t-fast);
+}
+#ios-install-banner .banner-close:hover {
+  color: var(--cream); background: rgba(255,255,255,0.08);
+}
+
+/* ══════════════════════════════════════════════════════
+   13. STANDALONE PWA MODE
+   When installed, there's NO browser chrome — we control
+   every pixel. Tighten up spacing accordingly.
+══════════════════════════════════════════════════════ */
+@media (display-mode: standalone) {
+  /* In standalone the address bar is gone — we need full-height control */
+  body { height: 100svh; } /* svh = small viewport height */
+  #header { padding-top: max(var(--sp-5), calc(var(--sat) + var(--sp-4))); }
+}
+
+/* ══════════════════════════════════════════════════════
+   14. APPLE WATCH  ≤ 184px
+   Apple Watch Ultra: 184×224pt. Series 9: 176×215pt.
+══════════════════════════════════════════════════════ */
+@media (max-width: 184px) {
+  :root {
+    --av:    44px;
+    --ph:    6px;
+    --sp-1:  2px; --sp-2: 3px; --sp-3: 5px; --sp-4: 7px; --sp-5: 9px;
+    --fs-xs: 0.50rem; --fs-sm: 0.56rem; --fs-base: 0.62rem;
+    --fs-md: 0.64rem; --fs-lg: 0.72rem;  --fs-xl:  0.78rem;
   }
-  #avatar-wrap { width: 40px; height: 40px; }
-  #input-row { padding: 6px 6px 8px; gap: 5px; }
-  #mic-btn { display: none; }
-  .msg-bubble { max-width: 96%; }
+  /* On Watch: ultra-compact — hide everything non-essential */
+  #lang-bar, #suggestions, #avatar-name,
+  #status-row, #avatar-glow, #llm-loader,
+  #mic-btn, #disclaimer-bar { display: none !important; }
+
+  #header {
+    padding: max(6px, var(--sat)) var(--ph) 4px;
+    flex-direction: row;
+    justify-content: center;
+    gap: 6px;
+  }
+  #avatar-wrap { width: 44px; height: 44px; animation: none; }
+  #avatar-halo { display: none; }
+  #app { max-width: 100%; }
+  #input-row {
+    padding: 4px var(--ph) max(4px, var(--sab));
+    gap: 4px;
+  }
+  #send-btn { width: 28px; height: 28px; }
+  .msg-bubble { max-width: 98%; font-size: 0.58rem; padding: 5px 8px; }
+  .msg-sender { display: none; }
+  #messages-wrap { padding: 4px var(--ph) 4px; }
 }
 
-/* ============================================================
-   TABLET / DESKTOP  ≥600px
-============================================================ */
-@media (min-width: 600px) {
-  #app { max-width: min(580px, 100%); }
+/* ══════════════════════════════════════════════════════
+   15. IPHONE — 185px to 430px
+   Covers SE (375pt) → 15 Pro Max (430pt).
+   The notch/Dynamic Island fix lives in the base styles.
+══════════════════════════════════════════════════════ */
+@media (min-width: 185px) and (max-width: 430px) {
+  :root { --av: clamp(86px, 22vmin, 140px); }
+  #app { max-width: 100%; }
 }
 
-/* ============================================================
-   TV  ≥1800px
-============================================================ */
+/* iPhone landscape — compact header */
+@media (max-height: 430px) and (orientation: landscape) {
+  :root { --av: clamp(48px, 14vmin, 72px); }
+  #header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    padding-top:    max(var(--sp-2), calc(var(--sat) + 4px));
+    padding-bottom: var(--sp-2);
+  }
+  #avatar-glow { display: none; }
+  #avatar-name { font-size: clamp(0.85rem,3vmin,1.1rem); }
+  #status-row  { display: none; }
+  .header-divider { margin-top: 0; }
+  #suggestions { max-height: 36px; }
+  .msg-bubble  { max-width: 70%; }
+}
+
+/* ══════════════════════════════════════════════════════
+   16. IPOD TOUCH — same as iPhone small
+   iPod Touch 7th gen: 320×568pt
+══════════════════════════════════════════════════════ */
+@media (min-width: 300px) and (max-width: 375px) {
+  :root { --av: clamp(80px, 22vmin, 120px); --ph: clamp(12px, 4vw, 20px); }
+}
+
+/* ══════════════════════════════════════════════════════
+   17. IPAD PORTRAIT — 768px to 1024px
+══════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  :root {
+    --av: clamp(150px, 18vmin, 220px);
+    --ph: clamp(24px, 4vw, 40px);
+  }
+  #app { max-width: min(640px, 90%); }
+}
+
+/* ══════════════════════════════════════════════════════
+   18. IPAD LANDSCAPE / MACBOOK — 1024px to 1400px
+══════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+  :root {
+    --av: clamp(170px, 16vmin, 230px);
+    --ph: clamp(28px, 3.5vw, 44px);
+    --sp-5: 22px; --sp-6: 30px;
+    --fs-base: clamp(0.90rem, 1.5vmin, 1.02rem);
+    --fs-md:   clamp(0.94rem, 1.6vmin, 1.08rem);
+  }
+  #app { max-width: min(680px, 86%); }
+  .msg-bubble { max-width: 78%; }
+}
+
+/* ══════════════════════════════════════════════════════
+   19. IMAC / LARGE DESKTOP — 1400px to 1800px
+══════════════════════════════════════════════════════ */
+@media (min-width: 1400px) {
+  :root {
+    --av: 220px;
+    --ph: 40px;
+    --fs-xl: 1.9rem;
+    --fs-md: 1.04rem;
+  }
+  #app { max-width: 720px; }
+}
+
+/* ══════════════════════════════════════════════════════
+   20. APPLE TV — 1800px to 2999px
+══════════════════════════════════════════════════════ */
 @media (min-width: 1800px) {
   :root {
-    --avatar-size:  240px;
-    --msg-font:     1.22rem;
-    --label-font:   0.82rem;
-    --chip-font:    0.88rem;
-    --input-font:   1.08rem;
-    --name-font:    2.1rem;
-    --status-font:  0.88rem;
-    --gap-xs: 8px; --gap-sm: 14px; --gap-md: 24px; --pad-h: 36px;
+    --av:         270px;
+    --ph:         48px;
+    --fs-xs:      0.88rem; --fs-sm:    0.96rem;
+    --fs-base:    1.08rem; --fs-md:    1.18rem;
+    --fs-lg:      1.55rem; --fs-xl:    2.10rem;
+    --sp-1: 8px; --sp-2: 12px; --sp-3: 18px;
+    --sp-4: 24px; --sp-5: 32px; --sp-6: 44px;
   }
-  #app { max-width: 700px; }
+  #app { max-width: 800px; }
+  .msg-bubble { max-width: 74%; }
+  /* TV: no pointer, hide cursor-based interaction hints */
+  #mic-tooltip { display: none; }
 }
 
-/* ============================================================
-   4K  ≥3000px
-============================================================ */
+/* ══════════════════════════════════════════════════════
+   21. APPLE TV 4K — 3000px+
+══════════════════════════════════════════════════════ */
 @media (min-width: 3000px) {
   :root {
-    --avatar-size:  340px;
-    --msg-font:     1.55rem;
-    --label-font:   1.02rem;
-    --chip-font:    1.08rem;
-    --input-font:   1.35rem;
-    --name-font:    2.9rem;
-    --status-font:  1.05rem;
-    --gap-xs: 12px; --gap-sm: 20px; --gap-md: 36px; --pad-h: 52px;
+    --av:         370px;
+    --ph:         64px;
+    --fs-xs:      1.05rem; --fs-sm:    1.14rem;
+    --fs-base:    1.28rem; --fs-md:    1.45rem;
+    --fs-lg:      1.90rem; --fs-xl:    2.80rem;
+    --sp-1: 10px; --sp-2: 16px; --sp-3: 24px;
+    --sp-4: 32px; --sp-5: 44px; --sp-6: 60px;
+    --r-msg: 24px;
   }
-  #app { max-width: 980px; }
+  #app { max-width: 1100px; }
+  .msg-bubble { max-width: 72%; }
 }

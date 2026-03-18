@@ -6,9 +6,9 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#0d0d1a",
-  "theme_color": "#0d0d1a",
+  "orientation": "any",
+  "background_color": "#13101a",
+  "theme_color": "#13101a",
   "categories": ["portfolio", "education", "productivity"],
   "icons": [
     {
