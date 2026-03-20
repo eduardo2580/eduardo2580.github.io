@@ -1,904 +1,244 @@
-/*
- * style.css — Eduardo.AI  (Profanity TUI Theme)
- *
- * Aesthetic: Classic terminal / XMPP client — monospace font, solid dark
- * background, no gradients on UI chrome, colored labels, status bars top
- * and bottom, timestamp prefix on every message line.
- *
- * Keeps: language switcher, suggestion chips, robot avatar, safe-area support.
- *
- * Safe-area: all env() vars applied — works on every Apple device.
- */
+/* Eduardo.AI — Clean Minimal Terminal
+   v2026.03.20 */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 
-/* ═══════════════════════════════════════════════
-   1. TOKENS
-═══════════════════════════════════════════════ */
-:root {
-  /* Terminal palette — faithful to Profanity's color scheme */
-  --bg:        #000000;   /* pure black terminal bg */
-  --bg2:       #0a0a0a;   /* slightly lighter rows */
-  --bar-bg:    #005f87;   /* Profanity top/bottom bar — bright blue */
-  --bar-text:  #ffffff;
-  --bar-dim:   rgba(255,255,255,0.70);
-
-  /* Message colors */
-  --c-time:    #5faf5f;   /* green timestamps */
-  --c-bot:     #00afff;   /* cyan — DemolitionGuy / Eduardo.AI label */
-  --c-user:    #ffaf00;   /* amber — "me:" label */
-  --c-sep:     #5f5f5f;   /* dash separator */
-  --c-text:    #d0d0d0;   /* message body */
-  --c-link:    #87d7ff;   /* links */
-  --c-error:   #ff5f5f;   /* errors */
-  --c-status:  #00ff87;   /* online dot */
-  --c-chip:    #ffaf00;   /* suggestion chip accent */
-  --c-chip2:   #00afff;   /* suggestion chip alt */
-
-  /* Monospace font stack */
-  --mono: 'Berkeley Mono', 'TX-02', 'Hack', 'Fira Code', 'Source Code Pro',
-          'Cascadia Code', 'JetBrains Mono', 'Menlo', 'Consolas',
-          'DejaVu Sans Mono', 'Liberation Mono', monospace;
-
-  /* Fluid font size — keeps terminal readable from watch to TV */
-  --tty-size: clamp(10px, 1.8vmin + 0.3rem, 17px);
-  --tty-sm:   clamp(9px,  1.5vmin + 0.2rem, 14px);
-  --tty-lg:   clamp(12px, 2.2vmin + 0.3rem, 20px);
-
-  /* Line height — tight like a real terminal */
-  --lh: 1.45;
-
-  /* Horizontal padding — with safe-area */
-  --ph: clamp(6px, 2vw, 16px);
-
-  /* Safe area insets */
-  --sat: env(safe-area-inset-top,    0px);
-  --sar: env(safe-area-inset-right,  0px);
-  --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left,   0px);
-
-  /* Avatar size */
-  --av: clamp(70px, 18vmin, 160px);
-
-  /* Bar heights */
-  --bar-h: clamp(18px, 3.5vmin, 26px);
+:root{
+  --bg:#0f0f0f;
+  --bg2:#161616;
+  --bg3:#1f1f1f;
+  --line:#ffffff0f;
+  --line2:#ffffff1a;
+  --fg:#f0f0f0;
+  --fg2:#888;
+  --fg3:#444;
+  --acc:#c8ff00;
+  --acc2:#c8ff0018;
+  --red:#ff5555;
+  --font:'SF Mono','Fira Code','Courier New',monospace;
+  --sans:-apple-system,'Helvetica Neue',Helvetica,Arial,sans-serif;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
 }
 
-/* ═══════════════════════════════════════════════
-   2. RESET
-═══════════════════════════════════════════════ */
-*, *::before, *::after {
-  margin: 0; padding: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+html{height:100%;height:-webkit-fill-available;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:13px;line-height:1.5;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{min-height:100%;min-height:-webkit-fill-available;min-height:100dvh;background:var(--bg);overflow:hidden}
+
+#app{
+  display:-webkit-flex;display:flex;
+  -webkit-flex-direction:column;flex-direction:column;
+  height:100vh;height:-webkit-fill-available;height:100dvh;
+  max-width:720px;margin:0 auto;
+  background:var(--bg);
+  border-left:1px solid var(--line2);
+  border-right:1px solid var(--line2);
 }
 
-html {
-  background: var(--bg);
-  overscroll-behavior: none;
+/* ── HEADER ── */
+#header{
+  -webkit-flex-shrink:0;flex-shrink:0;
+  padding:0 20px;
+  padding-top:calc(var(--safe-top) + 4px);
+  height:calc(48px + var(--safe-top));
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:center;align-items:center;
+  -webkit-justify-content:space-between;justify-content:space-between;
+  border-bottom:1px solid var(--line2);
+  background:var(--bg);
 }
 
-body {
-  width: 100%;
-  /*
-   * Height cascade — each line overrides the previous in capable browsers.
-   * viewport.js sets --vvh via the Visual Viewport API at runtime,
-   * which correctly accounts for Safari chrome AND the software keyboard.
-   */
-  height: 100vh;         /* baseline — all browsers         */
-  height: 100dvh;        /* dynamic vh — Chrome/FF/Safari   */
-  height: 100svh;        /* small vh — always within chrome */
-  height: var(--vvh, 100svh); /* JS visual viewport — most accurate */
-  background: var(--bg);
-  font-family: var(--mono);
-  font-size: var(--tty-size);
-  color: var(--c-text);
-  overflow: hidden;
-  overscroll-behavior: none;
-  -webkit-font-smoothing: subpixel-antialiased;
-  -moz-osx-font-smoothing: auto;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  -webkit-touch-callout: none;
-  cursor: default;
+#hdr-left{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;gap:10px}
+#hdr-dot{width:7px;height:7px;border-radius:50%;background:var(--acc);-webkit-flex-shrink:0;flex-shrink:0}
+#hdr-name{font-family:var(--sans);font-size:15px;font-weight:600;letter-spacing:-.3px;color:var(--fg)}
+#hdr-name span{color:var(--acc)}
+#hdr-right{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;gap:8px}
+
+/* status pill */
+#status-pill{
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:center;align-items:center;gap:5px;
+  font-family:var(--sans);font-size:11px;color:var(--fg2);letter-spacing:.3px
+}
+#status-dot{width:5px;height:5px;border-radius:50%;background:var(--acc);-webkit-transition:background .3s;transition:background .3s}
+#status-dot.busy{background:#f59e0b}
+
+/* lang buttons */
+#lang-bar{display:-webkit-flex;display:flex;gap:1px;background:var(--line2);border-radius:6px;padding:2px;overflow:hidden}
+.lang-btn{
+  background:none;border:none;
+  font-family:var(--font);font-size:10px;letter-spacing:.5px;
+  color:var(--fg3);padding:3px 7px;border-radius:5px;cursor:pointer;
+  -webkit-transition:background .1s,color .1s;transition:background .1s,color .1s;
+  -webkit-appearance:none;appearance:none
+}
+.lang-btn.active{background:var(--acc2);color:var(--acc)}
+
+/* ── MESSAGES ── */
+#messages-wrap{
+  -webkit-flex:1;flex:1;
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+  padding:16px 20px 8px;
+}
+#messages-wrap::-webkit-scrollbar{width:3px}
+#messages-wrap::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+
+#messages{
+  display:-webkit-flex;display:flex;
+  -webkit-flex-direction:column;flex-direction:column;
+  gap:2px;min-height:100%;
+  -webkit-justify-content:flex-end;justify-content:flex-end
 }
 
-/* No background layer — terminal has solid black */
-#bg-layer { display: none; }
-
-/* ═══════════════════════════════════════════════
-   3. LAYOUT — full-height flex column
-═══════════════════════════════════════════════ */
-#app {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  /* Match body height — viewport.js overrides this inline at runtime */
-  height: 100vh;
-  height: 100dvh;
-  height: 100svh;
-  height: var(--vvh, 100svh);
-  display: flex;
-  flex-direction: column;
-  /* Side safe areas for landscape phone/iPad */
-  padding-left:  max(0px, var(--sal));
-  padding-right: max(0px, var(--sar));
-  overflow: hidden;
+/* ── MESSAGE LINES ── */
+.msg-line{
+  display:-webkit-flex;display:flex;
+  gap:10px;
+  padding:2px 0;
+  font-size:12px;line-height:1.55;
+  -webkit-animation:appear .15s ease-out;animation:appear .15s ease-out;
+  word-break:break-word;
 }
 
-/* ═══════════════════════════════════════════════
-   4. TOP STATUS BAR  (mimics Profanity title bar)
-   "DemolitionGuy             [ ...online ]"
-═══════════════════════════════════════════════ */
-#header {
-  flex-shrink: 0;
-  width: 100%;
-  background: var(--bar-bg);
-  color: var(--bar-text);
-  display: flex;
-  flex-direction: column;
-  /* Push below notch / Dynamic Island */
-  padding-top:    max(var(--bar-h), calc(var(--sat) + 2px));
-  padding-bottom: 0;
-  position: relative;
-  z-index: 100;
-  /* No gap — this IS a bar */
-  gap: 0;
+.ml-meta{
+  -webkit-flex-shrink:0;flex-shrink:0;
+  display:-webkit-flex;display:flex;
+  -webkit-flex-direction:column;flex-direction:column;
+  -webkit-align-items:flex-end;align-items:flex-end;
+  gap:1px;
+  width:46px;
+  padding-top:1px;
 }
 
-/* Top bar row — name left, status right */
-.tui-top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 2px var(--ph) 2px;
-  min-height: var(--bar-h);
-  background: var(--bar-bg);
-  white-space: nowrap;
-  overflow: hidden;
+.ml-time{font-size:10px;color:var(--fg3);white-space:nowrap;-webkit-user-select:none;user-select:none}
+.ml-who{
+  font-size:10px;font-weight:600;letter-spacing:.4px;white-space:nowrap;text-transform:uppercase;
+  -webkit-user-select:none;user-select:none;
+}
+.ml-who.you{color:var(--acc)}
+.ml-who.ai{color:var(--fg3)}
+
+.ml-body{
+  -webkit-flex:1;flex:1;min-width:0;
+  color:var(--fg);
+}
+.ml-body.you{color:#d4f5a0}
+.ml-body.ai{color:var(--fg)}
+.ml-body.sys{color:var(--fg3);font-style:italic}
+.ml-body strong{color:var(--acc);font-weight:600}
+.ml-body a{color:var(--acc);text-decoration:none;border-bottom:1px solid rgba(200,255,0,.25)}
+
+/* ICD medical */
+.ml-body.icd{
+  color:#ffe082;
+  padding-left:8px;
+  border-left:2px solid rgba(255,224,130,.3);
+  margin-left:2px
 }
 
-/* Avatar + name combined — left side of top bar */
-#tui-identity {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow: hidden;
-  min-width: 0;
+/* divider */
+.msg-div{
+  font-size:10px;color:var(--fg3);
+  padding:8px 0 4px;text-align:center;
+  letter-spacing:.5px;
+  -webkit-user-select:none;user-select:none;
 }
 
-/* Avatar — small circle in the bar */
-#avatar-wrap {
-  position: relative;
-  width:  var(--av);
-  height: var(--av);
-  flex-shrink: 0;
-  /* Sits in the avatar section below the bar */
+/* typing dots */
+#typing{
+  display:none;padding:4px 0;
+  -webkit-align-self:flex-start;align-self:flex-start;
+}
+#typing.on{display:-webkit-flex;display:flex;gap:4px;-webkit-align-items:center;align-items:center;padding-left:56px}
+#typing span{
+  width:4px;height:4px;border-radius:50%;background:var(--fg3);
+  -webkit-animation:dot 1.2s ease-in-out infinite;animation:dot 1.2s ease-in-out infinite
+}
+#typing span:nth-child(2){-webkit-animation-delay:.15s;animation-delay:.15s}
+#typing span:nth-child(3){-webkit-animation-delay:.3s;animation-delay:.3s}
+
+/* ── INPUT ── */
+#input-wrap{
+  -webkit-flex-shrink:0;flex-shrink:0;
+  padding:10px 20px;
+  padding-bottom:calc(10px + var(--safe-bot));
+  border-top:1px solid var(--line2);
+  background:var(--bg);
 }
 
-/* We pull the avatar OUT of the bar and into a separate section */
-#avatar-section {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(6px,1.5vmin,14px) var(--ph);
-  border-bottom: 1px solid #1a1a1a;
-  background: #050505;
-  gap: clamp(4px,1vmin,8px);
-  position: relative;
+#input-row{
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:center;align-items:center;
+  gap:8px;
+  background:var(--bg2);
+  border:1px solid var(--line2);
+  border-radius:10px;
+  padding:0 6px 0 14px;
+  -webkit-transition:border-color .2s;transition:border-color .2s;
+}
+#input-row:focus-within{border-color:rgba(200,255,0,.25)}
+
+#input-prompt{
+  color:var(--acc);font-size:13px;font-weight:600;
+  -webkit-flex-shrink:0;flex-shrink:0;
+  -webkit-user-select:none;user-select:none;
+  opacity:.7;
 }
 
-/* Glow — subtle, not the huge soft blur */
-#avatar-glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 60% 80% at 50% 50%,
-    rgba(0,95,135,0.12) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
+#chat-input{
+  -webkit-flex:1;flex:1;
+  background:none;border:none;outline:none;
+  color:var(--fg);font-family:var(--font);font-size:13px;
+  padding:10px 0;caret-color:var(--acc);
+  -webkit-appearance:none;appearance:none;
+  letter-spacing:.01em;
 }
-#avatar-glow.talking {
-  background: radial-gradient(ellipse 60% 80% at 50% 50%,
-    rgba(0,175,255,0.18) 0%, transparent 70%);
+#chat-input::-webkit-input-placeholder{color:var(--fg3)}
+#chat-input::placeholder{color:var(--fg3)}
+
+#send-btn{
+  -webkit-flex-shrink:0;flex-shrink:0;
+  width:30px;height:30px;border-radius:7px;border:none;
+  background:var(--acc);color:#0f0f0f;
+  cursor:pointer;
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:center;align-items:center;
+  -webkit-justify-content:center;justify-content:center;
+  -webkit-transition:opacity .15s,-webkit-transform .1s;transition:opacity .15s,transform .1s;
+  -webkit-appearance:none;appearance:none;
+}
+#send-btn:disabled{opacity:.25;pointer-events:none}
+#send-btn:active{-webkit-transform:scale(.9);transform:scale(.9)}
+#send-btn svg{width:13px;height:13px}
+
+#disc{
+  font-family:var(--sans);font-size:10px;color:var(--fg3);
+  text-align:center;margin-top:5px;letter-spacing:.2px;
 }
 
-/* Robot SVG */
-#avatar-canvas {
-  display: block;
-  width: 100%; height: 100%;
-  overflow: visible;
-  position: relative; z-index: 1;
+/* ── ANIMS ── */
+@-webkit-keyframes appear{from{opacity:0;-webkit-transform:translateY(4px);transform:translateY(4px)}to{opacity:1;-webkit-transform:translateY(0);transform:translateY(0)}}
+@keyframes appear{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@-webkit-keyframes dot{0%,80%,100%{-webkit-transform:scale(.7);transform:scale(.7);opacity:.4}40%{-webkit-transform:scale(1);transform:scale(1);opacity:1}}
+@keyframes dot{0%,80%,100%{transform:scale(.7);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+/* ── WATCHOS ── */
+@media(max-width:200px){
+  html{font-size:11px}
+  #header{padding:0 8px;height:calc(40px + var(--safe-top))}
+  #lang-bar{display:none}
+  #status-pill{display:none}
+  .ml-meta{width:34px}
+  .ml-time{display:none}
+  #input-wrap{padding:6px 8px;padding-bottom:calc(6px + var(--safe-bot))}
+}
+@media(max-width:320px){
+  html{font-size:12px}
+  #messages-wrap{padding:10px 12px 6px}
+  #input-wrap{padding:8px 12px;padding-bottom:calc(8px + var(--safe-bot))}
+  .ml-meta{width:40px}
 }
 
-/* Halo — keeps spinning, now tighter */
-#avatar-halo {
-  position: absolute;
-  top: -6%; left: -6%;
-  width: 112%; height: 112%;
-  pointer-events: none;
-  z-index: 2;
-  animation: haloSpin 28s linear infinite;
-}
-@keyframes haloSpin { to { transform: rotate(360deg); } }
-#avatar-halo.talking { animation-duration: 4s; }
-
-/* Float */
-#avatar-wrap {
-  animation: termFloat 5s ease-in-out infinite;
-}
-@keyframes termFloat {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(-4px); }
-}
-
-/* Name line in avatar section */
-#avatar-name {
-  font-family: var(--mono);
-  font-size: var(--tty-lg);
-  font-weight: 700;
-  color: var(--c-bot);
-  letter-spacing: 0.02em;
-  text-align: center;
-  position: relative; z-index: 1;
-  text-shadow: none;
-  /* Terminal style: plain colored text */
-}
-
-/* Status row */
-#status-row {
-  display: flex; align-items: center; gap: 5px;
-  position: relative; z-index: 1;
-}
-#status-dot-shape { transition: fill 0.4s; }
-#status-text {
-  font-family: var(--mono);
-  font-size: var(--tty-sm);
-  color: var(--c-status);
-}
-
-/* ── Top bar right: status indicator ── */
-#tui-status-badge {
-  font-family: var(--mono);
-  font-size: var(--tty-sm);
-  color: var(--bar-text);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-#tui-status-badge::before { content: '[ '; }
-#tui-status-badge::after  { content: ' ]'; }
-
-/* ── Top bar left: title ── */
-#tui-title {
-  font-family: var(--mono);
-  font-size: var(--tty-size);
-  font-weight: 700;
-  color: var(--bar-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-
-/* ── Lang switcher — inline in top bar, right of title ── */
-#lang-bar {
-  display: flex;
-  gap: 0;
-  align-items: center;
-  margin-left: 8px;
-  flex-shrink: 0;
-}
-.lang-pill {
-  font-family: var(--mono);
-  font-size: var(--tty-sm);
-  font-weight: 400;
-  padding: 0 4px;
-  border: none;
-  background: transparent;
-  color: var(--bar-dim);
-  cursor: pointer;
-  letter-spacing: 0;
-  transition: color 0.15s;
-  /* Terminal style: [PT] [EN] [ES] */
-}
-.lang-pill::before { content: '['; color: var(--bar-dim); }
-.lang-pill::after  { content: ']'; color: var(--bar-dim); }
-.lang-pill:hover  { color: #fff; }
-.lang-pill.active {
-  color: #ffff00; /* yellow highlight — classic terminal selection */
-  font-weight: 700;
-}
-.lang-pill.active::before,
-.lang-pill.active::after { color: #ffff00; }
-
-/* ═══════════════════════════════════════════════
-   5. MESSAGES — terminal scrollback
-═══════════════════════════════════════════════ */
-#messages-wrap {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: clamp(4px,1vmin,8px) var(--ph);
-  background: var(--bg);
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  scrollbar-width: thin;
-  scrollbar-color: #1e3a4a var(--bg);
-}
-#messages-wrap::-webkit-scrollbar { width: 4px; }
-#messages-wrap::-webkit-scrollbar-thumb {
-  background: #1e3a4a; border-radius: 0;
-}
-#messages-wrap::-webkit-scrollbar-track { background: var(--bg); }
-
-#messages {
-  display: flex;
-  flex-direction: column;
-  /* No gap — lines are tight like a terminal */
-  gap: 0;
-}
-
-/* Message row — no bubble, just a text line */
-.msg {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  animation: lineIn 0.08s ease both;
-  padding: 1px 0;
-  line-height: var(--lh);
-  /* Wrap long lines */
-  flex-wrap: wrap;
-}
-@keyframes lineIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* Timestamp — always leftmost, green */
-.msg-time {
-  font-family: var(--mono);
-  font-size: var(--tty-sm);
-  color: var(--c-time);
-  white-space: nowrap;
-  flex-shrink: 0;
-  margin-right: 2px;
-  user-select: none;
-}
-
-/* Separator dash */
-.msg-sep {
-  color: var(--c-sep);
-  flex-shrink: 0;
-  margin-right: 2px;
-  user-select: none;
-}
-
-/* Sender label */
-.msg-sender {
-  font-family: var(--mono);
-  font-size: var(--tty-size);
-  font-weight: 700;
-  white-space: nowrap;
-  flex-shrink: 0;
-  /* No uppercase, no letter-spacing — raw terminal */
-  text-transform: none;
-  letter-spacing: 0;
-  margin-bottom: 0;
-}
-.msg.user .msg-sender { color: var(--c-user); }
-.msg.bot  .msg-sender { color: var(--c-bot); }
-
-/* Colon after sender */
-.msg-colon {
-  color: var(--c-sep);
-  flex-shrink: 0;
-  margin-right: 4px;
-}
-
-/* Message body */
-.msg-bubble {
-  font-family: var(--mono);
-  font-size: var(--tty-size);
-  color: var(--c-text);
-  line-height: var(--lh);
-  /* No background, no border, no padding — raw terminal line */
-  background: none;
-  border: none;
-  padding: 0;
-  max-width: none;
-  border-radius: 0;
-  word-break: break-word;
-  flex: 1;
-  min-width: 0;
-}
-/* Bold in messages */
-.msg.bot .msg-bubble strong {
-  color: #ffffff;
-  font-weight: 700;
-}
-/* Error line */
-.msg-bubble.error { color: var(--c-error); }
-
-/* Links */
-.msg-link {
-  color: var(--c-link);
-  text-decoration: underline;
-  word-break: break-all;
-}
-.msg-link:hover { color: #ffffff; }
-
-/* Block links in bot messages */
-.msg.bot .msg-bubble br + .msg-link,
-.msg.bot .msg-bubble .msg-link:first-child {
-  display: inline;
-  padding: 0; margin: 0;
-  background: none; border: none;
-  border-radius: 0;
-  font-size: inherit;
-  color: var(--c-link);
-  text-decoration: underline;
-}
-.msg.bot .msg-bubble br + .msg-link:hover,
-.msg.bot .msg-bubble .msg-link:first-child:hover {
-  color: #fff;
-  background: none;
-  border: none;
-}
-
-/* Typing indicator — terminal cursor blink style */
-.typing-bubble {
-  font-family: var(--mono);
-  font-size: var(--tty-size);
-  color: var(--c-bot);
-  background: none;
-  border: none;
-  padding: 0;
-  border-radius: 0;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0;
-}
-.typing-bubble::before { content: 'Eduardo.AI: '; color: var(--c-bot); }
-.typing-bubble span { display: none; }
-.typing-bubble::after {
-  content: '▋';
-  color: var(--c-bot);
-  animation: termBlink 1s step-start infinite;
-}
-@keyframes termBlink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
-}
-
-/* ═══════════════════════════════════════════════
-   6. SUGGESTION CHIPS
-   Terminal style: [Quem é Eduardo?] [Tecnologias] …
-═══════════════════════════════════════════════ */
-#suggestions {
-  flex-shrink: 0;
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(4px, 1vmin, 8px);
-  padding: clamp(4px,1vmin,6px) var(--ph) clamp(4px,1vmin,6px);
-  background: #050505;
-  border-top: 1px solid #111;
-  overflow: hidden;
-  max-height: clamp(52px, 12vmin, 80px);
-}
-.sug-chip {
-  font-family: var(--mono);
-  font-size: var(--tty-sm);
-  font-weight: 400;
-  padding: 1px 6px;
-  border: 1px solid #2a4a5a;
-  background: #050505;
-  color: var(--c-chip);
-  cursor: pointer;
-  white-space: nowrap;
-  border-radius: 0;           /* square — terminal style */
-  transition: background 0.1s, color 0.1s;
-  /* Terminal bracket style: wraps each chip in brackets visually */
-}
-.sug-chip::before { content: '['; color: var(--c-sep); }
-.sug-chip::after  { content: ']'; color: var(--c-sep); }
-.sug-chip:hover {
-  background: #0a2535;
-  color: #ffffff;
-  border-color: var(--c-chip2);
-}
-.sug-chip:active { background: #1a3545; }
-/* Alternate colors for visual variety */
-.sug-chip:nth-child(even) { color: var(--c-chip2); }
-.sug-chip:nth-child(even):hover { color: #ffffff; }
-
-/* ═══════════════════════════════════════════════
-   7. LLM LOADER
-═══════════════════════════════════════════════ */
-#llm-loader {
-  flex-shrink: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  padding: 3px var(--ph);
-  background: #050505;
-  border-top: 1px solid #111;
-  transition: opacity 0.3s;
-}
-#llm-loader.hidden {
-  opacity: 0; pointer-events: none;
-  height: 0; padding: 0; overflow: hidden; border: none;
-}
-/* Terminal progress: [====      ] */
-#llm-loader-track {
-  flex: 1;
-  height: 10px;
-  background: #0a0a0a;
-  border: 1px solid #1e3a4a;
-  border-radius: 0;
-  overflow: hidden;
-  position: relative;
-}
-#llm-loader-track::before {
-  content: '[';
-  position: absolute; left: 2px; top: 0;
-  color: var(--c-sep); font-family: var(--mono); font-size: 8px; line-height: 10px;
-}
-#llm-loader-track::after {
-  content: ']';
-  position: absolute; right: 2px; top: 0;
-  color: var(--c-sep); font-family: var(--mono); font-size: 8px; line-height: 10px;
-}
-#llm-loader-fill {
-  height: 100%; width: 0%;
-  background: var(--c-bot);
-  transition: width 0.4s linear;
-}
-#llm-loader-label {
-  font-family: var(--mono);
-  font-size: var(--tty-sm);
-  color: var(--c-time);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* ═══════════════════════════════════════════════
-   8. INPUT ROW  (Profanity's bottom input line)
-   "[17:55]  prof1@panesar  > _"
-═══════════════════════════════════════════════ */
-#input-row {
-  flex-shrink: 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 0;
-  background: var(--bar-bg);
-  /*
-   * HOME INDICATOR + KEYBOARD FIX:
-   * padding-bottom clears the home indicator.
-   * position:sticky bottom:0 means if viewport.js hasn't fired yet,
-   * the bar is still visible above the keyboard / browser chrome.
-   * It's a belt-and-braces safety net.
-   */
-  padding-bottom: max(2px, calc(var(--sab) + 2px));
-  padding-top: 2px;
-  min-height: calc(var(--bar-h) + 4px);
-  border-top: 1px solid #003f5f;
-  /* Sticky fallback — keeps bar visible even when height calc is late */
-  position: -webkit-sticky;
-  position: sticky;
-  bottom: 0;
-  z-index: 50;
-}
-
-/* Prompt prefix — ">" */
-#tui-prompt {
-  font-family: var(--mono);
-  font-size: var(--tty-size);
-  color: var(--bar-text);
-  white-space: nowrap;
-  flex-shrink: 0;
-  padding: 0 4px 0 var(--ph);
-  user-select: none;
-}
-
-/* Mic button — minimal, TUI style */
-#mic-btn {
-  position: relative;
-  flex-shrink: 0;
-  width:  clamp(22px, 5vmin, 30px);
-  height: clamp(22px, 5vmin, 30px);
-  border-radius: 0;
-  border: 1px solid rgba(255,255,255,0.25);
-  background: transparent;
-  color: var(--bar-text);
-  cursor: pointer;
-  outline: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.1s;
-  margin: 0 4px;
-}
-#mic-btn svg {
-  width:  clamp(10px, 2.5vmin, 14px);
-  height: clamp(10px, 2.5vmin, 14px);
-  pointer-events: none;
-}
-#mic-btn:hover:not(.mic-locked) { background: rgba(255,255,255,0.12); }
-#mic-btn.mic-listening {
-  border-color: #ff7070;
-  color: #ff7070;
-  background: rgba(255,112,112,0.10);
-  animation: micBlink 0.6s step-start infinite;
-}
-@keyframes micBlink {
-  0%,100% { opacity: 1; }
-  50%      { opacity: 0.5; }
-}
-#mic-btn.mic-locked { opacity: 0.35; cursor: not-allowed; }
-
-#mic-tooltip {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: #000;
-  border: 1px solid #1e3a4a;
-  color: var(--c-text);
-  font-family: var(--mono);
-  font-size: var(--tty-sm);
-  padding: 3px 8px;
-  white-space: normal;
-  max-width: 200px;
-  text-align: center;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
-  z-index: 200;
-  border-radius: 0;
-}
-#mic-btn:hover #mic-tooltip,
-#mic-btn.mic-listening #mic-tooltip,
-#mic-tooltip.tooltip-flash { opacity: 1; }
-
-/* Input pill → plain terminal text input */
-#input-wrap {
-  flex: 1; position: relative; min-width: 0; display: flex;
-}
-/* No glass pill — remove the ::before background */
-#input-wrap::before { display: none; }
-
-#chat-input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  outline: none;
-  padding: 2px 4px 2px 0;
-  color: var(--bar-text);
-  font-family: var(--mono);
-  font-size: var(--tty-size);
-  font-weight: 400;
-  caret-color: var(--bar-text);
-  min-width: 0;
-  position: relative; z-index: 2;
-}
-#chat-input::placeholder { color: rgba(255,255,255,0.35); }
-#chat-input:disabled { opacity: 0.35; cursor: not-allowed; }
-
-/* Ghost prediction */
-#input-ghost {
-  position: absolute; inset: 0;
-  padding: 2px 4px 2px 0;
-  font-family: var(--mono);
-  font-size: var(--tty-size);
-  color: transparent;
-  pointer-events: none;
-  white-space: pre;
-  overflow: hidden;
-  z-index: 1;
-}
-#input-ghost.visible { color: rgba(255,255,255,0.30); }
-
-/* Send button — "[SEND]" style */
-#send-btn {
-  flex-shrink: 0;
-  height: 100%;
-  padding: 2px clamp(8px, 2vw, 16px);
-  border-radius: 0;
-  border: none;
-  border-left: 1px solid #003f5f;
-  background: #004a70;
-  color: var(--bar-text);
-  font-family: var(--mono);
-  font-size: var(--tty-sm);
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.1s;
-  letter-spacing: 0.05em;
-}
-/* Show SVG icons inside */
-#send-btn svg {
-  width:  clamp(12px, 2.5vmin, 16px);
-  height: clamp(12px, 2.5vmin, 16px);
-  flex-shrink: 0;
-}
-#send-btn:hover:not(:disabled):not(.is-stopping) {
-  background: #005f8f;
-}
-#send-btn:active:not(:disabled) { background: #003a60; }
-#send-btn:disabled {
-  opacity: 0.40; cursor: not-allowed; background: #003050;
-}
-#send-btn.is-stopping {
-  background: #8b0000;
-  animation: stopBlink 1s step-start infinite;
-}
-@keyframes stopBlink {
-  0%,100% { background: #8b0000; }
-  50%      { background: #a00000; }
-}
-#send-btn.is-stopping:hover { background: #a00000; }
-
-/* ═══════════════════════════════════════════════
-   9. BOTTOM STATUS BAR  (Profanity bottom line)
-   "[17:55]  prof1@panesar  [ ][ ][ ][ ][ ]..."
-═══════════════════════════════════════════════ */
-#disclaimer {
-  display: none; /* hidden — we use disclaimer-bar */
-}
-#disclaimer-bar {
-  display: none; /* replaced by tui-bottom-bar */
-}
-#tui-bottom-bar {
-  flex-shrink: 0;
-  width: 100%;
-  background: var(--bar-bg);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 2px var(--ph);
-  padding-bottom: max(2px, calc(var(--sab) + 2px));
-  min-height: var(--bar-h);
-  font-family: var(--mono);
-  font-size: var(--tty-sm);
-  color: var(--bar-text);
-  white-space: nowrap;
-  overflow: hidden;
-  /* Sticky so it stays at bottom of visible viewport regardless of height calc */
-  position: -webkit-sticky;
-  position: sticky;
-  bottom: 0;
-  z-index: 100;
-}
-#tui-bottom-left {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-  color: var(--bar-dim);
-}
-#tui-bottom-right {
-  flex-shrink: 0;
-  color: var(--bar-dim);
-  letter-spacing: 0.02em;
-}
-
-/* ═══════════════════════════════════════════════
-   10. IOS INSTALL BANNER
-═══════════════════════════════════════════════ */
-#ios-install-banner {
-  display: none;
-  position: fixed;
-  bottom: max(12px, calc(var(--sab) + 8px));
-  left:   max(8px, calc(var(--sal) + 8px));
-  right:  max(8px, calc(var(--sar) + 8px));
-  z-index: 10000;
-  background: #000;
-  border: 1px solid var(--c-bot);
-  border-radius: 0;
-  padding: 10px 14px;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--mono);
-}
-#ios-install-banner.visible { display: flex; }
-.banner-icon { font-size: 1.4rem; flex-shrink: 0; }
-.banner-text { flex: 1; min-width: 0; }
-.banner-title { font-size: var(--tty-size); font-weight: 700; color: var(--c-bot); margin-bottom: 2px; }
-.banner-sub   { font-size: var(--tty-sm);  color: var(--c-text); line-height: 1.4; }
-.banner-sub strong { color: var(--c-chip); }
-.banner-close {
-  flex-shrink: 0; background: none; border: 1px solid #1e3a4a;
-  color: var(--c-text); cursor: pointer; font-family: var(--mono);
-  font-size: var(--tty-sm); padding: 2px 6px;
-}
-.banner-close:hover { color: #fff; border-color: var(--c-bot); }
-
-/* ═══════════════════════════════════════════════
-   11. STANDALONE PWA
-═══════════════════════════════════════════════ */
-@media (display-mode: standalone) {
-  /* In standalone: no browser chrome at all.
-     svh == dvh == lvh in this mode, but --vvh is still the most precise
-     because it accounts for the keyboard. */
-  body, #app {
-    height: 100svh;
-    height: var(--vvh, 100svh);
-  }
-  #header { padding-top: max(var(--bar-h), calc(var(--sat) + 4px)); }
-}
-
-/* ═══════════════════════════════════════════════
-   12. APPLE WATCH ≤184px
-═══════════════════════════════════════════════ */
-@media (max-width: 184px) {
-  :root {
-    --tty-size: 9px; --tty-sm: 8px; --tty-lg: 10px;
-    --av: 40px; --ph: 4px; --bar-h: 14px;
-  }
-  #lang-bar, #suggestions, #avatar-glow,
-  #mic-btn, #tui-bottom-bar { display: none !important; }
-  #avatar-section { padding: 4px; }
-  #avatar-name { font-size: 9px; }
-  #status-row  { display: none; }
-  #input-row   { padding: 1px 4px; }
-  .msg { padding: 0; }
-  .msg-time { display: none; }
-}
-
-/* ═══════════════════════════════════════════════
-   13. PHONE LANDSCAPE (short viewport)
-═══════════════════════════════════════════════ */
-@media (max-height: 430px) and (orientation: landscape) {
-  #avatar-section { display: none; }
-  #messages-wrap { padding-top: 4px; }
-  #suggestions { max-height: 36px; }
-}
-
-/* ═══════════════════════════════════════════════
-   14. TABLET ≥768px
-═══════════════════════════════════════════════ */
-@media (min-width: 768px) {
-  :root { --av: clamp(120px, 14vmin, 180px); }
-  #app { max-width: min(800px, 100%); margin: 0 auto; }
-}
-
-/* ═══════════════════════════════════════════════
-   15. DESKTOP ≥1024px
-═══════════════════════════════════════════════ */
-@media (min-width: 1024px) {
-  :root {
-    --tty-size: clamp(12px, 1.1vw, 15px);
-    --av: clamp(150px, 12vmin, 200px);
-    --ph: 20px;
-  }
-  #app { max-width: min(960px, 100%); }
-}
-
-/* ═══════════════════════════════════════════════
-   16. TV ≥1800px
-═══════════════════════════════════════════════ */
-@media (min-width: 1800px) {
-  :root {
-    --tty-size: 18px; --tty-sm: 15px; --tty-lg: 22px;
-    --av: 220px; --ph: 32px; --bar-h: 36px;
-  }
-  #app { max-width: 1200px; }
-}
-
-/* ═══════════════════════════════════════════════
-   17. 4K ≥3000px
-═══════════════════════════════════════════════ */
-@media (min-width: 3000px) {
-  :root {
-    --tty-size: 26px; --tty-sm: 21px; --tty-lg: 32px;
-    --av: 300px; --ph: 48px; --bar-h: 52px;
-  }
-  #app { max-width: 1800px; }
-}
+::-webkit-selection{background:rgba(200,255,0,.18)}
+::selection{background:rgba(200,255,0,.18)}
+:focus-visible{outline:1px solid var(--acc);outline-offset:1px}

@@ -1,554 +1,115 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"/>
-  <title>Eduardo.AI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
-  <link rel="manifest" href="manifest.json"/>
-  <meta name="theme-color" content="#000000"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="Eduardo.AI"/>
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"/>
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"/>
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"/>
-  <link rel="shortcut icon" href="favicon.ico"/>
+<!-- ── NO CACHE — all browsers ── -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta http-equiv="Surrogate-Control" content="no-store">
 
-  <meta name="description"
-    content="Eduardo Souza Rodrigues — Desenvolvedor Junior. Portfólio interativo com IA local."/>
-  <meta name="author" content="Eduardo Souza Rodrigues"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f0f0f">
+<title>Eduardo.AI</title>
 
-  <!--
-    Fira Code from Google Fonts — monospace, coding feel.
-    Falls back to system monospace if blocked (LibreWolf / TV).
-  -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap"
-    rel="stylesheet"/>
-
-  <link rel="stylesheet" href="css/style.css"/>
-  <script src="js/compat.js"></script>
+<!-- Cache-bust with timestamp + version -->
+<link rel="stylesheet" href="css/style.css?v=20260320&t=1">
 </head>
 <body>
+<!-- ── KILL CACHE FIRST ── -->
+<script>
+/* Inline cache-kill: runs before any external resource.
+   Clears SW registrations, Cache Storage, and bfcache. */
+(function(){
+  var ts = Date.now();
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(function(r){
+      r.forEach(function(s){s.unregister();});
+    });
+  }
+  if('caches' in window){
+    caches.keys().then(function(k){
+      k.forEach(function(n){caches.delete(n);});
+    });
+  }
+  /* bfcache bust */
+  window.addEventListener('pageshow',function(e){
+    if(e.persisted){window.location.reload(true);}
+  });
+  /* Expose build stamp for debugging */
+  window.__BUILD = '20260320';
+  window.__LOADED_AT = ts;
+}());
+</script>
 
-  <!-- bg-layer hidden by CSS in TUI mode -->
-  <div id="bg-layer" aria-hidden="true"></div>
+<div id="app">
 
-  <div id="app">
-
-    <!-- ══════════════════════════════════════════════════
-         TOP STATUS BAR  (Profanity title bar)
-         "Eduardo.AI  [PT][EN][ES]         [ ...online ]"
-    ══════════════════════════════════════════════════ -->
-    <header id="header">
-      <div class="tui-top-bar">
-
-        <!-- Left: title + lang switcher -->
-        <div id="tui-identity">
-          <span id="tui-title">Eduardo.AI</span>
-          <nav id="lang-bar" aria-label="Language">
-            <button class="lang-pill active" data-lang="pt" aria-pressed="true">PT</button>
-            <button class="lang-pill" data-lang="en" aria-pressed="false">EN</button>
-            <button class="lang-pill" data-lang="es" aria-pressed="false">ES</button>
-          </nav>
-        </div>
-
-        <!-- Right: status badge -->
-        <span id="tui-status-badge" aria-live="polite">
-          <svg width="7" height="7" viewBox="0 0 7 7"
-            style="display:inline;vertical-align:middle;margin-right:3px;"
-            aria-hidden="true">
-            <circle cx="3.5" cy="3.5" r="3.5" fill="#00ff87" id="status-dot-shape"/>
-          </svg><span id="status-text">online</span>
-        </span>
-
-      </div>
-    </header>
-
-    <!-- ══════════════════════════════════════════════════
-         AVATAR SECTION  — robot + name + status
-    ══════════════════════════════════════════════════ -->
-    <section id="avatar-section" aria-label="Avatar Eduardo.AI">
-
-      <div id="avatar-glow" aria-hidden="true"></div>
-
-      <!-- Avatar wrap -->
-      <div id="avatar-wrap">
-
-        <!-- Halo ring -->
-        <svg id="avatar-halo"
-          viewBox="0 0 100 100"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true">
-          <defs>
-            <linearGradient id="hring" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stop-color="#00afff" stop-opacity="0.70"/>
-              <stop offset="50%"  stop-color="#ffaf00" stop-opacity="0.50"/>
-              <stop offset="100%" stop-color="#00afff" stop-opacity="0.70"/>
-            </linearGradient>
-          </defs>
-          <circle cx="50" cy="50" r="46" fill="none"
-            stroke="url(#hring)" stroke-width="1"
-            stroke-dasharray="4 4" opacity="0.70"/>
-          <circle cx="50" cy="50" r="41" fill="none"
-            stroke="#005f87" stroke-width="0.6" opacity="0.50"/>
-          <!-- Cardinal dots — terminal green/cyan -->
-          <circle cx="50" cy="4"  r="1.5" fill="#00ff87" opacity="0.80"/>
-          <circle cx="96" cy="50" r="1.5" fill="#00afff" opacity="0.80"/>
-          <circle cx="50" cy="96" r="1.5" fill="#ffaf00" opacity="0.80"/>
-          <circle cx="4"  cy="50" r="1.5" fill="#00ff87" opacity="0.80"/>
-        </svg>
-
-        <!-- SVG Robot -->
-        <svg id="avatar-canvas"
-          viewBox="0 0 320 340"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-label="Robot Avatar"
-          role="img"
-          style="width:100%;height:100%;display:block;overflow:visible;">
-
-          <defs>
-            <!-- Terminal palette: dark body, cyan accents, amber highlights -->
-            <radialGradient id="av-body" cx="38%" cy="32%" r="65%">
-              <stop offset="0%"   stop-color="#0a1a2e"/>
-              <stop offset="100%" stop-color="#000510"/>
-            </radialGradient>
-            <radialGradient id="av-rim-l" cx="12%" cy="45%" r="55%">
-              <stop offset="0%"   stop-color="#00afff" stop-opacity="0.20"/>
-              <stop offset="100%" stop-color="#00afff" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="av-rim-r" cx="88%" cy="55%" r="50%">
-              <stop offset="0%"   stop-color="#ffaf00" stop-opacity="0.14"/>
-              <stop offset="100%" stop-color="#ffaf00" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="av-eye-l" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#ffffff"/>
-              <stop offset="40%"  stop-color="#00afff"/>
-              <stop offset="100%" stop-color="#005f87" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="av-eye-r" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#ffffff"/>
-              <stop offset="40%"  stop-color="#5faf5f"/>
-              <stop offset="100%" stop-color="#005f00" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="av-core" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#00afff"/>
-              <stop offset="60%"  stop-color="#005f87" stop-opacity="0.6"/>
-              <stop offset="100%" stop-color="#005f87" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="av-visor" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#00afff"/>
-              <stop offset="100%" stop-color="#003f5f" stop-opacity="0.4"/>
-            </radialGradient>
-            <radialGradient id="av-ant" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#00ff87"/>
-              <stop offset="100%" stop-color="#00ff87" stop-opacity="0"/>
-            </radialGradient>
-            <filter id="av-shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="2" stdDeviation="4"
-                flood-color="#00afff" flood-opacity="0.18"/>
-            </filter>
-            <filter id="av-glow" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="2.5" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <filter id="av-glow-soft" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur stdDeviation="4" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-
-          <g id="av-robot" filter="url(#av-shadow)">
-
-            <!-- ANTENNA -->
-            <g id="av-antenna">
-              <rect x="156" y="18" width="8" height="32" rx="2"
-                fill="#0a1a2e" stroke="#005f87" stroke-width="0.8" opacity="0.8"/>
-              <circle cx="160" cy="14" r="9" fill="url(#av-body)"
-                stroke="#00afff" stroke-width="1" filter="url(#av-glow-soft)"/>
-              <circle cx="160" cy="14" r="5" fill="url(#av-ant)" opacity="0.95">
-                <animate attributeName="r"       values="4;6;4"     dur="1.8s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" values="0.8;1;0.8" dur="1.8s" repeatCount="indefinite"/>
-              </circle>
-              <circle cx="160" cy="14" r="2.5" fill="#00ff87">
-                <animate attributeName="opacity" values="0.6;1;0.6" dur="1.8s" repeatCount="indefinite"/>
-              </circle>
-            </g>
-
-            <!-- HEAD -->
-            <g id="av-head">
-              <rect x="92" y="48" width="136" height="124" rx="12"
-                fill="url(#av-body)"/>
-              <rect x="92" y="48" width="136" height="124" rx="12"
-                fill="url(#av-rim-l)"/>
-              <rect x="92" y="48" width="136" height="124" rx="12"
-                fill="url(#av-rim-r)"/>
-              <!-- Terminal scanline border -->
-              <rect x="92" y="48" width="136" height="124" rx="12"
-                fill="none" stroke="#005f87" stroke-width="1.2" opacity="0.60"/>
-
-              <!-- Ear nubs — angular, terminal style -->
-              <rect x="82"  y="86" width="12" height="34" rx="2"
-                fill="url(#av-body)" stroke="#005f87" stroke-width="0.8" opacity="0.7"/>
-              <rect x="226" y="86" width="12" height="34" rx="2"
-                fill="url(#av-body)" stroke="#005f87" stroke-width="0.8" opacity="0.7"/>
-              <rect cx="89"  cy="101" width="4" height="4" rx="0"
-                x="86" y="99" fill="#00ff87" opacity="0.8">
-                <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
-              </rect>
-              <rect x="230" y="99" width="4" height="4" rx="0" fill="#00afff" opacity="0.8">
-                <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" begin="1.5s" repeatCount="indefinite"/>
-              </rect>
-
-              <!-- Visor — terminal green/cyan scan bar -->
-              <rect x="104" y="88" width="112" height="34" rx="2"
-                fill="#000c14" opacity="0.96"/>
-              <rect x="106" y="90" width="108" height="30" rx="2"
-                fill="url(#av-visor)" opacity="0.12"/>
-              <!-- Scan line -->
-              <rect id="av-scan" x="112" y="93" width="14" height="24" rx="0"
-                fill="#00afff" opacity="0.90" filter="url(#av-glow)">
-                <animate attributeName="x"
-                  values="112;186;112" dur="2.6s" repeatCount="indefinite"
-                  calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
-                <animate attributeName="opacity"
-                  values="0.90;0.45;0.90" dur="2.6s" repeatCount="indefinite"/>
-              </rect>
-              <!-- Visor border -->
-              <rect x="104" y="88" width="112" height="34" rx="2"
-                fill="none" stroke="#00afff" stroke-width="1" opacity="0.45"/>
-              <!-- Corner marks — terminal UI detail -->
-              <rect x="104" y="88" width="6" height="6" fill="#00afff" opacity="0.7"/>
-              <rect x="210" y="88" width="6" height="6" fill="#00afff" opacity="0.7"/>
-              <rect x="104" y="116" width="6" height="6" fill="#00afff" opacity="0.7"/>
-              <rect x="210" y="116" width="6" height="6" fill="#00afff" opacity="0.7"/>
-
-              <!-- Eyes — more angular/terminal -->
-              <rect x="122" y="133" width="28" height="28" rx="2" fill="#000c14"/>
-              <circle cx="136" cy="147" r="11" fill="url(#av-eye-l)" filter="url(#av-glow)">
-                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite"/>
-              </circle>
-              <rect x="122" y="133" width="28" height="28" rx="2"
-                fill="none" stroke="#00afff" stroke-width="0.8" opacity="0.5">
-                <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" repeatCount="indefinite"/>
-              </rect>
-              <circle cx="136" cy="147" r="4" fill="#ffffff">
-                <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
-              </circle>
-
-              <rect x="170" y="133" width="28" height="28" rx="2" fill="#000c14"/>
-              <circle cx="184" cy="147" r="11" fill="url(#av-eye-r)" filter="url(#av-glow)">
-                <animate attributeName="r" values="10;12;10" dur="2s" begin="0.15s" repeatCount="indefinite"/>
-              </circle>
-              <rect x="170" y="133" width="28" height="28" rx="2"
-                fill="none" stroke="#5faf5f" stroke-width="0.8" opacity="0.5">
-                <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" begin="0.15s" repeatCount="indefinite"/>
-              </rect>
-              <circle cx="184" cy="147" r="4" fill="#ffffff">
-                <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="0.15s" repeatCount="indefinite"/>
-              </circle>
-
-              <!-- Mouth grill — avatar.js animates these -->
-              <g id="av-mouth">
-                <line x1="135" y1="172" x2="185" y2="172"
-                  stroke="#00afff" stroke-width="1.8" opacity="0.40" stroke-linecap="square"/>
-                <line x1="138" y1="179" x2="182" y2="179"
-                  stroke="#5faf5f" stroke-width="1.4" opacity="0.40" stroke-linecap="square"/>
-                <line x1="135" y1="186" x2="185" y2="186"
-                  stroke="#00afff" stroke-width="1.8" opacity="0.40" stroke-linecap="square"/>
-              </g>
-            </g>
-
-            <!-- NECK -->
-            <rect x="148" y="174" width="24" height="26" rx="2"
-              fill="url(#av-body)" stroke="#005f87" stroke-width="0.8" opacity="0.6"/>
-            <rect x="153" y="180" width="5" height="5" fill="#00afff" opacity="0.50"/>
-            <rect x="162" y="180" width="5" height="5" fill="#5faf5f" opacity="0.50"/>
-
-            <!-- TORSO -->
-            <g id="av-torso">
-              <rect x="94" y="198" width="132" height="108" rx="8"
-                fill="url(#av-body)"/>
-              <rect x="94" y="198" width="132" height="108" rx="8"
-                fill="url(#av-rim-l)"/>
-              <rect x="94" y="198" width="132" height="108" rx="8"
-                fill="url(#av-rim-r)"/>
-              <rect x="94" y="198" width="132" height="108" rx="8"
-                fill="none" stroke="#005f87" stroke-width="1.2" opacity="0.55"/>
-              <!-- Corner marks -->
-              <rect x="94" y="198" width="7" height="7" fill="#005f87" opacity="0.8"/>
-              <rect x="219" y="198" width="7" height="7" fill="#005f87" opacity="0.8"/>
-              <rect x="94" y="299" width="7" height="7" fill="#005f87" opacity="0.8"/>
-              <rect x="219" y="299" width="7" height="7" fill="#005f87" opacity="0.8"/>
-
-              <!-- Shoulder joints — square terminals -->
-              <rect x="79" y="205" width="18" height="26" rx="2"
-                fill="url(#av-body)" stroke="#005f87" stroke-width="1" opacity="0.7"/>
-              <rect x="223" y="205" width="18" height="26" rx="2"
-                fill="url(#av-body)" stroke="#005f87" stroke-width="1" opacity="0.7"/>
-              <rect x="83" y="215" width="6" height="6" fill="#00afff" opacity="0.6">
-                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.5s" repeatCount="indefinite"/>
-              </rect>
-              <rect x="231" y="215" width="6" height="6" fill="#5faf5f" opacity="0.6">
-                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.5s" begin="1.25s" repeatCount="indefinite"/>
-              </rect>
-
-              <!-- Chest panel -->
-              <rect x="116" y="210" width="88" height="76" rx="4"
-                fill="#00050f" opacity="0.70"/>
-              <rect x="116" y="210" width="88" height="76" rx="4"
-                fill="none" stroke="#00afff" stroke-width="0.7" opacity="0.30"/>
-
-              <!-- Grill lines — terminal scanlines -->
-              <line x1="126" y1="232" x2="194" y2="232"
-                stroke="#00afff" stroke-width="1.2" opacity="0.28" stroke-linecap="square"/>
-              <line x1="122" y1="244" x2="198" y2="244"
-                stroke="#00afff" stroke-width="1.2" opacity="0.28" stroke-linecap="square"/>
-              <line x1="126" y1="256" x2="194" y2="256"
-                stroke="#00afff" stroke-width="1.2" opacity="0.28" stroke-linecap="square"/>
-
-              <!-- Core glow -->
-              <circle cx="160" cy="244" r="15" fill="url(#av-core)"
-                opacity="0.70" filter="url(#av-glow-soft)">
-                <animate attributeName="opacity" values="0.50;0.90;0.50" dur="2.4s" repeatCount="indefinite"/>
-              </circle>
-              <circle cx="160" cy="244" r="7" fill="#00afff">
-                <animate attributeName="r"       values="5.5;8;5.5"   dur="2.4s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" values="0.75;1;0.75" dur="2.4s" repeatCount="indefinite"/>
-              </circle>
-              <circle cx="160" cy="244" r="3.5" fill="#ffffff" opacity="0.90"/>
-
-              <!-- Side indicator blocks -->
-              <rect x="100" y="232" width="10" height="3" rx="0" fill="#00afff" opacity="0.5">
-                <animate attributeName="opacity" values="0.2;0.8;0.2" dur="1.9s" repeatCount="indefinite"/>
-              </rect>
-              <rect x="210" y="232" width="10" height="3" rx="0" fill="#5faf5f" opacity="0.5">
-                <animate attributeName="opacity" values="0.2;0.8;0.2" dur="1.9s" begin="0.95s" repeatCount="indefinite"/>
-              </rect>
-              <rect x="100" y="242" width="10" height="3" rx="0" fill="#ffaf00" opacity="0.4">
-                <animate attributeName="opacity" values="0.15;0.6;0.15" dur="2.3s" begin="0.4s" repeatCount="indefinite"/>
-              </rect>
-              <rect x="210" y="242" width="10" height="3" rx="0" fill="#ffaf00" opacity="0.4">
-                <animate attributeName="opacity" values="0.15;0.6;0.15" dur="2.3s" begin="1.15s" repeatCount="indefinite"/>
-              </rect>
-            </g>
-
-            <!-- ARMS — angular, no ellipses -->
-            <g id="av-arm-l">
-              <rect x="62" y="228" width="20" height="64" rx="2"
-                fill="url(#av-body)" stroke="#005f87" stroke-width="0.8" opacity="0.6"/>
-              <rect x="64" y="268" width="16" height="16" rx="2"
-                fill="#000c14" stroke="#00afff" stroke-width="0.8" opacity="0.6"/>
-              <rect x="60" y="290" width="24" height="18" rx="2"
-                fill="url(#av-body)" stroke="#005f87" stroke-width="0.7" opacity="0.5"/>
-            </g>
-            <g id="av-arm-r">
-              <rect x="238" y="228" width="20" height="64" rx="2"
-                fill="url(#av-body)" stroke="#005f87" stroke-width="0.8" opacity="0.6"/>
-              <rect x="240" y="268" width="16" height="16" rx="2"
-                fill="#000c14" stroke="#5faf5f" stroke-width="0.8" opacity="0.6"/>
-              <rect x="236" y="290" width="24" height="18" rx="2"
-                fill="url(#av-body)" stroke="#005f87" stroke-width="0.7" opacity="0.5"/>
-            </g>
-
-          </g><!-- /av-robot -->
-
-          <!-- Idle float -->
-          <animateTransform
-            xlink:href="#av-robot"
-            attributeName="transform"
-            type="translate"
-            values="0,0; 0,-5; 0,0"
-            dur="4s"
-            repeatCount="indefinite"
-            additive="sum"
-            calcMode="spline"
-            keySplines="0.45 0 0.55 1;0.45 0 0.55 1"/>
-
-        </svg><!-- /avatar-canvas -->
-      </div><!-- /#avatar-wrap -->
-
-      <!-- Name + status below robot -->
-      <div id="avatar-name">Eduardo.AI</div>
-      <div id="status-row">
-        <svg width="7" height="7" viewBox="0 0 7 7" aria-hidden="true">
-          <circle cx="3.5" cy="3.5" r="3.5" fill="#00ff87" id="status-dot-shape-2"/>
-        </svg>
-        <span id="status-text-2">Inicializando…</span>
-      </div>
-
-    </section><!-- /#avatar-section -->
-
-    <!-- ══════════════════════════════════════════════════
-         MESSAGE SCROLLBACK  (terminal chat log)
-    ══════════════════════════════════════════════════ -->
-    <div id="messages-wrap"
-      role="log"
-      aria-live="polite"
-      aria-label="Chat log">
-      <div id="messages"></div>
+  <header id="header">
+    <div id="hdr-left">
+      <span id="hdr-dot"></span>
+      <span id="hdr-name">Eduardo<span>.AI</span></span>
     </div>
-
-    <!-- ══════════════════════════════════════════════════
-         SUGGESTION CHIPS  (kept per request)
-    ══════════════════════════════════════════════════ -->
-    <nav id="suggestions"
-      role="navigation"
-      aria-label="Sugestões">
-    </nav>
-
-    <!-- ══════════════════════════════════════════════════
-         LLM LOADER
-    ══════════════════════════════════════════════════ -->
-    <div id="llm-loader" role="status" aria-live="polite" aria-atomic="true">
-      <div id="llm-loader-track" aria-hidden="true">
-        <div id="llm-loader-fill"></div>
+    <div id="hdr-right">
+      <div id="status-pill">
+        <span id="status-dot"></span>
+        <span id="status-text">online</span>
       </div>
-      <span id="llm-loader-label">Carregando IA local…</span>
+      <div id="lang-bar" role="group" aria-label="Idioma">
+        <button class="lang-btn active" data-lang="pt">PT</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="es">ES</button>
+      </div>
     </div>
+  </header>
 
-    <!-- ══════════════════════════════════════════════════
-         INPUT ROW  (Profanity bottom input bar)
-         "[>] [mic] message text ____________ [SEND]"
-    ══════════════════════════════════════════════════ -->
-    <div id="input-row" role="group" aria-label="Enviar mensagem">
+  <main id="messages-wrap" role="log" aria-live="polite">
+    <div id="messages"></div>
+    <div id="typing" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+  </main>
 
-      <!-- Prompt symbol -->
-      <span id="tui-prompt" aria-hidden="true">&gt;</span>
-
-      <!-- Mic -->
-      <button id="mic-btn" type="button" aria-label="Gravar voz">
-        <svg id="mic-icon-idle" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect x="9" y="2" width="6" height="12" rx="3"
-            stroke="currentColor" stroke-width="1.6"/>
-          <path d="M5 10a7 7 0 0 0 14 0"
-            stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <line x1="12" y1="17" x2="12" y2="21"
-            stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-        <svg id="mic-icon-active" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="display:none">
-          <rect x="9" y="2" width="6" height="12" rx="3"
-            fill="currentColor" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M5 10a7 7 0 0 0 14 0"
-            stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <line x1="12" y1="17" x2="12" y2="21"
-            stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-        <svg id="mic-icon-locked" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="display:none">
-          <rect x="9" y="2" width="6" height="10" rx="3"
-            stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
-          <path d="M5 10a7 7 0 0 0 14 0"
-            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-          <rect x="13" y="14" width="8" height="6" rx="1.5"
-            stroke="currentColor" stroke-width="1.3"/>
-          <path d="M14.5 14v-1.5a1.5 1.5 0 0 1 3 0V14"
-            stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-          <circle cx="17" cy="17" r="0.8" fill="currentColor"/>
-        </svg>
-        <span id="mic-tooltip" role="tooltip" aria-live="polite"></span>
-      </button>
-
-      <!-- Text input -->
-      <div id="input-wrap">
-        <input
-          id="chat-input"
-          type="text"
-          inputmode="text"
-          placeholder="message…"
-          maxlength="300"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="sentences"
-          spellcheck="true"
-          aria-label="Mensagem"
-          disabled
-        />
-        <span id="input-ghost" aria-hidden="true"></span>
-      </div>
-
-      <!-- Send -->
-      <button id="send-btn" type="button" aria-label="Enviar" disabled>
-        <!-- In TUI mode we show the SVG icon; CSS can swap to text if preferred -->
-        <svg id="send-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M22 2L11 13" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <svg id="stop-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="display:none">
-          <rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor"/>
+  <footer id="input-wrap">
+    <div id="input-row">
+      <span id="input-prompt">&#62;</span>
+      <input id="chat-input" type="text"
+        autocomplete="off" autocorrect="off"
+        autocapitalize="sentences" spellcheck="false"
+        placeholder="mensagem ou código CID (ex: F20)…"
+        aria-label="Mensagem" enterkeyhint="send">
+      <button id="send-btn" disabled aria-label="Enviar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
         </svg>
       </button>
-
-    </div><!-- /#input-row -->
-
-    <!-- ══════════════════════════════════════════════════
-         BOTTOM STATUS BAR  (Profanity bottom bar)
-         "[17:55]  eduardo.ai  [ ][ ][ ][ ]..."
-    ══════════════════════════════════════════════════ -->
-    <div id="tui-bottom-bar" aria-hidden="true">
-      <span id="tui-bottom-left">eduardo.ai — portfólio interativo</span>
-      <span id="tui-bottom-right">[ ][ ][ ][ ][ ][ ][ ][ ][ ][ ]</span>
     </div>
+    <div id="disc"></div>
+  </footer>
 
-  </div><!-- /#app -->
+</div>
 
-  <!-- disclaimer kept in DOM for chat.js, hidden visually -->
-  <p id="disclaimer" style="display:none">Eduardo.AI pode cometer erros.</p>
-  <div id="disclaimer-bar" style="display:none"></div>
+<!-- All assets loaded with cache-busting timestamps -->
+<script src="js/kb-core.js?v=20260320&t=1"></script>
+<script src="js/kb-physics.js?v=20260320&t=1"></script>
+<script src="js/kb-history.js?v=20260320&t=1"></script>
+<script src="js/kb-medicine.js?v=20260320&t=1"></script>
+<script src="js/chat.js?v=20260320&t=1"></script>
 
-  <!-- iOS install banner -->
-  <div id="ios-install-banner" role="dialog" aria-modal="true"
-    aria-label="Instalar Eduardo.AI">
-    <div class="banner-icon" aria-hidden="true">🤖</div>
-    <div class="banner-text">
-      <div class="banner-title">Instalar Eduardo.AI</div>
-      <div class="banner-sub">
-        Toque em
-        <svg style="display:inline-block;width:12px;height:12px;vertical-align:middle;margin:0 2px;"
-          viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 2v13M8 6l4-4 4 4M3 16v4a1 1 0 001 1h16a1 1 0 001-1v-4"
-            stroke="#00afff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        e depois <strong>Adicionar à Tela de Início</strong>
-      </div>
-    </div>
-    <button class="banner-close" id="ios-banner-close" type="button" aria-label="Fechar">✕</button>
-  </div>
-
-  <!-- Scripts -->
-  <script type="module" src="js/webllm-loader.js"></script>
-  <script src="js/knowledge.js"></script>
-  <script src="js/db.js"></script>
-  <script src="js/avatar.js"></script>
-  <script src="js/voice.js"></script>
-  <script src="js/chat.js"></script>
-  <script src="js/glow-sync.js"></script>
-  <script src="js/pwa-install.js"></script>
-  <script src="js/sw-register.js"></script>
-  <!-- Visual Viewport API — fixes Safari chrome + keyboard height -->
-  <script src="js/viewport.js"></script>
-
-  <!-- Sync the second status dot in avatar-section with chat.js status -->
-  <script>
-    (function(){
-      var dot2 = document.getElementById('status-dot-shape-2');
-      var txt2 = document.getElementById('status-text-2');
-      var dot1 = document.getElementById('status-dot-shape');
-      var txt1 = document.getElementById('status-text');
-      if(!dot1||!dot2) return;
-      var MO = window.MutationObserver||window.WebKitMutationObserver;
-      if(!MO) return;
-      new MO(function(){
-        dot2.setAttribute('fill', dot1.getAttribute('fill')||'#00ff87');
-        dot2.style.fill = dot1.style.fill||'';
-        if(txt2&&txt1) txt2.textContent = txt1.textContent;
-      }).observe(dot1, {attributes:true, characterData:true, subtree:true});
-    }());
-  </script>
-
+<!-- Register no-cache service worker last -->
+<script>
+(function(){
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js?t=' + Date.now())
+        .then(function(reg){ reg.update(); })
+        .catch(function(){});
+    });
+  }
+}());
+</script>
 </body>
 </html>

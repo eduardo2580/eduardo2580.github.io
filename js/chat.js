@@ -1,733 +1,335 @@
-/*
- * chat.js — Eduardo.AI  (patched)
- *
- * Patch summary vs original:
- *   resolveKeyword() — now reads ANSWER_CACHE directly instead of going
- *   through DB.getDefault, which had a race condition where db.js could
- *   open before knowledge.js finished seeding the GK keys into ANSWER_CACHE.
- *   All other logic is identical to the original.
- */
-(function (win, doc) {
-  'use strict';
+/* chat.js — Eduardo.AI v2026.03.20
+   Clean minimal engine. ES5 + full WebKit/watchOS.
+*/
+(function(W,D){
+'use strict';
 
-  /* ════════════════════════════════════════════════════════════════════════
-     CONFIG
-  ════════════════════════════════════════════════════════════════════════ */
-  var MAX_TOKENS         = 300;
-  var PREDICT_DEBOUNCE   = 80;
-  var POLL_INTERVAL      = 400;
-  var FAIL_MIN_POLLS     = 8;
+var MIN_SCORE=2,TOP_N=2;
+var lang='pt',busy=false,history=[],opI=0;
 
-  /* ════════════════════════════════════════════════════════════════════════
-     STATE
-  ════════════════════════════════════════════════════════════════════════ */
-  var lang             = 'pt';
-  var engine           = null;
-  var busy             = false;
-  var stopRequested    = false;
-  var talkTimer        = null;
-  var greetBubble      = null;
-  var predictTimer     = null;
-  var currentPrediction = '';
+var $msgs=D.getElementById('messages');
+var $wrap=D.getElementById('messages-wrap');
+var $inp=D.getElementById('chat-input');
+var $send=D.getElementById('send-btn');
+var $typ=D.getElementById('typing');
+var $sdot=D.getElementById('status-dot');
+var $stxt=D.getElementById('status-text');
+var $disc=D.getElementById('disc');
+var $lbtns=D.getElementsByClassName('lang-btn');
 
-  /* ════════════════════════════════════════════════════════════════════════
-     DOM REFS
-  ════════════════════════════════════════════════════════════════════════ */
-  var $msgs      = doc.getElementById('messages');
-  var $wrap      = doc.getElementById('messages-wrap');
-  var $input     = doc.getElementById('chat-input');
-  var $ghost     = doc.getElementById('input-ghost');
-  var $send      = doc.getElementById('send-btn');
-  var $sendIcon  = doc.getElementById('send-icon');
-  var $stopIcon  = doc.getElementById('stop-icon');
-  var $suggs     = doc.getElementById('suggestions');
-  var $status    = doc.getElementById('status-text');
-  var $statusDot = doc.getElementById('status-dot-shape');
-  var $loader    = doc.getElementById('llm-loader');
-  var $fill      = doc.getElementById('llm-loader-fill');
-  var $loaderLbl = doc.getElementById('llm-loader-label');
-  var $chatArea  = doc.getElementById('chat-area');
-  var $langBtns  = doc.getElementsByClassName('lang-pill');
-  var $disc      = doc.getElementById('disclaimer');
+/* strings */
+var S={
+  ph:{pt:'mensagem ou código CID (ex: F20)…',en:'message or ICD code (e.g. F20)…',es:'mensaje o código CIE (ej: F20)…'},
+  online:{pt:'online',en:'online',es:'en línea'},
+  busy:{pt:'buscando…',en:'searching…',es:'buscando…'},
+  typing:{pt:'Eduardo.AI está digitando…',en:'Eduardo.AI is typing…',es:'Eduardo.AI está escribiendo…'},
+  disc:{pt:'uso educacional · não substitui profissional',en:'educational use · not a substitute for professional advice',es:'uso educativo · no sustituye a un profesional'},
+  nf:{pt:'Não encontrei informações sobre isso. Tente perguntar sobre tecnologia, ciência, física, história, medicina ou evolução.',en:"Couldn't find that. Try asking about tech, science, physics, history, medicine or evolution.",es:'No encontré eso. Prueba con tecnología, ciencia, física, historia, medicina o evolución.'},
+  hint:{pt:'Talvez você queira saber sobre: ',en:'Maybe you want to know about: ',es:'Quizás te interese: '},
+  icdh:{pt:'CID-10: ',en:'ICD-10: ',es:'CIE-10: '},
+  icdd:{pt:'\n\n⚠ Informação educacional. Consulte um profissional de saúde.',en:'\n\n⚠ Educational only. Consult a healthcare professional.',es:'\n\n⚠ Solo educativo. Consulte a un profesional de salud.'},
+  icdm:{pt:'Código não encontrado. Ver: https://icd.who.int',en:'Code not found. See: https://icd.who.int',es:'Código no encontrado. Ver: https://icd.who.int'}
+};
+function s(k){var e=S[k];return e?(e[lang]||e.pt):''}
 
-  /* ════════════════════════════════════════════════════════════════════════
-     ES5 HELPERS
-  ════════════════════════════════════════════════════════════════════════ */
-  function addClass(el, cls) {
-    if (!el) return;
-    if (el.classList) { el.classList.add(cls); return; }
-    if (el.className.indexOf(cls) < 0) el.className += ' ' + cls;
+var OP={
+  pt:['','Sobre isso: ','','Claro: ','','Boa pergunta! '],
+  en:['','About that: ','','Sure: ','','Good question! '],
+  es:['','Sobre eso: ','','Claro: ','','¡Buena pregunta! ']
+};
+function op(){var l=OP[lang]||OP.pt,o=l[opI%l.length];opI++;return o}
+
+/* helpers */
+function norm(t){return String(t).toLowerCase().replace(/[^a-záàãâéêíóôõúüçñ\s0-9]/g,' ').replace(/\s+/g,' ').trim()}
+function tok(t){return norm(t).split(' ').filter(function(w){return w.length>2})}
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function hms(){var d=new Date();return('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2)}
+
+/* render markdown-ish */
+function rend(text){
+  if(!text)return'';
+  var lks=[],PH='\x00';
+  var o=String(text).replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,function(_,u,l){
+    var safe=/^(https?:|mailto:)/.test(u.trim())?u.trim():'#';
+    lks.push({u:safe,l:l});return PH+(lks.length-1)+PH;
+  });
+  o=esc(o);
+  o=o.replace(new RegExp(esc(PH)+'(\\d+)'+esc(PH),'g'),function(_,i){
+    var lk=lks[parseInt(i,10)];if(!lk)return'';
+    return'<a href="'+lk.u+'" target="_blank" rel="noopener">'+esc(lk.l)+'</a>';
+  });
+  o=o.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  o=o.replace(/\n/g,'<br>');
+  return o;
+}
+
+/* append one message line */
+function line(text,role,type){
+  var wrap=D.createElement('div');
+  wrap.className='msg-line';
+
+  /* meta column: time + who */
+  var meta=D.createElement('div');
+  meta.className='ml-meta';
+
+  var tm=D.createElement('span');
+  tm.className='ml-time';
+  tm.textContent=hms();
+
+  var who=D.createElement('span');
+  who.className='ml-who '+(role==='user'?'you':'ai');
+  who.textContent=role==='user'?(lang==='pt'?'você':lang==='es'?'tú':'you'):'ai';
+
+  meta.appendChild(tm);
+  meta.appendChild(who);
+
+  /* body */
+  var body=D.createElement('div');
+  var isICD=type&&type.indexOf('icd:')===0;
+  body.className='ml-body '+(role==='user'?'you':role==='sys'?'sys':isICD?'icd':'ai');
+
+  if(role==='user'||role==='sys'){body.textContent=text;}
+  else{body.innerHTML=rend(text);}
+
+  wrap.appendChild(meta);
+  wrap.appendChild(body);
+  if($msgs)$msgs.appendChild(wrap);
+
+  var entry=null;
+  if(role==='bot'){
+    entry={wrap:wrap,body:body,who:who,type:type||'kb',origQ:null};
+    history.push(entry);
   }
-  function removeClass(el, cls) {
-    if (!el) return;
-    if (el.classList) { el.classList.remove(cls); return; }
-    el.className = el.className.replace(new RegExp('\\b' + cls + '\\b', 'g'), '').trim();
-  }
-  function hasClass(el, cls) {
-    if (!el) return false;
-    if (el.classList) return el.classList.contains(cls);
-    return el.className.indexOf(cls) >= 0;
-  }
-  function toggleClass(el, cls, force) {
-    if (force === true)  return addClass(el, cls);
-    if (force === false) return removeClass(el, cls);
-    hasClass(el, cls) ? removeClass(el, cls) : addClass(el, cls);
-  }
-  function setAttr(el, name, val) { if (el) el.setAttribute(name, val); }
-  function on(el, ev, fn) {
-    if (!el) return;
-    if (el.addEventListener) el.addEventListener(ev, fn, false);
-    else if (el.attachEvent) el.attachEvent('on' + ev, fn);
-  }
-  function later(fn, ms) { return setTimeout(fn, ms || 0); }
-  function nextPaint(fn) {
-    if (win.requestAnimationFrame) win.requestAnimationFrame(fn);
-    else later(fn, 16);
-  }
-  function escapeHtml(s) {
-    return String(s)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
+  scroll();
+  return entry;
+}
 
-  /* ════════════════════════════════════════════════════════════════════════
-     UI STRINGS
-  ════════════════════════════════════════════════════════════════════════ */
-  var STR = {
-    placeholder:   { pt: 'Enviar mensagem…',   en: 'Send a message…',   es: 'Enviar mensaje…'   },
-    loaderInit:    { pt: 'Aguardando IA…',      en: 'Waiting for AI…',   es: 'Esperando IA…'     },
-    fallbackLabel: { pt: 'Modo teclado ativo',  en: 'Keyword mode',      es: 'Modo teclado'      },
-    disclaimer: {
-      pt: 'Eduardo.AI pode cometer erros. Verifique as respostas.',
-      en: 'Eduardo.AI can make mistakes. Please double-check responses.',
-      es: 'Eduardo.AI puede cometer errores. Verifique las respuestas.'
-    },
-    ariaMsg:   { pt: 'Mensagem',  en: 'Message',  es: 'Mensaje'  },
-    ariaSend:  { pt: 'Enviar',    en: 'Send',     es: 'Enviar'   },
-    ariaStop:  { pt: 'Parar',     en: 'Stop',     es: 'Detener'  },
-    errWebLLM: {
-      pt: '⚠ Erro ao gerar resposta.',
-      en: '⚠ Error generating response.',
-      es: '⚠ Error al generar respuesta.'
-    }
-  };
-  function s(key) {
-    var e = STR[key];
-    return e ? (e[lang] || e.pt) : '';
-  }
+function divider(t){
+  var el=D.createElement('div');el.className='msg-div';
+  el.textContent=t||'';
+  if($msgs)$msgs.appendChild(el);scroll();
+}
 
-  /* ════════════════════════════════════════════════════════════════════════
-     AVATAR / STATUS
-  ════════════════════════════════════════════════════════════════════════ */
-  var STATUS = {
-    loading:  { dot: '#facc15', txt: { pt: 'Carregando IA…', en: 'Loading AI…',    es: 'Cargando IA…'   }, talk: false },
-    online:   { dot: '#34d399', txt: { pt: 'Online',         en: 'Online',          es: 'En línea'       }, talk: false },
-    thinking: { dot: '#a78bfa', txt: { pt: 'Pensando…',      en: 'Thinking…',       es: 'Pensando…'      }, talk: true  },
-    fallback: { dot: '#fb923c', txt: { pt: 'Modo teclado',   en: 'Keyword mode',    es: 'Modo teclado'   }, talk: false },
-    error:    { dot: '#f87171', txt: { pt: 'Modo offline',   en: 'Offline mode',    es: 'Modo sin conexión' }, talk: false }
-  };
+function scroll(){
+  if(!$wrap)return;
+  if(W.requestAnimationFrame){
+    W.requestAnimationFrame(function(){$wrap.scrollTop=$wrap.scrollHeight});
+  }else{$wrap.scrollTop=$wrap.scrollHeight}
+}
 
-  function setAvatarState(state) {
-    var c = STATUS[state] || STATUS.online;
-    if ($statusDot) { setAttr($statusDot, 'fill', c.dot); $statusDot.style.fill = c.dot; }
-    if ($status)    $status.innerHTML = escapeHtml(c.txt[lang] || '');
-    if (win.AvatarController) win.AvatarController.setTalking(c.talk);
-    toggleClass($chatArea, 'ai-active', !!c.talk);
-  }
+/* typing */
+function showTyping(){
+  if($typ){$typ.setAttribute('aria-label',s('typing'));$typ.className='on'}
+  if($sdot){$sdot.className='busy'}
+  if($stxt)$stxt.textContent=s('busy');
+  scroll();
+}
+function hideTyping(){
+  if($typ)$typ.className='';
+  if($sdot)$sdot.className='';
+  if($stxt)$stxt.textContent=s('online');
+}
 
-  /* ════════════════════════════════════════════════════════════════════════
-     LOADER BAR
-  ════════════════════════════════════════════════════════════════════════ */
-  win.__webllmProgress = function (pct) {
-    if ($fill) $fill.style.width = Math.min(100, pct) + '%';
-  };
+/* identity */
+var IDR=[
+  /^(ol[aá]|oi|hey|hi|hello|hola|buenas)[\s!?]*$/i,
+  /\b(quem [eé] voc[eê]|who are you|qui[eé]n eres|o que [eé] eduardo|what is eduardo|qu[eé] es eduardo)\b/i,
+  /^eduardo(\.ai?)?[\s!?]*$/i,
+  /\b(se apresente|introduce yourself|preséntate)\b/i
+];
+function isID(t){for(var i=0;i<IDR.length;i++)if(IDR[i].test(t))return true;return false}
+function idAns(){
+  var id=W.IDENTITY;
+  if(id&&id.greeting&&id.greeting[lang])return id.greeting[lang];
+  var nm=(id&&id.name)||'Eduardo Souza Rodrigues';
+  return({
+    pt:'Olá! Sou Eduardo.AI, assistente de '+nm+'. Posso ajudar com tecnologia, ciência, física, história, medicina (CID-10) e muito mais.',
+    en:"Hi! I'm Eduardo.AI, "+nm+"'s assistant. Ask me about tech, science, physics, history, medicine (ICD-10) and more.",
+    es:'¡Hola! Soy Eduardo.AI, asistente de '+nm+'. Pregúntame sobre tecnología, ciencia, física, historia, medicina (CIE-10) y más.'
+  })[lang]||''
+}
 
-  function hideLoader() { addClass($loader, 'hidden'); }
+/* ICD */
+var ICDR=/^([A-Za-z]\d{2}(\.\d{1,2})?)$/;
+function icdCode(t){var x=t.trim();return ICDR.test(x)?x.toUpperCase():null}
+function icdAns(code){
+  if(typeof W.lookupICDCode!=='function')return null;
+  var r=W.lookupICDCode(code,lang);
+  if(!r)return s('icdh')+code+'\n\n'+s('icdm');
+  return s('icdh')+code+' — '+r.label+'\n\n'+r.detail+s('icdd');
+}
 
-  /* ════════════════════════════════════════════════════════════════════════
-     LANGUAGE
-  ════════════════════════════════════════════════════════════════════════ */
-  function applyLang(l) {
-    lang = l;
-    win.__webllmLang = l;
-
-    var i;
-    for (i = 0; i < $langBtns.length; i++) {
-      toggleClass($langBtns[i], 'active', $langBtns[i].getAttribute('data-lang') === l);
-    }
-
-    if ($input) {
-      $input.placeholder = s('placeholder');
-      setAttr($input, 'aria-label', s('ariaMsg'));
-    }
-    if ($send) setAttr($send, 'aria-label', s('ariaSend'));
-
-    if (greetBubble && win.GREETINGS) {
-      greetBubble.innerHTML = renderMsgContent(win.GREETINGS[l]);
-    }
-
-    if ($disc) $disc.innerHTML = escapeHtml(s('disclaimer'));
-
-    if ($loaderLbl && !win.__webllmStarted) {
-      $loaderLbl.textContent = s('loaderInit');
-    }
-
-    renderSuggestions();
-    setAvatarState('online');
-    clearPrediction();
-    if (win.VoiceController) win.VoiceController.setLang(l);
-  }
-
-  (function () {
-    for (var i = 0; i < $langBtns.length; i++) {
-      (function (btn) {
-        on(btn, 'click', function () { applyLang(btn.getAttribute('data-lang') || 'pt'); });
-      }($langBtns[i]));
-    }
-  }());
-
-  /* ════════════════════════════════════════════════════════════════════════
-     SUGGESTIONS
-  ════════════════════════════════════════════════════════════════════════ */
-  function renderSuggestions() {
-    if (!$suggs) return;
-    $suggs.innerHTML = '';
-    var suggs = win.SUGGESTIONS && win.SUGGESTIONS[lang];
-    if (!suggs) return;
-    for (var i = 0; i < suggs.length; i++) {
-      (function (item) {
-        var b = doc.createElement('button');
-        b.className = 'sug-chip';
-        b.innerHTML = item.label;
-        on(b, 'click', function () { sendChip(item.label, item.key); });
-        $suggs.appendChild(b);
-      }(suggs[i]));
+/* KB */
+function buildKB(lc){
+  var kb={};
+  var plugs=W.EduardoKB;
+  if(plugs&&plugs.length){
+    var sorted=plugs.slice().sort(function(a,b){return(b.priority||0)-(a.priority||0)});
+    for(var p=0;p<sorted.length;p++){
+      var ld=sorted[p].lang;if(!ld)continue;
+      var en=ld[lc]||ld['pt'];if(!en)continue;
+      var ks=Object.keys(en);
+      for(var k=0;k<ks.length;k++)if(!kb[ks[k]])kb[ks[k]]=en[ks[k]];
     }
   }
+  var ac=W.ANSWER_CACHE&&W.ANSWER_CACHE[lc];
+  if(ac){var aks=Object.keys(ac);for(var i=0;i<aks.length;i++)if(aks[i]!=='unknown'&&aks[i]!=='default'&&!kb[aks[i]])kb[aks[i]]=ac[aks[i]];}
+  return kb;
+}
 
-  /* ════════════════════════════════════════════════════════════════════════
-     MESSAGE RENDERING
-  ════════════════════════════════════════════════════════════════════════ */
-  var SENDER = {
-    user: { pt: 'Você', en: 'You',         es: 'Tú'         },
-    bot:  { pt: 'Eduardo.AI', en: 'Eduardo.AI', es: 'Eduardo.AI' }
-  };
-
-  function renderMsgContent(text) {
-    if (!text) return '';
-    var links = [];
-    var PH = '\x00L';
-    var processed = text.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, function (_, url, label) {
-      var safe = /^(https?:|mailto:)/.test(url.trim()) ? url.trim() : '#';
-      links.push({ url: safe, label: label });
-      return PH + (links.length - 1) + '\x00';
-    });
-    processed = escapeHtml(processed);
-    processed = processed.replace(
-      new RegExp(escapeHtml(PH) + '(\\d+)' + escapeHtml('\x00'), 'g'),
-      function (_, idx) {
-        var lk = links[parseInt(idx, 10)];
-        if (!lk) return '';
-        var tgt = lk.url.indexOf('mailto:') === 0 ? '' : ' target="_blank" rel="noopener noreferrer"';
-        return '<a href="' + lk.url + '"' + tgt + ' class="msg-link">' + escapeHtml(lk.label) + '</a>';
-      }
-    );
-    processed = processed.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    processed = processed.replace(/\n/g, '<br>');
-    return processed;
+function scoreAll(q,lc){
+  var kb=buildKB(lc),qr=norm(q),qt=tok(q),sc=[],ks=Object.keys(kb);
+  for(var i=0;i<ks.length;i++){
+    var key=ks[i],ans=kb[key];
+    if(!ans||typeof ans!=='string'||ans.length<8)continue;
+    var cl=ans.replace(/\[\[[^\]|]+\|([^\]]+)\]\]/g,'$1').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\n/g,' ').toLowerCase();
+    var kl=key.replace(/_/g,' ').toLowerCase();
+    var score=0;
+    if(cl.indexOf(qr)>=0)score+=12;
+    if(kl.indexOf(qr)>=0)score+=12;
+    if(qt.length>0){var ok=true;for(var w=0;w<qt.length;w++){if(cl.indexOf(qt[w])<0&&kl.indexOf(qt[w])<0){ok=false;break}}if(ok)score+=6}
+    for(var w2=0;w2<qt.length;w2++){
+      var qw=qt[w2];
+      if(kl.indexOf(qw)>=0)score+=4;else if(cl.indexOf(qw)>=0)score+=1;
+      if(qw.length>=4){var st=qw.slice(0,4);if(kl.indexOf(st)>=0)score+=2;else if(cl.indexOf(st)>=0)score+=0.5}
+    }
+    if(score>=MIN_SCORE)sc.push({key:key,answer:ans,score:score});
   }
+  sc.sort(function(a,b){return b.score-a.score});
+  return sc;
+}
 
-  /* TUI timestamp */
-  function nowHHMMSS() {
-    var d = new Date();
-    return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);
-  }
+function reply(q,lc){
+  var r=scoreAll(q,lc);if(!r.length)return null;
+  var top=r.slice(0,TOP_N);
+  if(top.length>1&&top[0].score>top[1].score*1.8)top=[top[0]];
+  var parts=[];for(var i=0;i<top.length;i++)parts.push(top[i].answer.replace(/\n{3,}/g,'\n\n').trim());
+  return op()+parts.join('\n\n—\n\n');
+}
 
-  function appendMsg(text, role, isError) {
-    var wrap = doc.createElement('div');
-    wrap.className = 'msg ' + role;
-
-    var time = doc.createElement('span');
-    time.className = 'msg-time';
-    time.textContent = nowHHMMSS();
-
-    var sep = doc.createElement('span');
-    sep.className = 'msg-sep';
-    sep.textContent = '\u00a0-\u00a0';
-
-    var lbl = doc.createElement('span');
-    lbl.className = 'msg-sender';
-    lbl.textContent = (SENDER[role] && SENDER[role][lang]) || role;
-
-    var colon = doc.createElement('span');
-    colon.className = 'msg-colon';
-    colon.textContent = ':\u00a0';
-
-    var bub = doc.createElement('span');
-    bub.className = 'msg-bubble' + (isError ? ' error' : '');
-    bub.innerHTML = (role === 'bot' && !isError) ? renderMsgContent(text) : escapeHtml(text);
-
-    wrap.appendChild(time);
-    wrap.appendChild(sep);
-    wrap.appendChild(lbl);
-    wrap.appendChild(colon);
-    wrap.appendChild(bub);
-    if ($msgs) $msgs.appendChild(wrap);
-    scrollBottom();
-    return wrap;
-  }
-
-  function showTyping() {
-    var wrap = doc.createElement('div');
-    wrap.className = 'msg bot';
-    wrap.id = 'typing-wrap';
-    var time = doc.createElement('span');
-    time.className = 'msg-time';
-    time.textContent = nowHHMMSS();
-    var sep = doc.createElement('span');
-    sep.className = 'msg-sep';
-    sep.textContent = '\u00a0-\u00a0';
-    var bub = doc.createElement('span');
-    bub.className = 'typing-bubble';
-    bub.innerHTML = '<span></span><span></span><span></span>';
-    wrap.appendChild(time);
-    wrap.appendChild(sep);
-    wrap.appendChild(bub);
-    if ($msgs) $msgs.appendChild(wrap);
-    scrollBottom();
-  }
-
-  function removeTyping() {
-    var el = doc.getElementById('typing-wrap');
-    if (el && el.parentNode) el.parentNode.removeChild(el);
-  }
-
-  function scrollBottom() {
-    if ($wrap) $wrap.scrollTop = $wrap.scrollHeight;
-  }
-
-  /* ════════════════════════════════════════════════════════════════════════
-     SEND BUTTON
-  ════════════════════════════════════════════════════════════════════════ */
-  function setSendState(st) {
-    if (!$send) return;
-    if (st === 'stop') {
-      addClass($send, 'is-stopping');
-      $send.disabled = false;
-      if ($sendIcon) $sendIcon.style.display = 'none';
-      if ($stopIcon) $stopIcon.style.display = '';
-      setAttr($send, 'aria-label', s('ariaStop'));
-    } else {
-      removeClass($send, 'is-stopping');
-      $send.disabled = (st === 'disabled');
-      if ($sendIcon) $sendIcon.style.display = '';
-      if ($stopIcon) $stopIcon.style.display = 'none';
-      setAttr($send, 'aria-label', s('ariaSend'));
+function fallback(q,lc){
+  var kb=buildKB(lc),qt=tok(q),hints=[],ks=Object.keys(kb);
+  for(var i=0;i<ks.length&&hints.length<4;i++){
+    var kl=ks[i].replace(/_/g,' ').toLowerCase();
+    for(var w=0;w<qt.length;w++){
+      if(kl.indexOf(qt[w])>=0||(qt[w].length>=4&&kl.indexOf(qt[w].slice(0,4))>=0)){hints.push('**'+ks[i].replace(/_/g,' ')+'**');break}
     }
   }
+  if(hints.length)return s('hint')+hints.join(', ')+'.';
+  return s('nf');
+}
 
-  /* ════════════════════════════════════════════════════════════════════════
-     TALK ANIMATION
-  ════════════════════════════════════════════════════════════════════════ */
-  function talkAnim(replyLen) {
-    var dur = Math.min(Math.max(replyLen * 40, 1800), 7000);
-    if (talkTimer) clearTimeout(talkTimer);
-    setAvatarState('thinking');
-    talkTimer = later(function () {
-      syncEngine();
-      setAvatarState(engine ? 'online' : 'fallback');
-    }, dur);
+/* retranslate */
+function retrans(nl){
+  for(var i=0;i<history.length;i++){
+    var e=history[i];if(!e||!e.body)continue;
+    if(e.who)e.who.textContent='ai';
+    var t=e.type||'kb',txt=null;
+    if(t==='identity'||t==='greeting')txt=(W.GREETINGS&&W.GREETINGS[nl])||idAns();
+    else if(t&&t.indexOf('icd:')===0)txt=icdAns(t.slice(4));
+    else if(e.origQ)txt=reply(e.origQ,nl)||fallback(e.origQ,nl);
+    if(txt)e.body.innerHTML=rend(txt);
   }
+}
 
-  /* ════════════════════════════════════════════════════════════════════════
-     ENGINE SYNC
-  ════════════════════════════════════════════════════════════════════════ */
-  function syncEngine() {
-    if (!engine && win.__webllmReady) engine = win.__webllmReady;
+/* language */
+function applyLang(l){
+  var prev=lang;lang=l;
+  for(var i=0;i<$lbtns.length;i++){
+    var b=$lbtns[i];b.className=b.getAttribute('data-lang')===l?'lang-btn active':'lang-btn';
   }
+  if($inp)$inp.placeholder=s('ph');
+  if($disc)$disc.textContent=s('disc');
+  if($stxt)$stxt.textContent=s('online');
+  if(l!==prev)retrans(l);
+}
 
-  /* ════════════════════════════════════════════════════════════════════════
-     TYPE-AHEAD PREDICTION
-  ════════════════════════════════════════════════════════════════════════ */
-  function predScore(input, candidate) {
-    if (!input) return 0;
-    var inp  = input.toLowerCase();
-    var cand = candidate.toLowerCase();
-    if (cand.indexOf(inp) === 0) return 100;
-    var words = cand.split(/\s+/);
-    for (var w = 0; w < words.length; w++) {
-      if (words[w].indexOf(inp) === 0) return 80;
-    }
-    var map = win.KEYWORD_MAP && win.KEYWORD_MAP[lang];
-    if (map) {
-      var keys = Object.keys(map);
-      for (var k = 0; k < keys.length; k++) {
-        if (map[keys[k]].test(inp)) {
-          var suggs = win.SUGGESTIONS && win.SUGGESTIONS[lang];
-          if (suggs) {
-            for (var ss = 0; ss < suggs.length; ss++) {
-              if (suggs[ss].key === keys[k]) return 60;
-            }
-          }
-        }
-      }
-    }
-    if (cand.indexOf(inp) >= 0) return 40;
-    return 0;
+for(var li=0;li<$lbtns.length;li++){
+  (function(b){b.addEventListener('click',function(){applyLang(b.getAttribute('data-lang')||'pt')},false)}($lbtns[li]));
+}
+
+/* send */
+function send(){
+  if(busy||!$inp)return;
+  var text=$inp.value.trim();if(!text)return;
+  var al=lang;$inp.value='';busy=true;
+  if($send)$send.disabled=true;
+
+  line(text,'user','user');
+
+  if(isID(text)){deliver(idAns(),'identity',null);return}
+
+  var ic=icdCode(text);
+  if(ic){var ir=icdAns(ic);if(ir){deliver(ir,'icd:'+ic,null);return}}
+
+  showTyping();
+  setTimeout(function(){
+    hideTyping();
+    var r=reply(text,al)||fallback(text,al);
+    var e=deliver(r,'kb',text);
+    if(e)e.origQ=text;
+  },160);
+}
+
+function deliver(text,type,origQ){
+  hideTyping();
+  var e=line(text,'bot',type);
+  if(e&&origQ)e.origQ=origQ;
+  busy=false;
+  if($send)$send.disabled=false;
+  return e;
+}
+
+/* input events */
+if($inp){
+  $inp.addEventListener('keydown',function(e){
+    var k=e.key||e.keyCode;
+    if((k==='Enter'||k===13)&&!e.shiftKey){if(e.preventDefault)e.preventDefault();send()}
+  },false);
+  $inp.addEventListener('input',function(){if($send)$send.disabled=!$inp.value.trim()},false);
+}
+if($send)$send.addEventListener('click',function(){send()},false);
+
+/* Ctrl+L clear */
+D.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&(e.key==='l'||e.key==='L'||e.keyCode===76)){
+    if($msgs)$msgs.innerHTML='';history=[];divider('cleared');
   }
+},false);
 
-  function bestPrediction(input) {
-    if (!input || input.length < 2) return '';
-    var suggs = win.SUGGESTIONS && win.SUGGESTIONS[lang];
-    if (!suggs) return '';
-    var best = null, bestScore = 0;
-    for (var i = 0; i < suggs.length; i++) {
-      var sc = predScore(input, suggs[i].label);
-      if (sc > bestScore) { bestScore = sc; best = suggs[i].label; }
-    }
-    if (bestScore >= 40 && best) {
-      var lo = best.toLowerCase();
-      var inp = input.toLowerCase();
-      if (lo.indexOf(inp) === 0 && best.length > input.length) return best.slice(input.length);
-      if (bestScore >= 60) return ' → ' + best;
-    }
-    return '';
-  }
+/* greeting */
+function greet(){
+  var day=new Date().toLocaleDateString(
+    lang==='en'?'en-US':lang==='es'?'es-ES':'pt-BR',
+    {weekday:'long',year:'numeric',month:'long',day:'numeric'}
+  );
+  divider(day);
+  var gt=(W.GREETINGS&&W.GREETINGS[lang])||idAns();
+  var e=line(gt,'bot','greeting');if(e)e.type='greeting';
+}
 
-  function showPrediction(suffix) {
-    currentPrediction = suffix;
-    if ($ghost) {
-      $ghost.innerHTML = suffix ? escapeHtml(suffix) : '';
-      toggleClass($ghost, 'visible', !!suffix);
-    }
-  }
+/* iOS viewport */
+function fixVP(){
+  var vp=W.visualViewport;
+  var h=vp?Math.round(vp.height):W.innerHeight;
+  var app=D.getElementById('app');
+  if(app)app.style.height=h+'px';
+  scroll();
+}
+if(W.visualViewport){
+  W.visualViewport.addEventListener('resize',fixVP,{passive:true});
+  W.visualViewport.addEventListener('scroll',fixVP,{passive:true});
+}else{W.addEventListener('resize',fixVP,{passive:true})}
 
-  function clearPrediction() {
-    currentPrediction = '';
-    if ($ghost) { $ghost.innerHTML = ''; removeClass($ghost, 'visible'); }
-  }
+/* boot */
+function boot(){
+  applyLang('pt');
+  if($inp)$inp.disabled=false;
+  greet();
+  setTimeout(function(){if(!('ontouchstart' in W)&&$inp)$inp.focus()},350);
+}
 
-  function onInputChange() {
-    if (predictTimer) clearTimeout(predictTimer);
-    predictTimer = later(function () {
-      showPrediction(bestPrediction($input ? $input.value : ''));
-    }, PREDICT_DEBOUNCE);
-  }
+if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',boot,false);else boot();
+W.chatSend=send;
 
-  function onInputKey(e) {
-    var key     = e.key || e.keyCode;
-    var isTab   = (key === 'Tab'        || key === 9);
-    var isRight = (key === 'ArrowRight' || key === 39);
-    var isEnter = (key === 'Enter'      || key === 13);
-
-    if (isEnter && !e.shiftKey) {
-      e.preventDefault ? e.preventDefault() : (e.returnValue = false);
-      sendFreeText();
-      return;
-    }
-
-    if (currentPrediction && (isTab || isRight)) {
-      var atEnd = !$input ||
-        (typeof $input.selectionEnd !== 'undefined'
-          ? $input.selectionEnd >= $input.value.length
-          : true);
-      if (isTab || (isRight && atEnd)) {
-        e.preventDefault ? e.preventDefault() : (e.returnValue = false);
-        if ($input) {
-          $input.value = currentPrediction.indexOf(' → ') === 0
-            ? currentPrediction.slice(3)
-            : $input.value + currentPrediction;
-        }
-        clearPrediction();
-      }
-    }
-  }
-
-  if ($input) {
-    on($input, 'input',   onInputChange);
-    on($input, 'keyup',   onInputChange);
-    on($input, 'keydown', onInputKey);
-    on($input, 'blur',    clearPrediction);
-  }
-
-  /* ════════════════════════════════════════════════════════════════════════
-     SEND — CHIP CLICK
-  ════════════════════════════════════════════════════════════════════════ */
-  function sendChip(label, key) {
-    if (busy) return;
-    clearPrediction();
-    appendMsg(label, 'user');
-    var cache = win.ANSWER_CACHE && win.ANSWER_CACHE[lang];
-    var reply = (cache && cache[key]) || (win.getAnswer ? win.getAnswer(key, lang) : '');
-    nextPaint(function () {
-      appendMsg(reply, 'bot');
-      talkAnim(reply.length);
-    });
-  }
-
-  /* ════════════════════════════════════════════════════════════════════════
-     SEND — FREE TEXT
-  ════════════════════════════════════════════════════════════════════════ */
-  function sendFreeText() {
-    if (!$input) return;
-
-    if (busy) {
-      stopRequested = true;
-      setSendState('send');
-      removeTyping();
-      syncEngine();
-      setAvatarState(engine ? 'online' : 'fallback');
-      busy = false;
-      return;
-    }
-
-    var text = $input.value.trim();
-    if (!text) return;
-
-    $input.value = '';
-    clearPrediction();
-    busy = true;
-    stopRequested = false;
-    syncEngine();
-
-    appendMsg(text, 'user');
-    showTyping();
-    setAvatarState('thinking');
-    setSendState('stop');
-
-    var keyHit     = win.keywordLookup ? win.keywordLookup(text, lang) : 'unknown';
-    var isKnownKey = (keyHit !== 'unknown' && keyHit !== 'default');
-
-    if (isKnownKey) {
-      resolveKeyword(keyHit);
-      return;
-    }
-
-    if (win.DB) {
-      win.DB.getLearned(text, lang, function (cached) {
-        if (stopRequested) { finish(); return; }
-        if (cached) {
-          removeTyping();
-          appendMsg(cached, 'bot');
-          talkAnim(cached.length);
-          finish();
-        } else {
-          routeToEngine(text);
-        }
-      });
-    } else {
-      routeToEngine(text);
-    }
-  }
-
-  /* ── PATCHED resolveKeyword ──────────────────────────────────────────────
-   * Original went to DB.getDefault first, which caused a race condition:
-   * db.js could open before knowledge.js finished seeding GK keys into
-   * ANSWER_CACHE, so any GK key (python, docker, etc.) would return null
-   * from the DB and fall through to the 'unknown' answer.
-   *
-   * Fix: read ANSWER_CACHE directly — it's always synchronously populated
-   * by knowledge.js before any user interaction can happen. Only fall back
-   * to DB.getDefault if ANSWER_CACHE doesn't have the key (for safety),
-   * then fall through to getAnswer as the final guaranteed source.
-   * ──────────────────────────────────────────────────────────────────────── */
-  function resolveKeyword(key) {
-    /* 1. ANSWER_CACHE — synchronous, always populated, covers all GK keys */
-    var cache = win.ANSWER_CACHE && win.ANSWER_CACHE[lang];
-    if (cache && cache[key]) {
-      removeTyping();
-      appendMsg(cache[key], 'bot');
-      talkAnim(cache[key].length);
-      finish();
-      return;
-    }
-
-    /* 2. getAnswer — direct lookup into _A / _GK (also synchronous) */
-    if (win.getAnswer) {
-      var direct = win.getAnswer(key, lang);
-      if (direct) {
-        removeTyping();
-        appendMsg(direct, 'bot');
-        talkAnim(direct.length);
-        finish();
-        return;
-      }
-    }
-
-    /* 3. DB fallback — for any edge case where the above both miss */
-    if (win.DB) {
-      win.DB.getDefault(key, lang, function (cached) {
-        var reply = cached || (win.getAnswer ? win.getAnswer('unknown', lang) : '');
-        removeTyping();
-        appendMsg(reply, 'bot');
-        talkAnim(reply.length);
-        finish();
-      });
-    } else {
-      var reply = win.getAnswer ? win.getAnswer('unknown', lang) : '';
-      removeTyping();
-      appendMsg(reply, 'bot');
-      talkAnim(reply.length);
-      finish();
-    }
-  }
-
-  function routeToEngine(text) {
-    syncEngine();
-    if (engine) {
-      sendViaWebLLM(text);
-      return;
-    }
-    useKeywordFallback(text);
-  }
-
-  function useKeywordFallback(text) {
-    if (stopRequested) { finish(); return; }
-    removeTyping();
-    var key   = win.keywordLookup ? win.keywordLookup(text, lang) : 'unknown';
-    var cache = win.ANSWER_CACHE && win.ANSWER_CACHE[lang];
-    var reply = (cache && cache[key]) || (win.getAnswer ? win.getAnswer(key, lang) : '');
-    appendMsg(reply, 'bot');
-    talkAnim(reply.length);
-    finish();
-  }
-
-  function sendViaWebLLM(text) {
-    var sys = win.buildSystemPrompt ? win.buildSystemPrompt(lang) : '';
-    engine.chat.completions.create({
-      messages:    [{ role: 'system', content: sys }, { role: 'user', content: text }],
-      max_tokens:  MAX_TOKENS,
-      temperature: 0.6,
-      top_p:       0.9,
-      stream:      false
-    }).then(function (res) {
-      if (stopRequested) { finish(); return; }
-      var reply = (res.choices[0].message.content || '').trim();
-      if (win.console) win.console.info('[WebLLM] reply:', reply.slice(0, 120));
-      removeTyping();
-      appendMsg(reply, 'bot');
-      talkAnim(reply.length);
-      if (win.DB) win.DB.saveLearned(text, lang, reply);
-      finish();
-    }).catch(function (err) {
-      if (stopRequested) { finish(); return; }
-      if (win.console) win.console.error('[WebLLM] error:', err);
-      removeTyping();
-      setAvatarState('error');
-      appendMsg(s('errWebLLM'), 'bot', true);
-      finish();
-    });
-  }
-
-  function finish() {
-    setSendState('send');
-    busy = false;
-  }
-
-  /* ════════════════════════════════════════════════════════════════════════
-     WEBLLM POLLER
-  ════════════════════════════════════════════════════════════════════════ */
-  function startWebLLMPoller() {
-    var polls = 0;
-    var MAX   = 3000;
-
-    function poll() {
-      polls++;
-      syncEngine();
-
-      if (engine) {
-        hideLoader();
-        setAvatarState('online');
-        if (win.console) win.console.info('[Chat] WebLLM engine active after', polls, 'polls');
-        return;
-      }
-
-      if (win.__webllmFailed && polls >= FAIL_MIN_POLLS) {
-        onWebLLMFailed(win.__webllmFailed);
-        return;
-      }
-
-      if (polls >= MAX) {
-        onWebLLMFailed('poll-ceiling');
-        return;
-      }
-
-      later(poll, POLL_INTERVAL);
-    }
-
-    later(poll, POLL_INTERVAL);
-  }
-
-  function onWebLLMFailed(reason) {
-    if (win.console) win.console.info('[Chat] WebLLM not available:', reason);
-    /* For quota errors, show immediately — no need to wait */
-    var delay = (reason === 'quota-exceeded' || reason === 'quota-insufficient') ? 600 : 2000;
-    later(function () {
-      hideLoader();
-      /* Use a specific status label for quota issues */
-      if (reason === 'quota-exceeded' || reason === 'quota-insufficient') {
-        if ($statusDot) { $statusDot.setAttribute('fill', '#ffaf00'); $statusDot.style.fill = '#ffaf00'; }
-        if ($status) {
-          var labels = { pt: 'Modo teclado', en: 'Keyword mode', es: 'Modo teclado' };
-          $status.innerHTML = escapeHtml(labels[lang] || 'Keyword mode');
-        }
-      } else {
-        setAvatarState('fallback');
-      }
-    }, delay);
-  }
-
-  /* ════════════════════════════════════════════════════════════════════════
-     GREETING
-  ════════════════════════════════════════════════════════════════════════ */
-  function showGreeting() {
-    var text = (win.GREETINGS && win.GREETINGS[lang]) || '';
-    var wrap = appendMsg(text, 'bot');
-    var bubs = wrap.getElementsByClassName('msg-bubble');
-    greetBubble = bubs.length ? bubs[0] : null;
-    talkAnim(text.length);
-  }
-
-  /* ════════════════════════════════════════════════════════════════════════
-     SEND BUTTON
-  ════════════════════════════════════════════════════════════════════════ */
-  on($send, 'click', function () { sendFreeText(); });
-  win.chatSend = sendFreeText;
-
-  /* ════════════════════════════════════════════════════════════════════════
-     BOOT
-  ════════════════════════════════════════════════════════════════════════ */
-  function boot() {
-    win.__webllmLang = lang;
-
-    if ($disc) $disc.innerHTML = escapeHtml(s('disclaimer'));
-
-    if ($loaderLbl && !win.__webllmStarted) {
-      $loaderLbl.textContent = s('loaderInit');
-    }
-
-    if ($input) $input.disabled = false;
-    setSendState('send');
-
-    setAvatarState('loading');
-    renderSuggestions();
-    showGreeting();
-
-    startWebLLMPoller();
-  }
-
-  var booted = false;
-  function bootOnce() {
-    if (booted) return;
-    booted = true;
-    boot();
-  }
-
-  if (doc.readyState === 'complete' || doc.readyState === 'loaded' || doc.readyState === 'interactive') {
-    bootOnce();
-  } else {
-    if (doc.addEventListener) doc.addEventListener('DOMContentLoaded', bootOnce, false);
-    on(win, 'load', bootOnce);
-  }
-
-}(window, document));
+}(window,document));
