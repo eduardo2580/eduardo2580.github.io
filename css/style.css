@@ -242,3 +242,7 @@ body{min-height:100%;min-height:-webkit-fill-available;min-height:100dvh;backgro
 ::-webkit-selection{background:rgba(200,255,0,.18)}
 ::selection{background:rgba(200,255,0,.18)}
 :focus-visible{outline:1px solid var(--acc);outline-offset:1px}
+
+/* Math result */
+.ml-body.math{color:#c8ff00;font-family:'SF Mono','Fira Code','Courier New',monospace}
+.ml-body.math strong{color:#e8ff80;font-size:14px}

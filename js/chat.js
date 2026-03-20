@@ -1,5 +1,5 @@
 /* chat.js — Eduardo.AI v2026.03.20
-   Clean minimal engine. ES5 + full WebKit/watchOS.
+   KB engine + Math evaluator hook. ES5 + full WebKit/watchOS.
 */
 (function(W,D){
 'use strict';
@@ -17,14 +17,14 @@ var $stxt=D.getElementById('status-text');
 var $disc=D.getElementById('disc');
 var $lbtns=D.getElementsByClassName('lang-btn');
 
-/* strings */
 var S={
-  ph:{pt:'mensagem ou código CID (ex: F20)…',en:'message or ICD code (e.g. F20)…',es:'mensaje o código CIE (ej: F20)…'},
+  ph:{pt:'mensagem, expressão matemática ou código CID…',en:'message, math expression or ICD code…',es:'mensaje, expresión matemática o código CIE…'},
   online:{pt:'online',en:'online',es:'en línea'},
-  busy:{pt:'buscando…',en:'searching…',es:'buscando…'},
+  busy:{pt:'calculando…',en:'calculating…',es:'calculando…'},
+  busyKB:{pt:'buscando…',en:'searching…',es:'buscando…'},
   typing:{pt:'Eduardo.AI está digitando…',en:'Eduardo.AI is typing…',es:'Eduardo.AI está escribiendo…'},
-  disc:{pt:'uso educacional · não substitui profissional',en:'educational use · not a substitute for professional advice',es:'uso educativo · no sustituye a un profesional'},
-  nf:{pt:'Não encontrei informações sobre isso. Tente perguntar sobre tecnologia, ciência, física, história, medicina ou evolução.',en:"Couldn't find that. Try asking about tech, science, physics, history, medicine or evolution.",es:'No encontré eso. Prueba con tecnología, ciencia, física, historia, medicina o evolución.'},
+  disc:{pt:'uso educacional · não substitui profissional',en:'educational use · not professional advice',es:'uso educativo · no sustituye al profesional'},
+  nf:{pt:'Não encontrei informações sobre isso. Tente perguntar sobre matemática, tecnologia, ciência, física, história, medicina, evolução…\n\n**Dica:** Para cálculos, escreva expressões como "2^10", "sqrt(144)", "15% de 200", "comb(10,3)", "sind(45)".',en:"Couldn't find that. Try math, technology, science, physics, history, medicine or evolution.\n\n**Tip:** For calculations, write expressions like \"2^10\", \"sqrt(144)\", \"comb(10,3)\", \"sind(45)\".",es:'No encontré eso. Prueba con matemáticas, tecnología, ciencia, física, historia, medicina.\n\n**Consejo:** Para cálculos: "2^10", "sqrt(144)", "comb(10,3)", "sind(45)".'},
   hint:{pt:'Talvez você queira saber sobre: ',en:'Maybe you want to know about: ',es:'Quizás te interese: '},
   icdh:{pt:'CID-10: ',en:'ICD-10: ',es:'CIE-10: '},
   icdd:{pt:'\n\n⚠ Informação educacional. Consulte um profissional de saúde.',en:'\n\n⚠ Educational only. Consult a healthcare professional.',es:'\n\n⚠ Solo educativo. Consulte a un profesional de salud.'},
@@ -39,13 +39,11 @@ var OP={
 };
 function op(){var l=OP[lang]||OP.pt,o=l[opI%l.length];opI++;return o}
 
-/* helpers */
 function norm(t){return String(t).toLowerCase().replace(/[^a-záàãâéêíóôõúüçñ\s0-9]/g,' ').replace(/\s+/g,' ').trim()}
 function tok(t){return norm(t).split(' ').filter(function(w){return w.length>2})}
 function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function hms(){var d=new Date();return('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2)}
 
-/* render markdown-ish */
 function rend(text){
   if(!text)return'';
   var lks=[],PH='\x00';
@@ -63,38 +61,22 @@ function rend(text){
   return o;
 }
 
-/* append one message line */
 function line(text,role,type){
   var wrap=D.createElement('div');
   wrap.className='msg-line';
-
-  /* meta column: time + who */
-  var meta=D.createElement('div');
-  meta.className='ml-meta';
-
-  var tm=D.createElement('span');
-  tm.className='ml-time';
-  tm.textContent=hms();
-
-  var who=D.createElement('span');
-  who.className='ml-who '+(role==='user'?'you':'ai');
+  var meta=D.createElement('div');meta.className='ml-meta';
+  var tm=D.createElement('span');tm.className='ml-time';tm.textContent=hms();
+  var who=D.createElement('span');who.className='ml-who '+(role==='user'?'you':'ai');
   who.textContent=role==='user'?(lang==='pt'?'você':lang==='es'?'tú':'you'):'ai';
-
-  meta.appendChild(tm);
-  meta.appendChild(who);
-
-  /* body */
+  meta.appendChild(tm);meta.appendChild(who);
   var body=D.createElement('div');
   var isICD=type&&type.indexOf('icd:')===0;
-  body.className='ml-body '+(role==='user'?'you':role==='sys'?'sys':isICD?'icd':'ai');
-
+  var isMath=type==='math';
+  body.className='ml-body '+(role==='user'?'you':role==='sys'?'sys':isICD?'icd':isMath?'math':'ai');
   if(role==='user'||role==='sys'){body.textContent=text;}
   else{body.innerHTML=rend(text);}
-
-  wrap.appendChild(meta);
-  wrap.appendChild(body);
+  wrap.appendChild(meta);wrap.appendChild(body);
   if($msgs)$msgs.appendChild(wrap);
-
   var entry=null;
   if(role==='bot'){
     entry={wrap:wrap,body:body,who:who,type:type||'kb',origQ:null};
@@ -105,23 +87,20 @@ function line(text,role,type){
 }
 
 function divider(t){
-  var el=D.createElement('div');el.className='msg-div';
-  el.textContent=t||'';
+  var el=D.createElement('div');el.className='msg-div';el.textContent=t||'';
   if($msgs)$msgs.appendChild(el);scroll();
 }
 
 function scroll(){
   if(!$wrap)return;
-  if(W.requestAnimationFrame){
-    W.requestAnimationFrame(function(){$wrap.scrollTop=$wrap.scrollHeight});
-  }else{$wrap.scrollTop=$wrap.scrollHeight}
+  if(W.requestAnimationFrame){W.requestAnimationFrame(function(){$wrap.scrollTop=$wrap.scrollHeight});}
+  else{$wrap.scrollTop=$wrap.scrollHeight}
 }
 
-/* typing */
-function showTyping(){
+function showTyping(mode){
   if($typ){$typ.setAttribute('aria-label',s('typing'));$typ.className='on'}
-  if($sdot){$sdot.className='busy'}
-  if($stxt)$stxt.textContent=s('busy');
+  if($sdot)$sdot.className='busy';
+  if($stxt)$stxt.textContent=mode==='math'?s('busy'):s('busyKB');
   scroll();
 }
 function hideTyping(){
@@ -130,7 +109,7 @@ function hideTyping(){
   if($stxt)$stxt.textContent=s('online');
 }
 
-/* identity */
+/* Identity */
 var IDR=[
   /^(ol[aá]|oi|hey|hi|hello|hola|buenas)[\s!?]*$/i,
   /\b(quem [eé] voc[eê]|who are you|qui[eé]n eres|o que [eé] eduardo|what is eduardo|qu[eé] es eduardo)\b/i,
@@ -143,9 +122,9 @@ function idAns(){
   if(id&&id.greeting&&id.greeting[lang])return id.greeting[lang];
   var nm=(id&&id.name)||'Eduardo Souza Rodrigues';
   return({
-    pt:'Olá! Sou Eduardo.AI, assistente de '+nm+'. Posso ajudar com tecnologia, ciência, física, história, medicina (CID-10) e muito mais.',
-    en:"Hi! I'm Eduardo.AI, "+nm+"'s assistant. Ask me about tech, science, physics, history, medicine (ICD-10) and more.",
-    es:'¡Hola! Soy Eduardo.AI, asistente de '+nm+'. Pregúntame sobre tecnología, ciencia, física, historia, medicina (CIE-10) y más.'
+    pt:'Olá! Sou Eduardo.AI, assistente de '+nm+'. Posso ajudar com tecnologia, ciência, física, história, medicina (CID-10), **matemática e cálculos** e muito mais. Como posso ajudar?',
+    en:"Hi! I'm Eduardo.AI, "+nm+"'s assistant. I can help with tech, science, physics, history, medicine (ICD-10), **mathematics and calculations**, and more. How can I help?",
+    es:'¡Hola! Soy Eduardo.AI, asistente de '+nm+'. Puedo ayudar con tecnología, ciencia, física, historia, medicina, **matemáticas y cálculos** y más. ¿En qué puedo ayudarte?'
   })[lang]||''
 }
 
@@ -219,7 +198,7 @@ function fallback(q,lc){
   return s('nf');
 }
 
-/* retranslate */
+/* Retranslate */
 function retrans(nl){
   for(var i=0;i<history.length;i++){
     var e=history[i];if(!e||!e.body)continue;
@@ -227,12 +206,13 @@ function retrans(nl){
     var t=e.type||'kb',txt=null;
     if(t==='identity'||t==='greeting')txt=(W.GREETINGS&&W.GREETINGS[nl])||idAns();
     else if(t&&t.indexOf('icd:')===0)txt=icdAns(t.slice(4));
+    else if(t==='math'&&e.origQ)txt=W.tryMathEval?W.tryMathEval(e.origQ,nl):null;
     else if(e.origQ)txt=reply(e.origQ,nl)||fallback(e.origQ,nl);
     if(txt)e.body.innerHTML=rend(txt);
   }
 }
 
-/* language */
+/* Language */
 function applyLang(l){
   var prev=lang;lang=l;
   for(var i=0;i<$lbtns.length;i++){
@@ -243,12 +223,11 @@ function applyLang(l){
   if($stxt)$stxt.textContent=s('online');
   if(l!==prev)retrans(l);
 }
-
 for(var li=0;li<$lbtns.length;li++){
   (function(b){b.addEventListener('click',function(){applyLang(b.getAttribute('data-lang')||'pt')},false)}($lbtns[li]));
 }
 
-/* send */
+/* Send */
 function send(){
   if(busy||!$inp)return;
   var text=$inp.value.trim();if(!text)return;
@@ -257,12 +236,29 @@ function send(){
 
   line(text,'user','user');
 
+  /* 1. Identity */
   if(isID(text)){deliver(idAns(),'identity',null);return}
 
+  /* 2. ICD code */
   var ic=icdCode(text);
   if(ic){var ir=icdAns(ic);if(ir){deliver(ir,'icd:'+ic,null);return}}
 
-  showTyping();
+  /* 3. Math evaluator — try before KB */
+  if(W.tryMathEval){
+    var mathResult=W.tryMathEval(text,al);
+    if(mathResult){
+      showTyping('math');
+      setTimeout(function(){
+        hideTyping();
+        var e=deliver(mathResult,'math',text);
+        if(e)e.origQ=text;
+      },60);
+      return;
+    }
+  }
+
+  /* 4. KB scoring */
+  showTyping('kb');
   setTimeout(function(){
     hideTyping();
     var r=reply(text,al)||fallback(text,al);
@@ -280,7 +276,6 @@ function deliver(text,type,origQ){
   return e;
 }
 
-/* input events */
 if($inp){
   $inp.addEventListener('keydown',function(e){
     var k=e.key||e.keyCode;
@@ -290,14 +285,12 @@ if($inp){
 }
 if($send)$send.addEventListener('click',function(){send()},false);
 
-/* Ctrl+L clear */
 D.addEventListener('keydown',function(e){
   if((e.ctrlKey||e.metaKey)&&(e.key==='l'||e.key==='L'||e.keyCode===76)){
     if($msgs)$msgs.innerHTML='';history=[];divider('cleared');
   }
 },false);
 
-/* greeting */
 function greet(){
   var day=new Date().toLocaleDateString(
     lang==='en'?'en-US':lang==='es'?'es-ES':'pt-BR',
@@ -308,7 +301,6 @@ function greet(){
   var e=line(gt,'bot','greeting');if(e)e.type='greeting';
 }
 
-/* iOS viewport */
 function fixVP(){
   var vp=W.visualViewport;
   var h=vp?Math.round(vp.height):W.innerHeight;
@@ -321,7 +313,6 @@ if(W.visualViewport){
   W.visualViewport.addEventListener('scroll',fixVP,{passive:true});
 }else{W.addEventListener('resize',fixVP,{passive:true})}
 
-/* boot */
 function boot(){
   applyLang('pt');
   if($inp)$inp.disabled=false;
