@@ -236,6 +236,12 @@ function send(){
 
   line(text,'user','user');
 
+  /* 0. Conversational / small-talk */
+  if(W.tryConversational){
+    var convResult=W.tryConversational(text,al);
+    if(convResult){deliver(convResult,'conv',null);return}
+  }
+
   /* 1. Identity */
   if(isID(text)){deliver(idAns(),'identity',null);return}
 
