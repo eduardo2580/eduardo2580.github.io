@@ -1,192 +1,974 @@
 /* kb-medicine.js — Eduardo.AI Medical Knowledge Base v2026.03.20
-   Comprehensive: ICD-10 + 100+ medical topics (PT/EN/ES)
-   Sources: Wikipedia Medicine, MedlinePlus, WHO, UpToDate summaries
+   ICD-10-CM 2022: 72,748 codes loaded from JSON at runtime.
+   Supports PT / EN / ES translation via pattern substitution.
+   GitHub Pages compatible: uses fetch() — no server needed.
+   Code normalization: dots removed (F20.0 = F200), prefix match.
    Educational only. Not a substitute for professional medical advice.
 */
 (function(W) {
   'use strict';
 
-  var ICD = {
-    'F20':{ pt:{label:'Esquizofrenia',detail:'Transtorno psicótico crônico: delírios, alucinações, pensamento desorganizado, embotamento afetivo. Início típico: 15–35 anos. Hipótese dopaminérgica. Tratamento: antipsicóticos (haloperidol, risperidona, olanzapina, clozapina para refratários) + reabilitação psicossocial. Nunca suspender abruptamente. Prevalência ~1% mundial.'},
-             en:{label:'Schizophrenia',detail:'Chronic psychotic disorder: delusions, hallucinations, disorganized thinking, flat affect. Typical onset: 15–35 years. Dopamine hypothesis. Treatment: antipsychotics (haloperidol, risperidone, olanzapine, clozapine for refractory) + psychosocial rehabilitation. Never stop abruptly. ~1% worldwide prevalence.'},
+  /* ═══════════════════════════════════════════════════════════
+     TRANSLATION ENGINE
+     Ordered phrase/word substitutions EN → PT and EN → ES.
+     Longer phrases must come before shorter words.
+  ═══════════════════════════════════════════════════════════ */
+
+  /* Each entry: [regex, pt_replacement, es_replacement] */
+  var TRANS = [
+    /* ── Encounter types ── */
+    [/\binitial encounter for open fracture type I or II\b/gi, 'encontro inicial para fratura exposta tipo I ou II', 'encuentro inicial para fractura expuesta tipo I o II'],
+    [/\binitial encounter for open fracture type IIIA, IIIB, or IIIC\b/gi, 'encontro inicial para fratura exposta tipo IIIA, IIIB ou IIIC', 'encuentro inicial para fractura expuesta tipo IIIA, IIIB o IIIC'],
+    [/\binitial encounter for open fracture\b/gi, 'encontro inicial para fratura exposta', 'encuentro inicial para fractura expuesta'],
+    [/\binitial encounter for closed fracture\b/gi, 'encontro inicial para fratura fechada', 'encuentro inicial para fractura cerrada'],
+    [/\binitial encounter\b/gi, 'encontro inicial', 'encuentro inicial'],
+    [/\bsubsequent encounter for fracture with routine healing\b/gi, 'encontro subsequente para fratura com consolidação normal', 'encuentro subsecuente para fractura con curación rutinaria'],
+    [/\bsubsequent encounter for fracture with delayed healing\b/gi, 'encontro subsequente para fratura com consolidação retardada', 'encuentro subsecuente para fractura con curación demorada'],
+    [/\bsubsequent encounter for fracture with nonunion\b/gi, 'encontro subsequente para fratura com não-união', 'encuentro subsecuente para fractura con no-unión'],
+    [/\bsubsequent encounter for fracture with malunion\b/gi, 'encontro subsequente para fratura com consolidação viciosa', 'encuentro subsecuente para fractura con mala unión'],
+    [/\bsubsequent encounter for open fracture type I or II with routine healing\b/gi, 'encontro subsequente para fratura exposta tipo I ou II com consolidação normal', 'encuentro subsecuente para fractura expuesta tipo I o II con curación rutinaria'],
+    [/\bsubsequent encounter for open fracture type IIIA, IIIB, or IIIC with routine healing\b/gi, 'encontro subsequente para fratura exposta tipo IIIA, IIIB ou IIIC com consolidação normal', 'encuentro subsecuente para fractura expuesta tipo IIIA, IIIB o IIIC con curación rutinaria'],
+    [/\bsubsequent encounter for open fracture type I or II with delayed healing\b/gi, 'encontro subsequente para fratura exposta tipo I ou II com consolidação retardada', 'encuentro subsecuente para fractura expuesta tipo I o II con curación demorada'],
+    [/\bsubsequent encounter for open fracture type IIIA, IIIB, or IIIC with delayed healing\b/gi, 'encontro subsequente para fratura exposta tipo IIIA, IIIB ou IIIC com consolidação retardada', 'encuentro subsecuente para fractura expuesta tipo IIIA, IIIB o IIIC con curación demorada'],
+    [/\bsubsequent encounter for open fracture type I or II with nonunion\b/gi, 'encontro subsequente para fratura exposta tipo I ou II com não-união', 'encuentro subsecuente para fractura expuesta tipo I o II con no-unión'],
+    [/\bsubsequent encounter for open fracture type IIIA, IIIB, or IIIC with nonunion\b/gi, 'encontro subsequente para fratura exposta tipo IIIA, IIIB ou IIIC com não-união', 'encuentro subsecuente para fractura expuesta tipo IIIA, IIIB o IIIC con no-unión'],
+    [/\bsubsequent encounter for open fracture type I or II with malunion\b/gi, 'encontro subsequente para fratura exposta tipo I ou II com consolidação viciosa', 'encuentro subsecuente para fractura expuesta tipo I o II con mala unión'],
+    [/\bsubsequent encounter for open fracture type IIIA, IIIB, or IIIC with malunion\b/gi, 'encontro subsequente para fratura exposta tipo IIIA, IIIB ou IIIC com consolidação viciosa', 'encuentro subsecuente para fractura expuesta tipo IIIA, IIIB o IIIC con mala unión'],
+    [/\bsubsequent encounter\b/gi, 'encontro subsequente', 'encuentro subsecuente'],
+    [/\bencounter for examination of blood pressure with abnormal findings\b/gi, 'consulta para exame de pressão arterial com achados anormais', 'consulta para examen de presión arterial con hallazgos anormales'],
+    [/\bencounter for examination of blood pressure without abnormal findings\b/gi, 'consulta para exame de pressão arterial sem achados anormais', 'consulta para examen de presión arterial sin hallazgos anormales'],
+    [/\bencounter for\b/gi, 'consulta para', 'consulta para'],
+    [/\bsequela\b/gi, 'sequela', 'secuela'],
+
+    /* ── Fracture descriptors ── */
+    [/\bdisplaced fracture\b/gi, 'fratura desviada', 'fractura desplazada'],
+    [/\bnondisplaced fracture\b/gi, 'fratura sem desvio', 'fractura no desplazada'],
+    [/\bstress fracture\b/gi, 'fratura por estresse', 'fractura por estrés'],
+    [/\bpathological fracture\b/gi, 'fratura patológica', 'fractura patológica'],
+    [/\bcompression fracture\b/gi, 'fratura por compressão', 'fractura por compresión'],
+    [/\bavulsion fracture\b/gi, 'fratura por avulsão', 'fractura por avulsión'],
+    [/\bincarcerated fracture \(avulsion\)\b/gi, 'fratura encarcerada (avulsão)', 'fractura encarcerada (avulsión)'],
+    [/\bfracture of shaft\b/gi, 'fratura da diáfise', 'fractura de la diáfisis'],
+    [/\bfracture of neck\b/gi, 'fratura do colo', 'fractura del cuello'],
+    [/\bfracture of head\b/gi, 'fratura da cabeça', 'fractura de la cabeza'],
+    [/\bfracture of base\b/gi, 'fratura da base', 'fractura de la base'],
+    [/\bfracture of body\b/gi, 'fratura do corpo', 'fractura del cuerpo'],
+    [/\bfracture\b/gi, 'fratura', 'fractura'],
+    [/\bopen fracture\b/gi, 'fratura exposta', 'fractura expuesta'],
+    [/\bclosed fracture\b/gi, 'fratura fechada', 'fractura cerrada'],
+    [/\bmalunion\b/gi, 'consolidação viciosa', 'mala unión'],
+    [/\bnonunion\b/gi, 'não-união', 'no-unión'],
+
+    /* ── Diabetes ── */
+    [/\btype 1 diabetes mellitus\b/gi, 'diabetes mellitus tipo 1', 'diabetes mellitus tipo 1'],
+    [/\btype 2 diabetes mellitus\b/gi, 'diabetes mellitus tipo 2', 'diabetes mellitus tipo 2'],
+    [/\bother specified diabetes mellitus\b/gi, 'diabetes mellitus especificado', 'diabetes mellitus especificado'],
+    [/\bdiabetes mellitus\b/gi, 'diabetes mellitus', 'diabetes mellitus'],
+    [/\bdiabetic retinopathy\b/gi, 'retinopatia diabética', 'retinopatía diabética'],
+    [/\bproliferative diabetic retinopathy\b/gi, 'retinopatia diabética proliferativa', 'retinopatía diabética proliferativa'],
+    [/\bnon-proliferative diabetic retinopathy\b/gi, 'retinopatia diabética não proliferativa', 'retinopatía diabética no proliferativa'],
+    [/\bdiabetic macular edema\b/gi, 'edema macular diabético', 'edema macular diabético'],
+    [/\bdiabetic nephropathy\b/gi, 'nefropatia diabética', 'nefropatía diabética'],
+    [/\bdiabetic neuropathy\b/gi, 'neuropatia diabética', 'neuropatía diabética'],
+    [/\bdiabetic polyneuropathy\b/gi, 'polineuropatia diabética', 'polineuropatía diabética'],
+    [/\bdiabetic peripheral angiopathy\b/gi, 'angiopatia periférica diabética', 'angiopatía periférica diabética'],
+    [/\bdiabetic foot ulcer\b/gi, 'úlcera do pé diabético', 'úlcera del pie diabético'],
+    [/\bdiabetic ketoacidosis\b/gi, 'cetoacidose diabética', 'cetoacidosis diabética'],
+    [/\bhyperosmolarity\b/gi, 'hiperosmolaridade', 'hiperosmolaridad'],
+    [/\bhypoglycemia\b/gi, 'hipoglicemia', 'hipoglucemia'],
+    [/\bhyperglycemia\b/gi, 'hiperglicemia', 'hiperglucemia'],
+    [/\btraction retinal detachment\b/gi, 'descolamento de retina tracional', 'desprendimiento de retina traccional'],
+    [/\bstable proliferative diabetic retinopathy\b/gi, 'retinopatia diabética proliferativa estável', 'retinopatía diabética proliferativa estable'],
+    [/\bwith diabetic macular edema, resolved\b/gi, 'com edema macular diabético, resolvido', 'con edema macular diabético, resuelto'],
+    [/\bwithout macular edema\b/gi, 'sem edema macular', 'sin edema macular'],
+    [/\bwith macular edema\b/gi, 'com edema macular', 'con edema macular'],
+
+    /* ── Cardiovascular ── */
+    [/\bST elevation \(STEMI\) myocardial infarction\b/gi, 'infarto do miocárdio com supradesnivelamento de ST (IAMCST)', 'infarto de miocardio con elevación del ST (IAMCST)'],
+    [/\bnon-ST elevation \(NSTEMI\) myocardial infarction\b/gi, 'infarto do miocárdio sem supradesnivelamento de ST (IAMSST)', 'infarto de miocardio sin elevación del ST (IAMSST)'],
+    [/\bmyocardial infarction\b/gi, 'infarto do miocárdio', 'infarto de miocardio'],
+    [/\bessential \(primary\) hypertension\b/gi, 'hipertensão arterial essencial (primária)', 'hipertensión arterial esencial (primaria)'],
+    [/\bheart failure\b/gi, 'insuficiência cardíaca', 'insuficiencia cardíaca'],
+    [/\batrial fibrillation\b/gi, 'fibrilação atrial', 'fibrilación auricular'],
+    [/\batrial flutter\b/gi, 'flutter atrial', 'aleteo auricular'],
+    [/\bcoronary artery disease\b/gi, 'doença arterial coronariana', 'enfermedad arterial coronaria'],
+    [/\bischemic heart disease\b/gi, 'cardiopatia isquêmica', 'cardiopatía isquémica'],
+    [/\bcardiac arrest\b/gi, 'parada cardíaca', 'paro cardíaco'],
+    [/\bangina pectoris\b/gi, 'angina pectoris', 'angina de pecho'],
+    [/\bunstable angina\b/gi, 'angina instável', 'angina inestable'],
+    [/\bstable angina\b/gi, 'angina estável', 'angina estable'],
+    [/\bdeep vein thrombosis\b/gi, 'trombose venosa profunda', 'trombosis venosa profunda'],
+    [/\bpulmonary embolism\b/gi, 'embolia pulmonar', 'embolia pulmonar'],
+    [/\bischemic stroke\b/gi, 'acidente vascular cerebral isquêmico', 'accidente cerebrovascular isquémico'],
+    [/\bhemorrhagic stroke\b/gi, 'acidente vascular cerebral hemorrágico', 'accidente cerebrovascular hemorrágico'],
+    [/\bcerebral infarction\b/gi, 'infarto cerebral', 'infarto cerebral'],
+    [/\bperipheral vascular disease\b/gi, 'doença vascular periférica', 'enfermedad vascular periférica'],
+    [/\baortic aneurysm\b/gi, 'aneurisma da aorta', 'aneurisma de aorta'],
+    [/\bhypertensive chronic kidney disease\b/gi, 'doença renal crônica hipertensiva', 'enfermedad renal crónica hipertensiva'],
+    [/\bhypertensive heart disease\b/gi, 'cardiopatia hipertensiva', 'cardiopatía hipertensiva'],
+    [/\bhypertension\b/gi, 'hipertensão', 'hipertensión'],
+    [/\bventricular fibrillation\b/gi, 'fibrilação ventricular', 'fibrilación ventricular'],
+    [/\bventricular tachycardia\b/gi, 'taquicardia ventricular', 'taquicardia ventricular'],
+    [/\btachycardia\b/gi, 'taquicardia', 'taquicardia'],
+    [/\bbradycardia\b/gi, 'bradicardia', 'bradicardia'],
+    [/\bpalpitations\b/gi, 'palpitações', 'palpitaciones'],
+    [/\bleft anterior descending coronary artery\b/gi, 'artéria coronária descendente anterior esquerda', 'arteria coronaria descendente anterior izquierda'],
+    [/\bright coronary artery\b/gi, 'artéria coronária direita', 'arteria coronaria derecha'],
+    [/\bleft main coronary artery\b/gi, 'artéria coronária principal esquerda', 'arteria coronaria principal izquierda'],
+    [/\bleft circumflex coronary artery\b/gi, 'artéria coronária circunflexa esquerda', 'arteria coronaria circunfleja izquierda'],
+    [/\bcoronary artery\b/gi, 'artéria coronária', 'arteria coronaria'],
+    [/\binferior wall\b/gi, 'parede inferior', 'pared inferior'],
+    [/\banterior wall\b/gi, 'parede anterior', 'pared anterior'],
+    [/\blateral wall\b/gi, 'parede lateral', 'pared lateral'],
+    [/\bposterior wall\b/gi, 'parede posterior', 'pared posterior'],
+
+    /* ── Respiratory ── */
+    [/\bchronic obstructive pulmonary disease\b/gi, 'doença pulmonar obstrutiva crônica (DPOC)', 'enfermedad pulmonar obstructiva crónica (EPOC)'],
+    [/\basthma\b/gi, 'asma', 'asma'],
+    [/\bpneumonia\b/gi, 'pneumonia', 'neumonía'],
+    [/\bbronchitis\b/gi, 'bronquite', 'bronquitis'],
+    [/\brespiratory failure\b/gi, 'insuficiência respiratória', 'insuficiencia respiratoria'],
+    [/\bpulmonary edema\b/gi, 'edema pulmonar', 'edema pulmonar'],
+    [/\bpleural effusion\b/gi, 'derrame pleural', 'derrame pleural'],
+    [/\bpneumothorax\b/gi, 'pneumotórax', 'neumotórax'],
+    [/\blung cancer\b/gi, 'câncer de pulmão', 'cáncer de pulmón'],
+    [/\bsleep apnea\b/gi, 'apneia do sono', 'apnea del sueño'],
+    [/\bobstructive sleep apnea\b/gi, 'apneia obstrutiva do sono', 'apnea obstructiva del sueño'],
+    [/\binfluenza\b/gi, 'influenza', 'influenza'],
+    [/\btuberculosis\b/gi, 'tuberculose', 'tuberculosis'],
+    [/\bsinusitis\b/gi, 'sinusite', 'sinusitis'],
+    [/\btonsillitis\b/gi, 'amigdalite', 'amigdalitis'],
+    [/\bpharyngitis\b/gi, 'faringite', 'faringitis'],
+    [/\blaryngitis\b/gi, 'laringite', 'laringitis'],
+    [/\btracheitis\b/gi, 'traqueíte', 'traqueítis'],
+    [/\bpleuritis\b/gi, 'pleurite', 'pleuritis'],
+    [/\bbronchiectasis\b/gi, 'bronquiectasia', 'bronquiectasia'],
+    [/\bpulmonary fibrosis\b/gi, 'fibrose pulmonar', 'fibrosis pulmonar'],
+    [/\bsarcoidosis\b/gi, 'sarcoidose', 'sarcoidosis'],
+
+    /* ── Mental health ── */
+    [/\bschizophrenia\b/gi, 'esquizofrenia', 'esquizofrenia'],
+    [/\bbipolar disorder\b/gi, 'transtorno bipolar', 'trastorno bipolar'],
+    [/\bdepressive disorder\b/gi, 'transtorno depressivo', 'trastorno depresivo'],
+    [/\bmajor depressive disorder\b/gi, 'transtorno depressivo maior', 'trastorno depresivo mayor'],
+    [/\bdysthymia\b/gi, 'distimia', 'distimia'],
+    [/\bpost-traumatic stress disorder\b/gi, 'transtorno de estresse pós-traumático (TEPT)', 'trastorno de estrés postraumático (TEPT)'],
+    [/\banxiety disorder\b/gi, 'transtorno de ansiedade', 'trastorno de ansiedad'],
+    [/\bgeneralized anxiety disorder\b/gi, 'transtorno de ansiedade generalizada', 'trastorno de ansiedad generalizada'],
+    [/\bpanic disorder\b/gi, 'transtorno de pânico', 'trastorno de pánico'],
+    [/\bphobia\b/gi, 'fobia', 'fobia'],
+    [/\bobsessive-compulsive disorder\b/gi, 'transtorno obsessivo-compulsivo (TOC)', 'trastorno obsesivo-compulsivo (TOC)'],
+    [/\bautism spectrum disorder\b/gi, 'transtorno do espectro autista', 'trastorno del espectro autista'],
+    [/\battention-deficit hyperactivity disorder\b/gi, 'transtorno de déficit de atenção e hiperatividade (TDAH)', 'trastorno por déficit de atención e hiperactividad (TDAH)'],
+    [/\bintellectual disability\b/gi, 'deficiência intelectual', 'discapacidad intelectual'],
+    [/\bconduct disorder\b/gi, 'transtorno de conduta', 'trastorno de conducta'],
+    [/\balcohol dependence\b/gi, 'dependência alcoólica', 'dependencia alcohólica'],
+    [/\balcohol use disorder\b/gi, 'transtorno por uso de álcool', 'trastorno por uso de alcohol'],
+    [/\bsubstance use disorder\b/gi, 'transtorno por uso de substâncias', 'trastorno por uso de sustancias'],
+    [/\bcocaine abuse\b/gi, 'abuso de cocaína', 'abuso de cocaína'],
+    [/\bopioid use disorder\b/gi, 'transtorno por uso de opioide', 'trastorno por uso de opioides'],
+    [/\bnicotine dependence\b/gi, 'dependência de nicotina', 'dependencia de nicotina'],
+    [/\bhallucinogen\b/gi, 'alucinógeno', 'alucinógeno'],
+    [/\bparanoid schizophrenia\b/gi, 'esquizofrenia paranoide', 'esquizofrenia paranoide'],
+    [/\bschizoaffective disorder\b/gi, 'transtorno esquizoafetivo', 'trastorno esquizoafectivo'],
+    [/\bschizophreniform disorder\b/gi, 'transtorno esquizofreniforme', 'trastorno esquizofreniforme'],
+    [/\bdelusional disorder\b/gi, 'transtorno delirante', 'trastorno delirante'],
+    [/\bdementia\b/gi, 'demência', 'demencia'],
+    [/\balzheimer\b/gi, "alzheimer", 'alzheimer'],
+    [/\bdelirium\b/gi, 'delirium', 'delirium'],
+    [/\binsomnia\b/gi, 'insônia', 'insomnio'],
+    [/\beating disorder\b/gi, 'transtorno alimentar', 'trastorno alimentario'],
+    [/\banorexia nervosa\b/gi, 'anorexia nervosa', 'anorexia nerviosa'],
+    [/\bbulimia nervosa\b/gi, 'bulimia nervosa', 'bulimia nerviosa'],
+    [/\bself-harm\b/gi, 'automutilação', 'autolesión'],
+    [/\bsuicidal\b/gi, 'suicida', 'suicida'],
+
+    /* ── Neurological ── */
+    [/\bepilepsy\b/gi, "epilepsia", 'epilepsia'],
+    [/\bseizure\b/gi, 'crise epiléptica', 'crisis epiléptica'],
+    [/\bparkinson\b/gi, 'parkinson', 'parkinson'],
+    [/\bmigraine\b/gi, 'enxaqueca', 'migraña'],
+    [/\bheadache\b/gi, 'cefaleia', 'cefalea'],
+    [/\bvertigo\b/gi, 'vertigem', 'vértigo'],
+    [/\bdizziness\b/gi, 'tontura', 'mareo'],
+    [/\bneuropathy\b/gi, 'neuropatia', 'neuropatía'],
+    [/\bneuralgia\b/gi, 'nevralgia', 'neuralgia'],
+    [/\bencephalopathy\b/gi, 'encefalopatia', 'encefalopatía'],
+    [/\bencephalitis\b/gi, 'encefalite', 'encefalitis'],
+    [/\bmeningitis\b/gi, 'meningite', 'meningitis'],
+    [/\bmultiple sclerosis\b/gi, 'esclerose múltipla', 'esclerosis múltiple'],
+    [/\bamyotrophic lateral sclerosis\b/gi, 'esclerose lateral amiotrófica (ELA)', 'esclerosis lateral amiotrófica (ELA)'],
+    [/\bGuillain-Barr[eé] syndrome\b/gi, 'síndrome de Guillain-Barré', 'síndrome de Guillain-Barré'],
+    [/\btransient ischemic attack\b/gi, 'ataque isquêmico transitório (AIT)', 'ataque isquémico transitorio (AIT)'],
+    [/\bcerebrovascular\b/gi, 'cerebrovascular', 'cerebrovascular'],
+    [/\bintracranial hemorrhage\b/gi, 'hemorragia intracraniana', 'hemorragia intracraneal'],
+    [/\bsubarachnoid hemorrhage\b/gi, 'hemorragia subaracnoide', 'hemorragia subaracnoidea'],
+    [/\bsubdural hematoma\b/gi, 'hematoma subdural', 'hematoma subdural'],
+    [/\bepidural hematoma\b/gi, 'hematoma epidural', 'hematoma epidural'],
+
+    /* ── Musculoskeletal / Bones ── */
+    [/\brheumatoid arthritis\b/gi, 'artrite reumatoide', 'artritis reumatoide'],
+    [/\bosteoarthritis\b/gi, 'osteoartrite', 'osteoartritis'],
+    [/\bosteoporosis\b/gi, 'osteoporose', 'osteoporosis'],
+    [/\bgout\b/gi, 'gota', 'gota'],
+    [/\bspondylosis\b/gi, 'espondilose', 'espondilosis'],
+    [/\bspondylolysis\b/gi, 'espondilólise', 'espondilólisis'],
+    [/\bspondylolisthesis\b/gi, 'espondilolistese', 'espondilolistesis'],
+    [/\bankylosing spondylitis\b/gi, 'espondilite anquilosante', 'espondilitis anquilosante'],
+    [/\bintervertebral disc degeneration\b/gi, 'degeneração do disco intervertebral', 'degeneración del disco intervertebral'],
+    [/\bintervertebral disc\b/gi, 'disco intervertebral', 'disco intervertebral'],
+    [/\bdisc herniation\b/gi, 'hérnia de disco', 'hernia de disco'],
+    [/\btendinitis\b/gi, 'tendinite', 'tendinitis'],
+    [/\btendinopathy\b/gi, 'tendinopatia', 'tendinopatía'],
+    [/\bbursitis\b/gi, 'bursite', 'bursitis'],
+    [/\bsynovitis\b/gi, 'sinovite', 'sinovitis'],
+    [/\bfibromyalgia\b/gi, 'fibromialgia', 'fibromialgia'],
+    [/\bcarpal tunnel syndrome\b/gi, 'síndrome do túnel do carpo', 'síndrome del túnel carpiano'],
+    [/\bthoracic outlet syndrome\b/gi, 'síndrome do desfiladeiro torácico', 'síndrome del opérculo torácico'],
+    [/\brotator cuff\b/gi, 'manguito rotador', 'manguito rotador'],
+    [/\bmeniscus\b/gi, 'menisco', 'menisco'],
+    [/\bligament\b/gi, 'ligamento', 'ligamento'],
+    [/\btendon\b/gi, 'tendão', 'tendón'],
+    [/\bsprain\b/gi, 'entorse', 'esguince'],
+    [/\bstrain\b/gi, 'distensão muscular', 'distensión muscular'],
+    [/\bdislocation\b/gi, 'luxação', 'luxación'],
+    [/\bsubluxation\b/gi, 'subluxação', 'subluxación'],
+    [/\bosteomyelitis\b/gi, 'osteomielite', 'osteomielitis'],
+    [/\bosteoarthropathy\b/gi, 'osteoartropatia', 'osteoartropatía'],
+    [/\bosteochondrosis\b/gi, 'osteocondrosis', 'osteocondrosis'],
+    [/\bchondromalacia\b/gi, 'condromalacia', 'condromalacia'],
+    [/\bfemur\b/gi, 'fêmur', 'fémur'],
+    [/\btibia\b/gi, 'tíbia', 'tibia'],
+    [/\bfibula\b/gi, 'fíbula', 'fíbula'],
+    [/\bhumerus\b/gi, 'úmero', 'húmero'],
+    [/\bradius\b/gi, 'rádio', 'radio'],
+    [/\bulna\b/gi, 'ulna', 'cúbito'],
+    [/\bclavicle\b/gi, 'clavícula', 'clavícula'],
+    [/\bscapula\b/gi, 'escápula', 'escápula'],
+    [/\bpelvis\b/gi, 'pelve', 'pelvis'],
+    [/\bacetabulum\b/gi, 'acetábulo', 'acetábulo'],
+    [/\blumbar vertebra\b/gi, 'vértebra lombar', 'vértebra lumbar'],
+    [/\bthoracic vertebra\b/gi, 'vértebra torácica', 'vértebra torácica'],
+    [/\bcervical vertebra\b/gi, 'vértebra cervical', 'vértebra cervical'],
+    [/\bsacrum\b/gi, 'sacro', 'sacro'],
+    [/\bcoccyx\b/gi, 'cóccix', 'cóccix'],
+    [/\bmetacarpal\b/gi, 'metacarpo', 'metacarpiano'],
+    [/\bmetatarsal\b/gi, 'metatarso', 'metatarsiano'],
+    [/\bphalanx\b/gi, 'falange', 'falange'],
+    [/\bphalanges\b/gi, 'falanges', 'falanges'],
+    [/\bcalcaneus\b/gi, 'calcâneo', 'calcáneo'],
+    [/\bpatella\b/gi, 'patela', 'rótula'],
+    [/\bsternum\b/gi, 'esterno', 'esternón'],
+    [/\brib\b/gi, 'costela', 'costilla'],
+    [/\bspine\b/gi, 'coluna vertebral', 'columna vertebral'],
+    [/\bvertebral column\b/gi, 'coluna vertebral', 'columna vertebral'],
+
+    /* ── Body regions ── */
+    [/\bcervical region\b/gi, 'região cervical', 'región cervical'],
+    [/\bthoracic region\b/gi, 'região torácica', 'región torácica'],
+    [/\blumbar region\b/gi, 'região lombar', 'región lumbar'],
+    [/\bsacral region\b/gi, 'região sacral', 'región sacra'],
+    [/\blumbosacral region\b/gi, 'região lombossacral', 'región lumbosacra'],
+    [/\boccipitoatlantoaxial region\b/gi, 'região occiptoatlantoaxial', 'región occiptoatlantoaxial'],
+    [/\bcervicothoracic region\b/gi, 'região cervicotorácica', 'región cervicotorácica'],
+    [/\bthoracolumbar region\b/gi, 'região toracolombar', 'región toracolumbar'],
+    [/\bright hand\b/gi, 'mão direita', 'mano derecha'],
+    [/\bleft hand\b/gi, 'mão esquerda', 'mano izquierda'],
+    [/\bright arm\b/gi, 'braço direito', 'brazo derecho'],
+    [/\bleft arm\b/gi, 'braço esquerdo', 'brazo izquierdo'],
+    [/\bright leg\b/gi, 'perna direita', 'pierna derecha'],
+    [/\bleft leg\b/gi, 'perna esquerda', 'pierna izquierda'],
+    [/\bright foot\b/gi, 'pé direito', 'pie derecho'],
+    [/\bleft foot\b/gi, 'pé esquerdo', 'pie izquierdo'],
+    [/\bright knee\b/gi, 'joelho direito', 'rodilla derecha'],
+    [/\bleft knee\b/gi, 'joelho esquerdo', 'rodilla izquierda'],
+    [/\bright hip\b/gi, 'quadril direito', 'cadera derecha'],
+    [/\bleft hip\b/gi, 'quadril esquerdo', 'cadera izquierda'],
+    [/\bright shoulder\b/gi, 'ombro direito', 'hombro derecho'],
+    [/\bleft shoulder\b/gi, 'ombro esquerdo', 'hombro izquierdo'],
+    [/\bright elbow\b/gi, 'cotovelo direito', 'codo derecho'],
+    [/\bleft elbow\b/gi, 'cotovelo esquerdo', 'codo izquierdo'],
+    [/\bright wrist\b/gi, 'punho direito', 'muñeca derecha'],
+    [/\bleft wrist\b/gi, 'punho esquerdo', 'muñeca izquierda'],
+    [/\bright ankle\b/gi, 'tornozelo direito', 'tobillo derecho'],
+    [/\bleft ankle\b/gi, 'tornozelo esquerdo', 'tobillo izquierdo'],
+    [/\bright eye\b/gi, 'olho direito', 'ojo derecho'],
+    [/\bleft eye\b/gi, 'olho esquerdo', 'ojo izquierdo'],
+    [/\bright ear\b/gi, 'orelha direita', 'oído derecho'],
+    [/\bleft ear\b/gi, 'orelha esquerda', 'oído izquierdo'],
+    [/\bunspecified eye\b/gi, 'olho não especificado', 'ojo no especificado'],
+    [/\bunspecified ear\b/gi, 'orelha não especificada', 'oído no especificado'],
+    [/\bunspecified hand\b/gi, 'mão não especificada', 'mano no especificada'],
+    [/\bunspecified arm\b/gi, 'braço não especificado', 'brazo no especificado'],
+    [/\bunspecified leg\b/gi, 'perna não especificada', 'pierna no especificada'],
+    [/\bunspecified foot\b/gi, 'pé não especificado', 'pie no especificado'],
+    [/\bunspecified knee\b/gi, 'joelho não especificado', 'rodilla no especificada'],
+    [/\bunspecified hip\b/gi, 'quadril não especificado', 'cadera no especificada'],
+    [/\bunspecified shoulder\b/gi, 'ombro não especificado', 'hombro no especificado'],
+    [/\bunspecified elbow\b/gi, 'cotovelo não especificado', 'codo no especificado'],
+    [/\bunspecified wrist\b/gi, 'punho não especificado', 'muñeca no especificada'],
+    [/\bunspecified ankle\b/gi, 'tornozelo não especificado', 'tobillo no especificado'],
+    [/\bforearm\b/gi, 'antebraço', 'antebrazo'],
+    [/\bupper arm\b/gi, 'braço', 'brazo'],
+    [/\blower leg\b/gi, 'perna', 'pierna'],
+    [/\bupper leg\b/gi, 'coxa', 'muslo'],
+    [/\bupper back\b/gi, 'parte superior das costas', 'parte superior de la espalda'],
+    [/\blower back\b/gi, 'parte inferior das costas', 'parte inferior de la espalda'],
+    [/\babdominal wall\b/gi, 'parede abdominal', 'pared abdominal'],
+    [/\bupper quadrant\b/gi, 'quadrante superior', 'cuadrante superior'],
+    [/\blower quadrant\b/gi, 'quadrante inferior', 'cuadrante inferior'],
+    [/\bright upper quadrant\b/gi, 'quadrante superior direito', 'cuadrante superior derecho'],
+    [/\bright lower quadrant\b/gi, 'quadrante inferior direito', 'cuadrante inferior derecho'],
+    [/\bleft upper quadrant\b/gi, 'quadrante superior esquerdo', 'cuadrante superior izquierdo'],
+    [/\bleft lower quadrant\b/gi, 'quadrante inferior esquerdo', 'cuadrante inferior izquierdo'],
+    [/\bepigastric\b/gi, 'epigástrico', 'epigástrico'],
+    [/\bumbilical\b/gi, 'umbilical', 'umbilical'],
+    [/\binguinal\b/gi, 'inguinal', 'inguinal'],
+
+    /* ── Eyes ── */
+    [/\bcataract\b/gi, 'catarata', 'catarata'],
+    [/\bglaucoma\b/gi, 'glaucoma', 'glaucoma'],
+    [/\bconjunctivitis\b/gi, 'conjuntivite', 'conjuntivitis'],
+    [/\bretinal detachment\b/gi, 'descolamento de retina', 'desprendimiento de retina'],
+    [/\bmacular degeneration\b/gi, 'degeneração macular', 'degeneración macular'],
+    [/\bdiabetic macular edema\b/gi, 'edema macular diabético', 'edema macular diabético'],
+    [/\bstrabismus\b/gi, 'estrabismo', 'estrabismo'],
+    [/\bamblyopia\b/gi, 'ambliopia', 'ambliopía'],
+    [/\bkeratoconus\b/gi, 'ceratocone', 'queratocono'],
+    [/\buveitis\b/gi, 'uveíte', 'uveítis'],
+    [/\biritis\b/gi, 'irite', 'iritis'],
+    [/\boptic neuritis\b/gi, 'neurite óptica', 'neuritis óptica'],
+
+    /* ── Ear ── */
+    [/\botitis media\b/gi, 'otite média', 'otitis media'],
+    [/\botitis externa\b/gi, 'otite externa', 'otitis externa'],
+    [/\bhearing loss\b/gi, 'perda auditiva', 'pérdida auditiva'],
+    [/\btinnitus\b/gi, 'zumbido', 'acúfenos'],
+    [/\b[Mm]énière[']?s disease\b/g, "doença de Ménière", "enfermedad de Ménière"],
+    [/\botosclerosis\b/gi, 'otosclerose', 'otosclerosis'],
+
+    /* ── Gastrointestinal ── */
+    [/\bgastroesophageal reflux disease\b/gi, 'doença do refluxo gastroesofágico (DRGE)', 'enfermedad por reflujo gastroesofágico (ERGE)'],
+    [/\bgastroesophageal reflux\b/gi, 'refluxo gastroesofágico', 'reflujo gastroesofágico'],
+    [/\bpeptic ulcer\b/gi, 'úlcera péptica', 'úlcera péptica'],
+    [/\bgastric ulcer\b/gi, 'úlcera gástrica', 'úlcera gástrica'],
+    [/\bduodenal ulcer\b/gi, 'úlcera duodenal', 'úlcera duodenal'],
+    [/\bgastritis\b/gi, 'gastrite', 'gastritis'],
+    [/\bcolitis\b/gi, 'colite', 'colitis'],
+    [/\bcrohn[']?s disease\b/gi, "doença de Crohn", "enfermedad de Crohn"],
+    [/\bulcerative colitis\b/gi, 'colite ulcerativa', 'colitis ulcerativa'],
+    [/\birritable bowel syndrome\b/gi, 'síndrome do intestino irritável', 'síndrome del intestino irritable'],
+    [/\bappendicitis\b/gi, 'apendicite', 'apendicitis'],
+    [/\bcholecystitis\b/gi, 'colecistite', 'colecistitis'],
+    [/\bcholelithiasis\b/gi, 'colelitíase', 'colelitiasis'],
+    [/\bpancreatitis\b/gi, 'pancreatite', 'pancreatitis'],
+    [/\bhepatitis\b/gi, 'hepatite', 'hepatitis'],
+    [/\bcirrhosis\b/gi, 'cirrose', 'cirrosis'],
+    [/\bliver failure\b/gi, 'insuficiência hepática', 'insuficiencia hepática'],
+    [/\bdiverticulitis\b/gi, 'diverticulite', 'diverticulitis'],
+    [/\bdiverticulosis\b/gi, 'diverticulose', 'diverticulosis'],
+    [/\bintestinal obstruction\b/gi, 'obstrução intestinal', 'obstrucción intestinal'],
+    [/\binguinal hernia\b/gi, 'hérnia inguinal', 'hernia inguinal'],
+    [/\bumbilical hernia\b/gi, 'hérnia umbilical', 'hernia umbilical'],
+    [/\bventral hernia\b/gi, 'hérnia ventral', 'hernia ventral'],
+    [/\bhernia\b/gi, 'hérnia', 'hernia'],
+    [/\brectal bleeding\b/gi, 'sangramento retal', 'sangrado rectal'],
+    [/\bhemorrhoids\b/gi, 'hemorroidas', 'hemorroides'],
+    [/\bperitonitis\b/gi, 'peritonite', 'peritonitis'],
+    [/\besophagitis\b/gi, 'esofagite', 'esofagitis'],
+    [/\bdysphagia\b/gi, 'disfagia', 'disfagia'],
+    [/\bnausea and vomiting\b/gi, 'náusea e vômito', 'náuseas y vómitos'],
+    [/\bnausea\b/gi, 'náusea', 'náusea'],
+    [/\bvomiting\b/gi, 'vômito', 'vómito'],
+    [/\bdiarrhea\b/gi, 'diarreia', 'diarrea'],
+    [/\bconstipation\b/gi, 'constipação', 'estreñimiento'],
+    [/\bfecal incontinence\b/gi, 'incontinência fecal', 'incontinencia fecal'],
+
+    /* ── Kidney / Urinary ── */
+    [/\bchronic kidney disease\b/gi, 'doença renal crônica', 'enfermedad renal crónica'],
+    [/\bacute kidney injury\b/gi, 'lesão renal aguda', 'lesión renal aguda'],
+    [/\bkidney failure\b/gi, 'insuficiência renal', 'insuficiencia renal'],
+    [/\brenal failure\b/gi, 'insuficiência renal', 'insuficiencia renal'],
+    [/\bglomerulonephritis\b/gi, 'glomerulonefrite', 'glomerulonefritis'],
+    [/\bnephrotic syndrome\b/gi, 'síndrome nefrótico', 'síndrome nefrótico'],
+    [/\bnephrolithiasis\b/gi, 'nefrolitíase', 'nefrolitiasis'],
+    [/\burolithiasis\b/gi, 'urolitíase', 'urolitiasis'],
+    [/\burinary tract infection\b/gi, 'infecção do trato urinário', 'infección del tracto urinario'],
+    [/\bcystitis\b/gi, 'cistite', 'cistitis'],
+    [/\bpyelonephritis\b/gi, 'pielonefrite', 'pielonefritis'],
+    [/\bprostatic hyperplasia\b/gi, 'hiperplasia prostática', 'hiperplasia prostática'],
+    [/\bbenign prostatic hyperplasia\b/gi, 'hiperplasia prostática benigna', 'hiperplasia prostática benigna'],
+    [/\burinary incontinence\b/gi, 'incontinência urinária', 'incontinencia urinaria'],
+    [/\bhematuria\b/gi, 'hematúria', 'hematuria'],
+    [/\bproteinuria\b/gi, 'proteinúria', 'proteinuria'],
+    [/\bpolycystic kidney\b/gi, 'rim policístico', 'riñón poliquístico'],
+
+    /* ── Cancer / Neoplasms ── */
+    [/\bmalignant neoplasm\b/gi, 'neoplasia maligna', 'neoplasia maligna'],
+    [/\bbenign neoplasm\b/gi, 'neoplasia benigna', 'neoplasia benigna'],
+    [/\bneoplasm of uncertain behavior\b/gi, 'neoplasia de comportamento incerto', 'neoplasia de comportamiento incierto'],
+    [/\blung cancer\b/gi, 'câncer de pulmão', 'cáncer de pulmón'],
+    [/\bbreast cancer\b/gi, 'câncer de mama', 'cáncer de mama'],
+    [/\bcolon cancer\b/gi, 'câncer de cólon', 'cáncer de colon'],
+    [/\brectal cancer\b/gi, 'câncer de reto', 'cáncer de recto'],
+    [/\bcolorectal cancer\b/gi, 'câncer colorretal', 'cáncer colorrectal'],
+    [/\bprostate cancer\b/gi, 'câncer de próstata', 'cáncer de próstata'],
+    [/\bcervical cancer\b/gi, 'câncer do colo do útero', 'cáncer de cuello uterino'],
+    [/\buterine cancer\b/gi, 'câncer uterino', 'cáncer uterino'],
+    [/\bovarian cancer\b/gi, 'câncer de ovário', 'cáncer de ovario'],
+    [/\bpancreatic cancer\b/gi, 'câncer de pâncreas', 'cáncer de páncreas'],
+    [/\bgastric cancer\b/gi, 'câncer gástrico', 'cáncer gástrico'],
+    [/\bstomach cancer\b/gi, 'câncer de estômago', 'cáncer de estómago'],
+    [/\bskin cancer\b/gi, 'câncer de pele', 'cáncer de piel'],
+    [/\bmelanoma\b/gi, 'melanoma', 'melanoma'],
+    [/\bleukemia\b/gi, 'leucemia', 'leucemia'],
+    [/\blymphoma\b/gi, 'linfoma', 'linfoma'],
+    [/\bhodgkin lymphoma\b/gi, 'linfoma de Hodgkin', 'linfoma de Hodgkin'],
+    [/\bnon-hodgkin lymphoma\b/gi, 'linfoma não-Hodgkin', 'linfoma no Hodgkin'],
+    [/\bmultiple myeloma\b/gi, 'mieloma múltiplo', 'mieloma múltiple'],
+    [/\bthyroid cancer\b/gi, 'câncer de tireoide', 'cáncer de tiroides'],
+    [/\bladder cancer\b/gi, 'câncer de bexiga', 'cáncer de vejiga'],
+    [/\bkidney cancer\b/gi, 'câncer de rim', 'cáncer de riñón'],
+    [/\brenal cell carcinoma\b/gi, 'carcinoma de células renais', 'carcinoma de células renales'],
+    [/\bhepatocellular carcinoma\b/gi, 'carcinoma hepatocelular', 'carcinoma hepatocelular'],
+    [/\bnon-small cell lung cancer\b/gi, 'câncer de pulmão de células não pequenas', 'cáncer de pulmón de células no pequeñas'],
+    [/\bsmall cell lung cancer\b/gi, 'câncer de pulmão de células pequenas', 'cáncer de pulmón de células pequeñas'],
+    [/\badenoma\b/gi, 'adenoma', 'adenoma'],
+    [/\bcarcinoma\b/gi, 'carcinoma', 'carcinoma'],
+    [/\bsarcoma\b/gi, 'sarcoma', 'sarcoma'],
+    [/\bglioma\b/gi, 'glioma', 'glioma'],
+    [/\bmeningioma\b/gi, 'meningioma', 'meningioma'],
+    [/\bbrain tumor\b/gi, 'tumor cerebral', 'tumor cerebral'],
+    [/\bmetastasis\b/gi, 'metástase', 'metástasis'],
+    [/\bmetastatic\b/gi, 'metastático', 'metastásico'],
+
+    /* ── Endocrine ── */
+    [/\bhypothyroidism\b/gi, 'hipotireoidismo', 'hipotiroidismo'],
+    [/\bhyperthyroidism\b/gi, 'hipertireoidismo', 'hipertiroidismo'],
+    [/\bthyroiditis\b/gi, 'tireoidite', 'tiroiditis'],
+    [/\bHashimoto[']?s thyroiditis\b/gi, "tireoidite de Hashimoto", "tiroiditis de Hashimoto"],
+    [/\bGraves[']? disease\b/gi, "doença de Graves", "enfermedad de Graves"],
+    [/\badrenal insufficiency\b/gi, 'insuficiência adrenal', 'insuficiencia adrenal'],
+    [/\bCushing[']?s syndrome\b/gi, "síndrome de Cushing", "síndrome de Cushing"],
+    [/\bAddison[']?s disease\b/gi, "doença de Addison", "enfermedad de Addison"],
+    [/\bpheochromocytoma\b/gi, 'feocromocitoma', 'feocromocitoma'],
+    [/\bhyperparathyroidism\b/gi, 'hiperparatireoidismo', 'hiperparatiroidismo'],
+    [/\bhypoparathyroidism\b/gi, 'hipoparatireoidismo', 'hipoparatiroidismo'],
+    [/\bobesity\b/gi, 'obesidade', 'obesidad'],
+    [/\boverweight\b/gi, 'sobrepeso', 'sobrepeso'],
+    [/\bdyslipidemia\b/gi, 'dislipidemia', 'dislipidemia'],
+    [/\bhypercholesterolemia\b/gi, 'hipercolesterolemia', 'hipercolesterolemia'],
+    [/\bhypertriglyceridemia\b/gi, 'hipertrigliceridemia', 'hipertrigliceridemia'],
+    [/\bhyperuricemia\b/gi, 'hiperuricemia', 'hiperuricemia'],
+    [/\banemia\b/gi, 'anemia', 'anemia'],
+    [/\biron deficiency anemia\b/gi, 'anemia ferropriva', 'anemia ferropénica'],
+    [/\bvitamin B12 deficiency\b/gi, 'deficiência de vitamina B12', 'deficiencia de vitamina B12'],
+    [/\bfolate deficiency\b/gi, 'deficiência de folato', 'deficiencia de folato'],
+    [/\bvitamin D deficiency\b/gi, 'deficiência de vitamina D', 'deficiencia de vitamina D'],
+
+    /* ── Skin ── */
+    [/\bdermatitis\b/gi, 'dermatite', 'dermatitis'],
+    [/\bpsoriasis\b/gi, 'psoríase', 'psoriasis'],
+    [/\beczema\b/gi, 'eczema', 'eccema'],
+    [/\burticaria\b/gi, 'urticária', 'urticaria'],
+    [/\bancne\b/gi, 'acne', 'acné'],
+    [/\brosacea\b/gi, 'rosácea', 'rosácea'],
+    [/\balopecia\b/gi, 'alopecia', 'alopecia'],
+    [/\bcellulitis\b/gi, 'celulite', 'celulitis'],
+    [/\bimpetigo\b/gi, 'impetigo', 'impétigo'],
+    [/\bherpes zoster\b/gi, 'herpes zoster', 'herpes zóster'],
+    [/\bherpes simplex\b/gi, 'herpes simples', 'herpes simple'],
+    [/\bwart\b/gi, 'verruga', 'verruga'],
+    [/\bpressure ulcer\b/gi, 'úlcera de pressão', 'úlcera por presión'],
+    [/\bcontact dermatitis\b/gi, 'dermatite de contato', 'dermatitis de contacto'],
+    [/\bseborrheic dermatitis\b/gi, 'dermatite seborreica', 'dermatitis seborreica'],
+    [/\birritant contact dermatitis\b/gi, 'dermatite de contato irritativa', 'dermatitis de contacto irritante'],
+    [/\ballergic contact dermatitis\b/gi, 'dermatite alérgica de contato', 'dermatitis alérgica de contacto'],
+    [/\bburn\b/gi, 'queimadura', 'quemadura'],
+    [/\bscald\b/gi, 'escaldadura', 'escaldadura'],
+    [/\bwound\b/gi, 'ferida', 'herida'],
+    [/\blaceration\b/gi, 'laceração', 'laceración'],
+    [/\bcontusion\b/gi, 'contusão', 'contusión'],
+    [/\babrasion\b/gi, 'abrasão', 'abrasión'],
+    [/\bpuncture wound\b/gi, 'ferida perfurante', 'herida punzante'],
+
+    /* ── Infectious diseases ── */
+    [/\bchickenpox\b/gi, 'catapora', 'varicela'],
+    [/\bvaricella\b/gi, 'varicela', 'varicela'],
+    [/\bcholera\b/gi, 'cólera', 'cólera'],
+    [/\btyphoid\b/gi, 'febre tifoide', 'fiebre tifoidea'],
+    [/\bsalmonella\b/gi, 'salmonela', 'salmonela'],
+    [/\bmalaria\b/gi, 'malária', 'malaria'],
+    [/\bdengue\b/gi, 'dengue', 'dengue'],
+    [/\bzika\b/gi, 'zika', 'zika'],
+    [/\bchikungunya\b/gi, 'chikungunya', 'chikungunya'],
+    [/\bHIV\b/g, 'HIV', 'VIH'],
+    [/\bAIDS\b/g, 'SIDA/AIDS', 'SIDA'],
+    [/\bsepsis\b/gi, 'sepse', 'sepsis'],
+    [/\bsepticemia\b/gi, 'septicemia', 'septicemia'],
+    [/\bbacteremia\b/gi, 'bacteremia', 'bacteriemia'],
+    [/\bmeningococcal\b/gi, 'meningocócico', 'meningocócico'],
+    [/\bpneumococcal\b/gi, 'pneumocócico', 'neumocócico'],
+    [/\bstaphylococcal\b/gi, 'estafilocócico', 'estafilocócico'],
+    [/\bstreptococcal\b/gi, 'estreptocócico', 'estreptocócico'],
+    [/\binfection\b/gi, 'infecção', 'infección'],
+    [/\binfectious\b/gi, 'infeccioso', 'infeccioso'],
+
+    /* ── Reproductive / Pregnancy ── */
+    [/\bpregnancy\b/gi, 'gravidez', 'embarazo'],
+    [/\bchildbirth\b/gi, 'parto', 'parto'],
+    [/\bdelivery\b/gi, 'parto', 'parto'],
+    [/\bmiscarriage\b/gi, 'aborto espontâneo', 'aborto espontáneo'],
+    [/\babortion\b/gi, 'aborto', 'aborto'],
+    [/\bpreeclampsia\b/gi, 'pré-eclâmpsia', 'preeclampsia'],
+    [/\beclampsia\b/gi, 'eclâmpsia', 'eclampsia'],
+    [/\bgestational diabetes\b/gi, 'diabetes gestacional', 'diabetes gestacional'],
+    [/\bmenstrual disorder\b/gi, 'transtorno menstrual', 'trastorno menstrual'],
+    [/\bendometriosis\b/gi, 'endometriose', 'endometriosis'],
+    [/\buterine fibroids\b/gi, 'miomas uterinos', 'miomas uterinos'],
+    [/\bovarian cyst\b/gi, 'cisto ovariano', 'quiste ovárico'],
+    [/\bpolycystic ovary syndrome\b/gi, 'síndrome dos ovários policísticos', 'síndrome del ovario poliquístico'],
+    [/\bamenorrhea\b/gi, 'amenorreia', 'amenorrea'],
+    [/\bdysmenorrhea\b/gi, 'dismenorreia', 'dismenorrea'],
+    [/\bmenorrhagia\b/gi, 'menorragia', 'menorragia'],
+    [/\binfertility\b/gi, 'infertilidade', 'infertilidad'],
+    [/\bectopic pregnancy\b/gi, 'gravidez ectópica', 'embarazo ectópico'],
+    [/\bplacenta previa\b/gi, 'placenta prévia', 'placenta previa'],
+    [/\bneonatal\b/gi, 'neonatal', 'neonatal'],
+    [/\bnewborn\b/gi, 'recém-nascido', 'recién nacido'],
+    [/\bcongenital\b/gi, 'congênito', 'congénito'],
+
+    /* ── Injuries / Trauma ── */
+    [/\btrauma\b/gi, 'trauma', 'trauma'],
+    [/\binjury\b/gi, 'lesão', 'lesión'],
+    [/\binjured\b/gi, 'acidentado', 'lesionado'],
+    [/\baccident\b/gi, 'acidente', 'accidente'],
+    [/\bmotor vehicle accident\b/gi, 'acidente de veículo motorizado', 'accidente de vehículo de motor'],
+    [/\bfall\b/gi, 'queda', 'caída'],
+    [/\bconcussion\b/gi, 'concussão', 'conmoción cerebral'],
+    [/\btraumatic brain injury\b/gi, 'traumatismo craniencefálico', 'traumatismo craneoencefálico'],
+    [/\bspinal cord injury\b/gi, 'lesão medular', 'lesión medular'],
+    [/\bamputation\b/gi, 'amputação', 'amputación'],
+    [/\bforeign body\b/gi, 'corpo estranho', 'cuerpo extraño'],
+    [/\bopen wound\b/gi, 'ferida aberta', 'herida abierta'],
+    [/\bpoisoning\b/gi, 'intoxicação', 'intoxicación'],
+    [/\boverdose\b/gi, 'superdosagem', 'sobredosis'],
+    [/\bvenomous\b/gi, 'venenoso', 'venenoso'],
+    [/\bsnakebite\b/gi, 'picada de cobra', 'mordedura de serpiente'],
+    [/\binsect bite\b/gi, 'picada de inseto', 'picadura de insecto'],
+    [/\bdrowning\b/gi, 'afogamento', 'ahogamiento'],
+    [/\bsuffocation\b/gi, 'sufocação', 'sofocación'],
+    [/\belectric shock\b/gi, 'choque elétrico', 'descarga eléctrica'],
+
+    /* ── Common medical terms ── */
+    [/\bpain\b/gi, 'dor', 'dolor'],
+    [/\bacute pain\b/gi, 'dor aguda', 'dolor agudo'],
+    [/\bchronic pain\b/gi, 'dor crônica', 'dolor crónico'],
+    [/\bfever\b/gi, 'febre', 'fiebre'],
+    [/\bfatigue\b/gi, 'fadiga', 'fatiga'],
+    [/\bweakness\b/gi, 'fraqueza', 'debilidad'],
+    [/\bswelling\b/gi, 'inchaço', 'hinchazón'],
+    [/\bedema\b/gi, 'edema', 'edema'],
+    [/\bhemorrhage\b/gi, 'hemorragia', 'hemorragia'],
+    [/\bbleeding\b/gi, 'sangramento', 'sangrado'],
+    [/\bthrombosis\b/gi, 'trombose', 'trombosis'],
+    [/\bembolism\b/gi, 'embolia', 'embolia'],
+    [/\binflammation\b/gi, 'inflamação', 'inflamación'],
+    [/\bnecrosis\b/gi, 'necrose', 'necrosis'],
+    [/\bfibrosis\b/gi, 'fibrose', 'fibrosis'],
+    [/\batrophy\b/gi, 'atrofia', 'atrofia'],
+    [/\bhypertrophy\b/gi, 'hipertrofia', 'hipertrofia'],
+    [/\bdysplasia\b/gi, 'displasia', 'displasia'],
+    [/\bhyperplasia\b/gi, 'hiperplasia', 'hiperplasia'],
+    [/\babnormal\b/gi, 'anormal', 'anormal'],
+    [/\bchronic\b/gi, 'crônico', 'crónico'],
+    [/\bacute\b/gi, 'agudo', 'agudo'],
+    [/\brecurrent\b/gi, 'recorrente', 'recurrente'],
+    [/\bpersistent\b/gi, 'persistente', 'persistente'],
+    [/\bsevere\b/gi, 'grave', 'grave'],
+    [/\bmild\b/gi, 'leve', 'leve'],
+    [/\bmoderate\b/gi, 'moderado', 'moderado'],
+    [/\bbilateral\b/gi, 'bilateral', 'bilateral'],
+    [/\bunilateral\b/gi, 'unilateral', 'unilateral'],
+    [/\bstage\b/gi, 'estágio', 'estadio'],
+    [/\bgrade\b/gi, 'grau', 'grado'],
+    [/\btype\b/gi, 'tipo', 'tipo'],
+    [/\bsyndrome\b/gi, 'síndrome', 'síndrome'],
+    [/\bdisorder\b/gi, 'transtorno', 'trastorno'],
+    [/\bdisease\b/gi, 'doença', 'enfermedad'],
+    [/\bcondition\b/gi, 'condição', 'condición'],
+    [/\bcomplication\b/gi, 'complicação', 'complicación'],
+    [/\bdeformity\b/gi, 'deformidade', 'deformidad'],
+    [/\bdefect\b/gi, 'defeito', 'defecto'],
+    [/\bdysfunction\b/gi, 'disfunção', 'disfunción'],
+    [/\binsufficiency\b/gi, 'insuficiência', 'insuficiencia'],
+    [/\bdeficiency\b/gi, 'deficiência', 'deficiencia'],
+    [/\bexcess\b/gi, 'excesso', 'exceso'],
+    [/\bstenosis\b/gi, 'estenose', 'estenosis'],
+    [/\bobstruction\b/gi, 'obstrução', 'obstrucción'],
+    [/\brupture\b/gi, 'ruptura', 'ruptura'],
+    [/\bperforation\b/gi, 'perfuração', 'perforación'],
+    [/\bmass\b/gi, 'massa', 'masa'],
+    [/\bcyst\b/gi, 'cisto', 'quiste'],
+    [/\bpolyp\b/gi, 'pólipo', 'pólipo'],
+    [/\blesion\b/gi, 'lesão', 'lesión'],
+    [/\bulcer\b/gi, 'úlcera', 'úlcera'],
+    [/\bfistula\b/gi, 'fístula', 'fístula'],
+    [/\babscess\b/gi, 'abscesso', 'absceso'],
+    [/\bcalculus\b/gi, 'cálculo', 'cálculo'],
+    [/\bstone\b/gi, 'pedra', 'piedra'],
+    [/\btumor\b/gi, 'tumor', 'tumor'],
+    [/\bgrowth\b/gi, 'crescimento anormal', 'crecimiento anormal'],
+    [/\bsclerosis\b/gi, 'esclerose', 'esclerosis'],
+    [/\bocclusion\b/gi, 'oclusão', 'oclusión'],
+    [/\bspasm\b/gi, 'espasmo', 'espasmo'],
+    [/\bparalysis\b/gi, 'paralisia', 'parálisis'],
+    [/\bparesis\b/gi, 'paresia', 'paresia'],
+    [/\bcontracture\b/gi, 'contratura', 'contractura'],
+    [/\binstability\b/gi, 'instabilidade', 'inestabilidad'],
+    [/\bhypersensitivity\b/gi, 'hipersensibilidade', 'hipersensibilidad'],
+    [/\ballergy\b/gi, 'alergia', 'alergia'],
+    [/\banaphylaxis\b/gi, 'anafilaxia', 'anafilaxia'],
+    [/\bautoimmune\b/gi, 'autoimune', 'autoinmune'],
+    [/\bimmune\b/gi, 'imune', 'inmune'],
+    [/\btransplant\b/gi, 'transplante', 'trasplante'],
+    [/\bgraft\b/gi, 'enxerto', 'injerto'],
+    [/\bprosthesis\b/gi, 'prótese', 'prótesis'],
+    [/\bimplant\b/gi, 'implante', 'implante'],
+    [/\bsurgery\b/gi, 'cirurgia', 'cirugía'],
+    [/\boperation\b/gi, 'operação', 'operación'],
+    [/\bprocedure\b/gi, 'procedimento', 'procedimiento'],
+    [/\btherapy\b/gi, 'terapia', 'terapia'],
+    [/\btreatment\b/gi, 'tratamento', 'tratamiento'],
+    [/\bmedication\b/gi, 'medicação', 'medicación'],
+    [/\bdrug\b/gi, 'fármaco', 'fármaco'],
+    [/\bscreening\b/gi, 'rastreamento', 'tamizaje'],
+    [/\bexamination\b/gi, 'exame', 'examen'],
+    [/\bdiagnosis\b/gi, 'diagnóstico', 'diagnóstico'],
+    [/\bsymptom\b/gi, 'sintoma', 'síntoma'],
+    [/\bsign\b/gi, 'sinal', 'signo'],
+    [/\bfinding\b/gi, 'achado', 'hallazgo'],
+    [/\bhistory\b/gi, 'história', 'historia'],
+    [/\bstatus\b/gi, 'estado', 'estado'],
+    [/\bfollow-up\b/gi, 'acompanhamento', 'seguimiento'],
+    [/\bsurveillance\b/gi, 'vigilância', 'vigilancia'],
+    [/\bpreventive\b/gi, 'preventivo', 'preventivo'],
+    [/\bprophylactic\b/gi, 'profilático', 'profiláctico'],
+    [/\brehabilitation\b/gi, 'reabilitação', 'rehabilitación'],
+    [/\bpalliative\b/gi, 'paliativo', 'paliativo'],
+
+    /* ── Laterality / Position ── */
+    [/\bright\b/gi, 'direito', 'derecho'],
+    [/\bleft\b/gi, 'esquerdo', 'izquierdo'],
+    [/\bunspecified\b/gi, 'não especificado', 'no especificado'],
+    [/\bbilateral\b/gi, 'bilateral', 'bilateral'],
+    [/\bproximal\b/gi, 'proximal', 'proximal'],
+    [/\bdistal\b/gi, 'distal', 'distal'],
+    [/\bmedial\b/gi, 'medial', 'medial'],
+    [/\blateral\b/gi, 'lateral', 'lateral'],
+    [/\banterior\b/gi, 'anterior', 'anterior'],
+    [/\bposterior\b/gi, 'posterior', 'posterior'],
+    [/\bsuperior\b/gi, 'superior', 'superior'],
+    [/\binferior\b/gi, 'inferior', 'inferior'],
+    [/\bexternal\b/gi, 'externo', 'externo'],
+    [/\binternal\b/gi, 'interno', 'interno'],
+    [/\bupper\b/gi, 'superior', 'superior'],
+    [/\blower\b/gi, 'inferior', 'inferior'],
+    [/\bother\b/gi, 'outro', 'otro'],
+    [/\bmultiple\b/gi, 'múltiplo', 'múltiple'],
+    [/\bsingle\b/gi, 'único', 'único'],
+    [/\bprimary\b/gi, 'primário', 'primario'],
+    [/\bsecondary\b/gi, 'secundário', 'secundario'],
+    [/\binitial\b/gi, 'inicial', 'inicial'],
+    [/\bsubsequent\b/gi, 'subsequente', 'subsecuente'],
+    [/\bdue to\b/gi, 'devido a', 'debido a'],
+    [/\bcaused by\b/gi, 'causado por', 'causado por'],
+    [/\binvolving\b/gi, 'envolvendo', 'que involucra'],
+    [/\bassociated with\b/gi, 'associado a', 'asociado con'],
+    [/\bwithout\b/gi, 'sem', 'sin'],
+    [/\bwith\b/gi, 'com', 'con'],
+    [/\band\b/gi, 'e', 'y'],
+    [/\bor\b/gi, 'ou', 'o'],
+    [/\bof\b/gi, 'de', 'de'],
+    [/\bfor\b/gi, 'para', 'para'],
+    [/\bat\b/gi, 'em', 'en'],
+    [/\bin\b/gi, 'em', 'en'],
+    [/\bto\b/gi, 'para', 'a'],
+    [/\bby\b/gi, 'por', 'por'],
+    [/\ba\b/gi, 'um', 'un'],
+
+    /* ── Activity codes ── */
+    [/\bactivity,\b/gi, 'atividade,', 'actividad,'],
+    [/\bother caregiving\b/gi, 'outros cuidados', 'otros cuidados'],
+  ];
+
+  /* Translate EN description to target language */
+  function translateDesc(en, targetLang) {
+    if (!en || targetLang === 'en') return en;
+    var idx = (targetLang === 'es') ? 2 : 1; /* 1=PT, 2=ES */
+    var result = en;
+    for (var i = 0; i < TRANS.length; i++) {
+      result = result.replace(TRANS[i][0], TRANS[i][idx]);
+    }
+    return result;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     CODE NORMALIZATION
+     Handles: F20 → F20*, F20.0 → F200, 200 → search all
+  ═══════════════════════════════════════════════════════════ */
+
+  function normalizeCode(raw) {
+    var t = String(raw).trim().toUpperCase();
+    /* Remove dots and spaces */
+    t = t.replace(/[\s.]/g, '');
+    return t;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     ICD DATA STORE
+     Loaded once via fetch(), stored in _icdMap
+  ═══════════════════════════════════════════════════════════ */
+
+  var _icdMap = null;     /* {CODE: 'description', ...} */
+  var _loadState = 'idle'; /* idle | loading | ready | error */
+  var _loadQueue = [];     /* callbacks waiting for data */
+
+  /* JSON path — same directory as this script */
+  var JSON_URL = (function() {
+    /* Find script tag src to derive base path */
+    var scripts = document.getElementsByTagName('script');
+    for (var i = scripts.length - 1; i >= 0; i--) {
+      var src = scripts[i].src || '';
+      if (src.indexOf('kb-medicine') >= 0) {
+        return src.replace(/kb-medicine\.js[^/]*$/, '') + 'icd10cm_codes_2022-2.json';
+      }
+    }
+    return 'icd10cm_codes_2022-2.json';
+  }());
+
+  function loadICD(callback) {
+    if (_loadState === 'ready') { callback(true); return; }
+    if (_loadState === 'error') { callback(false); return; }
+    _loadQueue.push(callback);
+    if (_loadState === 'loading') return;
+    _loadState = 'loading';
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', JSON_URL, true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState !== 4) return;
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          _icdMap = {};
+          for (var i = 0; i < data.length; i++) {
+            _icdMap[data[i].code] = data[i].description;
+          }
+          _loadState = 'ready';
+          for (var j = 0; j < _loadQueue.length; j++) _loadQueue[j](true);
+          _loadQueue = [];
+        } catch(e) {
+          _loadState = 'error';
+          for (var k = 0; k < _loadQueue.length; k++) _loadQueue[k](false);
+          _loadQueue = [];
+        }
+      } else {
+        _loadState = 'error';
+        for (var m = 0; m < _loadQueue.length; m++) _loadQueue[m](false);
+        _loadQueue = [];
+      }
+    };
+    xhr.send();
+  }
+
+  /* Start loading immediately */
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() { loadICD(function(){}); });
+    } else {
+      loadICD(function(){});
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     PUBLIC API
+  ═══════════════════════════════════════════════════════════ */
+
+  /* Synchronous lookup (works after data is loaded) */
+  W.lookupICDCode = function(rawCode, lang) {
+    var lc = lang || 'pt';
+    if (!_icdMap) return null;
+
+    var code = normalizeCode(rawCode);
+    var desc = null;
+
+    /* 1. Exact match */
+    if (_icdMap[code]) {
+      desc = _icdMap[code];
+      return { label: translateDesc(desc, lc), detail: null };
+    }
+
+    /* 2. Prefix match — return first match + count */
+    var matches = [];
+    var keys = Object.keys(_icdMap);
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i].indexOf(code) === 0) {
+        matches.push({ code: keys[i], desc: _icdMap[keys[i]] });
+      }
+    }
+
+    if (matches.length === 0) return null;
+    if (matches.length === 1) {
+      return { label: translateDesc(matches[0].desc, lc), detail: null };
+    }
+
+    /* Multiple subcodes — build a summary */
+    var lines = [];
+    var limit = Math.min(matches.length, 15);
+    for (var j = 0; j < limit; j++) {
+      lines.push(matches[j].code + ' — ' + translateDesc(matches[j].desc, lc));
+    }
+    if (matches.length > 15) {
+      lines.push('... (' + (matches.length - 15) + (lc === 'pt' ? ' mais' : lc === 'es' ? ' más' : ' more') + ')');
+    }
+
+    var heading = lc === 'pt' ? 'Subcódigos para ' + code + ':' :
+                  lc === 'es' ? 'Subcódigos para ' + code + ':' :
+                  'Subcodes for ' + code + ':';
+
+    return { label: heading, detail: lines.join('\n') };
+  };
+
+  /* Async lookup — callback(result) where result may be null */
+  W.lookupICDAsync = function(rawCode, lang, callback) {
+    loadICD(function(ok) {
+      if (!ok) { callback(null); return; }
+      callback(W.lookupICDCode(rawCode, lang));
+    });
+  };
+
+  /* Check if ICD data is ready */
+  W.icdReady = function() { return _loadState === 'ready'; };
+  W.icdLoading = function() { return _loadState === 'loading'; };
+
+  /* ═══════════════════════════════════════════════════════════
+     KB PLUGIN: medical topics (non-ICD knowledge)
+  ═══════════════════════════════════════════════════════════ */
+
+  var ICD_DETAIL = {
+    'F20':{ pt:{label:'Esquizofrenia',detail:'Transtorno psicótico crônico: delírios, alucinações, pensamento desorganizado, embotamento afetivo. Início típico: 15–35 anos. Hipótese dopaminérgica. Tratamento: antipsicóticos (haloperidol, risperidona, olanzapina, clozapina para refratários) + reabilitação psicossocial. Prevalência ~1% mundial.'},
+             en:{label:'Schizophrenia',detail:'Chronic psychotic disorder: delusions, hallucinations, disorganized thinking, flat affect. Typical onset: 15–35 years. Dopamine hypothesis. Treatment: antipsychotics (haloperidol, risperidone, olanzapine, clozapine for refractory) + psychosocial rehabilitation. ~1% worldwide prevalence.'},
              es:{label:'Esquizofrenia',detail:'Trastorno psicótico crónico: delirios, alucinaciones, pensamiento desorganizado. Inicio: 15–35 años. Tratamiento: antipsicóticos + rehabilitación psicosocial. Prevalencia ~1%.'}},
     'F31':{ pt:{label:'Transtorno bipolar',detail:'Episódios alternantes de mania (euforia, grandiosidade, impulsividade, pouco sono) e depressão. Tipo I: mania plena; Tipo II: hipomania+depressão. Tratamento: lítio (reduz suicídio), valproato, lamotrigina, antipsicóticos atípicos (quetiapina). Manutenção a longo prazo é essencial.'},
              en:{label:'Bipolar disorder',detail:'Alternating mania (euphoria, grandiosity, impulsivity, decreased sleep) and depression. Type I: full mania; Type II: hypomania+depression. Treatment: lithium (reduces suicide), valproate, lamotrigine, atypical antipsychotics (quetiapine). Long-term maintenance essential.'},
              es:{label:'Trastorno bipolar',detail:'Alternancia entre manía y depresión. Tipo I: manía plena; Tipo II: hipomanía. Tratamiento: litio, valproato, lamotrigina, antipsicóticos atípicos. Mantenimiento a largo plazo esencial.'}},
-    'F32':{ pt:{label:'Episódio depressivo',detail:'Humor deprimido, anedonia, fadiga, alterações de sono/apetite, concentração reduzida, sentimentos de culpa, pensamentos de morte ≥2 semanas. Graus: leve, moderado, grave (com/sem psicose). Tratamento: ISRS (fluoxetina, sertralina, escitalopram), ISRN (venlafaxina, duloxetina), TCC, para refratários: ECT, esketamina nasal.'},
-             en:{label:'Depressive episode',detail:'Depressed mood, anhedonia, fatigue, sleep/appetite changes, poor concentration, guilt, thoughts of death ≥2 weeks. Grades: mild, moderate, severe (with/without psychosis). Treatment: SSRIs (fluoxetine, sertraline, escitalopram), SNRIs (venlafaxine, duloxetine), CBT, for refractory: ECT, nasal esketamine.'},
+    'F32':{ pt:{label:'Episódio depressivo',detail:'Humor deprimido, anedonia, fadiga, alterações de sono/apetite, concentração reduzida, sentimentos de culpa, pensamentos de morte ≥2 semanas. Tratamento: ISRS (fluoxetina, sertralina, escitalopram), ISRN (venlafaxina, duloxetina), TCC, para refratários: ECT, esketamina nasal.'},
+             en:{label:'Depressive episode',detail:'Depressed mood, anhedonia, fatigue, sleep/appetite changes, poor concentration, guilt, thoughts of death ≥2 weeks. Treatment: SSRIs (fluoxetine, sertraline, escitalopram), SNRIs (venlafaxine, duloxetine), CBT, for refractory: ECT, nasal esketamine.'},
              es:{label:'Episodio depresivo',detail:'Humor deprimido, anhedonia, fatiga ≥2 semanas. Tratamiento: ISRS (fluoxetina, sertralina), IRSN (venlafaxina), TCC, ECT en refractarios.'}},
-    'F41':{ pt:{label:'Transtornos de ansiedade',detail:'TAG (F41.1): preocupação difusa crônica ≥6m. Pânico (F41.0): ataques súbitos com taquicardia, dispneia, sensação de morte. Tratamento: ISRS/ISRN (1ª linha), TCC (eficaz a longo prazo), benzodiazepínicos apenas curto prazo (risco de dependência), pregabalina para TAG.'},
-             en:{label:'Anxiety disorders',detail:'GAD (F41.1): chronic diffuse worry ≥6m. Panic disorder (F41.0): sudden attacks with tachycardia, dyspnea, fear of death. Treatment: SSRIs/SNRIs (1st line), CBT (effective long-term), benzodiazepines short-term only (dependence risk), pregabalin for GAD.'},
-             es:{label:'Trastornos de ansiedad',detail:'TAG (F41.1): preocupación crónica ≥6m. Pánico (F41.0): ataques súbitos. Tratamiento: ISRS/IRSN, TCC, benzodiazepinas solo corto plazo, pregabalina para TAG.'}},
-    'F10':{ pt:{label:'Transtornos por álcool',detail:'Inclui intoxicação, síndrome de dependência, uso nocivo, abstinência (risco convulsão/delirium tremens). Abstinência grave: benzodiazepínicos + tiamina IV (prevenção de Wernicke-Korsakoff). Tratamento da dependência: naltrexona, acamprosato, disulfiram, desintoxicação, suporte psicossocial, AA.'},
-             en:{label:'Alcohol use disorders',detail:'Includes intoxication, dependence, harmful use, withdrawal (seizure/delirium tremens risk). Severe withdrawal: benzodiazepines + IV thiamine (prevent Wernicke-Korsakoff). Dependence treatment: naltrexone, acamprosate, disulfiram, detox, psychosocial support, AA.'},
-             es:{label:'Trastornos por alcohol',detail:'Incluye intoxicación, dependencia, abstinencia (convulsiones/delirium). Abstinencia grave: benzodiazepinas + tiamina IV. Dependencia: naltrexona, acamprosato, disulfiram.'}},
-    'F43':{ pt:{label:'TEPT/Reações ao estresse',detail:'TEPT (F43.1): flashbacks, pesadelos, hipervigilância, evitação após trauma. Critérios: >1 mês, prejuízo funcional. Tratamento: TCC focada no trauma, EMDR (dessensibilização por movimentos oculares), ISRS (sertralina, paroxetina). Transtorno de adaptação (F43.2): reação a estressor identificável, resolve em 6m.'},
-             en:{label:'PTSD/Stress reactions',detail:'PTSD (F43.1): flashbacks, nightmares, hypervigilance, avoidance after trauma. Criteria: >1 month, functional impairment. Treatment: trauma-focused CBT, EMDR (eye movement desensitization), SSRIs (sertraline, paroxetine). Adjustment disorder (F43.2): reaction to identifiable stressor, resolves in 6m.'},
-             es:{label:'TEPT/Reacciones al estrés',detail:'TEPT (F43.1): flashbacks, pesadillas, hipervigilancia. Tratamiento: TCC centrada en trauma, EMDR, ISRS (sertralina, paroxetina).'}},
-    'I10':{ pt:{label:'Hipertensão arterial essencial',detail:'PA ≥130/80 mmHg. 1,28 bilhões de adultos. Principal causa de AVC e IAM. Geralmente assintomática. Diagnóstico: 2 medidas em 2 visitas. MAPA: hipertensão do jaleco branco. Tratamento escalonado: estilo de vida → IECA/BRA + tiazídico + BCC → espironolactona + beta-bloqueador. Meta <130/80 (ou <140/90 em idosos).'},
-             en:{label:'Essential hypertension',detail:'BP ≥130/80 mmHg. 1.28 billion adults. #1 cause of stroke and MI. Usually asymptomatic. Diagnosis: 2 readings at 2 visits. ABPM: white-coat hypertension. Treatment ladder: lifestyle → ACE inhibitor/ARB + thiazide + CCB → spironolactone + beta-blocker. Target <130/80 (or <140/90 in elderly).'},
-             es:{label:'Hipertensión arterial esencial',detail:'PA ≥130/80 mmHg. 1.280 millones de adultos. Principal causa de ACV e IAM. Diagnóstico: 2 mediciones en 2 visitas. Tratamiento: estilo de vida + IECA/ARA2 + tiazida + BCC. Meta <130/80.'}},
-    'I21':{ pt:{label:'Infarto agudo do miocárdio',detail:'Necrose miocárdica por oclusão coronária. IAMCSST: supra ST → angioplastia primária <90min (gold standard). IAMSST: troponina elevada, sem supra. Sintomas: dor opressiva retroesternal irradiando ao braço E/mandíbula, sudorese, dispneia, náusea. Tratamento: AAS + ticagrelor/clopidogrel, anticoagulante (heparina), betabloqueador, IECA, estatina alta intensidade, reabilitação cardíaca.'},
-             en:{label:'Acute myocardial infarction',detail:'Myocardial necrosis from coronary occlusion. STEMI: ST elevation → primary PCI <90min (gold standard). NSTEMI: elevated troponin, no ST elevation. Symptoms: crushing retrosternal pain radiating to left arm/jaw, sweating, dyspnea, nausea. Treatment: ASA + ticagrelor/clopidogrel, anticoagulant (heparin), beta-blocker, ACE inhibitor, high-intensity statin, cardiac rehab.'},
-             es:{label:'Infarto agudo de miocardio',detail:'Necrosis miocárdica. IAMCEST: angioplastia primaria <90min. IAMSEST: troponina elevada. Síntomas: dolor opresivo irradiado al brazo izquierdo. Tratamiento: AAS + ticagrelor, heparina, betabloqueador, IECA, estatina.'}},
-    'I20':{ pt:{label:'Angina pectoris',detail:'Dor torácica isquêmica sem necrose. Estável: esforço, cede com repouso ou nitratos em <5min. Instável: repouso ou mudança recente de padrão — síndrome coronária aguda (emergência). Tratamento estável: nitratos, betabloqueadores, BCC (2ª linha), AAS, estatinas, revascularização se refratária.'},
-             en:{label:'Angina pectoris',detail:'Ischemic chest pain without necrosis. Stable: exertion-induced, relieved by rest or nitrates in <5min. Unstable: at rest or pattern change — acute coronary syndrome (emergency). Stable treatment: nitrates, beta-blockers, CCBs (2nd line), aspirin, statins, revascularization if refractory.'},
-             es:{label:'Angina de pecho',detail:'Dolor torácico isquémico. Estable: esfuerzo, cede con reposo/nitratos. Inestable: síndrome coronario agudo. Tratamiento: nitratos, betabloqueadores, AAS, estatinas.'}},
-    'I50':{ pt:{label:'Insuficiência cardíaca',detail:'IC sistólica: FEVE<40% (FEVEr). IC diastólica: FEVE≥50% (FEVEp). Causas: cardiopatia isquêmica, HAS, miocardiopatia, valvopatia. Sintomas: dispneia esforço→repouso, ortopneia, DPN, edema MMII, fadiga, BNP/NT-proBNP elevado. Classificação NYHA I–IV. Tratamento FEVEr (4 pilares): IECA/sacubitril-valsartana + betabloqueador + espironolactona + SGLT2i (dapagliflozina).'},
-             en:{label:'Heart failure',detail:'Systolic HF: EF<40% (HFrEF). Diastolic HF: EF≥50% (HFpEF). Causes: ischemic cardiomyopathy, hypertension, cardiomyopathy, valvular. Symptoms: exertional→resting dyspnea, orthopnea, PND, lower limb edema, fatigue, elevated BNP/NT-proBNP. NYHA I–IV. HFrEF treatment (4 pillars): ACE inhibitor/sacubitril-valsartan + beta-blocker + spironolactone + SGLT2i (dapagliflozin).'},
-             es:{label:'Insuficiencia cardíaca',detail:'IC sistólica: FEVI<40%. Síntomas: disnea, ortopnea, edema. NYHA I–IV. Tratamiento FEVIr: IECA/sacubitril-valsartán + betabloqueador + espironolactona + SGLT2i.'}},
-    'I48':{ pt:{label:'Fibrilação atrial',detail:'Arritmia sustentada mais comum. Risco principal: AVC tromboembólico (5× maior). CHA₂DS₂-VASc ≥2 (H) ou ≥3 (M): anticoagular. NOACs (apixabana, rivaroxabana, dabigatrana) preferíveis à warfarina. Controle de frequência: betabloqueador, digoxina, diltiazem. Controle de ritmo: cardioversão elétrica/química, ablação por cateter (radiofrequência/crioablação).'},
-             en:{label:'Atrial fibrillation',detail:'Most common sustained arrhythmia. Main risk: thromboembolic stroke (5× higher). CHA₂DS₂-VASc ≥2 (M) or ≥3 (F): anticoagulate. NOACs (apixaban, rivaroxaban, dabigatran) preferred over warfarin. Rate control: beta-blocker, digoxin, diltiazem. Rhythm control: electrical/chemical cardioversion, catheter ablation (radiofrequency/cryoablation).'},
-             es:{label:'Fibrilación auricular',detail:'Arritmia más común. Riesgo: ACV tromboembólico (5×). CHA₂DS₂-VASc guía anticoagulación. NOACs preferidos (apixabán, rivaroxabán). Control de frecuencia: betabloqueadores. Ablación por catéter para control de ritmo.'}},
-    'I63':{ pt:{label:'AVC isquêmico',detail:'Infarto cerebral por oclusão arterial (trombótica ou embólica). Déficit neurológico focal súbito. NIHSS avalia gravidade. Janela trombolítica: alteplase IV 0,9mg/kg até 4,5h. Trombectomia mecânica: grandes vasos até 24h (com penumbra viável). Controle peri-AVC: PA <185/110 para trombólise, glicemia 140-180, normotermia. Prevenção 2ária: AAS+clopidogrel 21d→AAS, estatina alta, controle FA/HAS.'},
-             en:{label:'Ischaemic stroke',detail:'Cerebral infarction from arterial occlusion (thrombotic or embolic). Sudden focal neurological deficit. NIHSS assesses severity. Thrombolysis window: IV alteplase 0.9mg/kg up to 4.5h. Mechanical thrombectomy: large vessels up to 24h (with viable penumbra). Peri-stroke management: BP <185/110 for thrombolysis, glucose 140-180, normothermia. 2° prevention: ASA+clopidogrel 21d→ASA, high statin, AF/HTN control.'},
-             es:{label:'ACV isquémico',detail:'Infarto cerebral. NIHSS evalúa gravedad. Ventana trombolítica: alteplasa IV hasta 4,5h. Trombectomía mecánica hasta 24h. Prevención 2°: AAS+clopidogrel 21d→AAS, estatina de alta intensidad.'}},
-    'J06':{ pt:{label:'IVAS — resfriado comum',detail:'Infecção viral (rinovírus 50%, coronavírus, RSV) autolimitada 7–10 dias. Sintomas: rinorreia, espirros, congestão, faringite, febre leve. Tratamento: sintomático (paracetamol, descongestionantes, lavagem nasal). Antibióticos NÃO indicados para vírus. Faringite por Streptococcus pyogenes: penicilina V ou amoxicilina 10d (prevenir febre reumática). Diagnóstico: teste rápido ou cultura de orofaringe.'},
-             en:{label:'URTI — common cold',detail:'Viral infection (rhinovirus 50%, coronavirus, RSV) self-limiting 7–10 days. Symptoms: rhinorrhea, sneezing, congestion, pharyngitis, low-grade fever. Treatment: symptomatic only (paracetamol, decongestants, saline irrigation). Antibiotics NOT indicated. Streptococcal pharyngitis: penicillin V or amoxicillin 10d (prevent rheumatic fever). Diagnosis: rapid test or throat culture.'},
-             es:{label:'IVRS — resfriado común',detail:'Infección viral autolimitada 7–10 días. Tratamiento: sintomático. Antibióticos NO indicados. Faringitis estreptocócica: amoxicilina 10d (prevenir fiebre reumática).'}},
-    'J18':{ pt:{label:'Pneumonia',detail:'PAC: S. pneumoniae (principal), H. influenzae, Mycoplasma, Legionella, vírus (influenza, SARS-CoV-2). CURB-65 orienta internação (0–1: ambulatorial, 2: internação, ≥3: UTI). Radiografia: consolidação. Tratamento ambulatorial: amoxicilina 500mg 8/8h (± macrolídeo se atípica). Hospitalar: beta-lactâmico IV + macrolídeo IV ou quinolona respiratória (levofloxacino). UTI: beta-lactâmico antipseudomonas. Vacinas: pneumocócica + influenza.'},
-             en:{label:'Pneumonia',detail:'CAP: S. pneumoniae (main), H. influenzae, Mycoplasma, Legionella, viral (influenza, SARS-CoV-2). CURB-65 guides admission (0–1: outpatient, 2: admit, ≥3: ICU). X-ray: consolidation. Outpatient: amoxicillin 500mg TID (± macrolide if atypical). Inpatient: IV beta-lactam + IV macrolide or respiratory quinolone (levofloxacin). ICU: anti-pseudomonal beta-lactam. Vaccines: pneumococcal + influenza.'},
-             es:{label:'Neumonía',detail:'NAC: S. pneumoniae, Mycoplasma, Legionella, vírus. CURB-65 orienta ingreso. Ambulatorio: amoxicilina ± macrólido. Hospitalario: beta-lactámico IV + macrólido o quinolona respiratoria.'}},
-    'J44':{ pt:{label:'DPOC',detail:'Obstrução irreversível do fluxo aéreo. Causa: tabagismo (85%), poluição (15%). Espirometria pós-BD: VEF₁/CVF <0,70. Estádios GOLD I–IV por VEF₁. Sintomas: dispneia progressiva, tosse crônica, expectoração, exacerbações. Tratamento estável: cessação tabágica (mais eficaz), broncodilatadores (LAMA>LABA), CI+LABA em exacerbações frequentes, reabilitação pulmonar, oxigenoterapia domiciliar (PaO₂<55). Exacerbação: corticoide sistêmico + broncodilatador + ATB se infecção.'},
-             en:{label:'COPD',detail:'Irreversible airflow obstruction. Cause: smoking (85%), pollution (15%). Post-BD spirometry: FEV₁/FVC <0.70. GOLD grades I–IV by FEV₁. Symptoms: progressive dyspnea, chronic cough, sputum, exacerbations. Stable treatment: smoking cessation (most effective), bronchodilators (LAMA>LABA), ICS+LABA in frequent exacerbations, pulmonary rehabilitation, home O₂ (PaO₂<55). Exacerbation: systemic corticosteroid + bronchodilator + antibiotic if infection.'},
-             es:{label:'EPOC',detail:'Obstrucción irreversible. Causa: tabaquismo (85%). Espirometría: FEV₁/FVC <0,70. GOLD I–IV. Tratamiento: cese tabáquico, LAMA, LABA, rehabilitación pulmonar. Exacerbación: corticoide + broncodilatador + antibiótico.'}},
-    'J45':{ pt:{label:'Asma',detail:'Inflamação + obstrução reversível das vias aéreas + hiperresponsividade brônquica. Sintomas: sibilos, dispneia, opressão torácica, tosse (noturna/matinal). Gatilhos: alérgenos, exercício, infecções virais, AINE, β-bloqueadores. Graus: intermitente → persistente leve/moderado/grave. Tratamento de fundo: CI (beclometasona, budesonida, fluticasona). Controle: CI+LABA. Alívio: SABA (salbutamol). Grave/refratário: biológicos (dupilumabe anti-IL-4/13, mepolizumabe anti-IL-5, omalizumabe anti-IgE).'},
-             en:{label:'Asthma',detail:'Airway inflammation + reversible obstruction + bronchial hyperresponsiveness. Symptoms: wheeze, dyspnea, chest tightness, cough (nocturnal/morning). Triggers: allergens, exercise, viral infections, NSAIDs, β-blockers. Grades: intermittent → mild/moderate/severe persistent. Maintenance: ICS (beclomethasone, budesonide, fluticasone). Control: ICS+LABA. Rescue: SABA (salbutamol). Severe/refractory: biologics (dupilumab anti-IL-4/13, mepolizumab anti-IL-5, omalizumab anti-IgE).'},
-             es:{label:'Asma',detail:'Inflamación + obstrucción reversible + hiperresponsividad. Síntomas: sibilancias, disnea, tos nocturna. Tratamiento: CI (base), CI+LABA (control), SABA (alivio). Grave: biológicos (dupilumab, mepolizumab).'}},
-    'E11':{ pt:{label:'Diabetes tipo 2',detail:'Resistência insulínica + falência progressiva de células β. Diagnóstico: glicemia jejum ≥126 mg/dL em 2 dosagens, HbA1c ≥6,5%, TOTG 2h ≥200, glicemia ao acaso ≥200 + sintomas. Metas: HbA1c <7%, PA <130/80, LDL <70. Tratamento: metformina (1ª linha) + SGLT2i (proteção cardiorrenal, dapagliflozina/empagliflozina) + GLP-1RA (perda de peso, semaglutida) + insulina se refratário. Complicações microvasculares: retinopatia (causa de cegueira), nefropatia, neuropatia. Macrovasculares: IAM, AVC, DAP.'},
-             en:{label:'Type 2 diabetes',detail:'Insulin resistance + progressive β-cell failure. Diagnosis: fasting glucose ≥126 mg/dL ×2, HbA1c ≥6.5%, 2h OGTT ≥200, random glucose ≥200 + symptoms. Targets: HbA1c <7%, BP <130/80, LDL <70. Treatment: metformin (1st line) + SGLT2i (cardio-renal protection, dapagliflozin/empagliflozin) + GLP-1RA (weight loss, semaglutide) + insulin if refractory. Microvascular: retinopathy (cause of blindness), nephropathy, neuropathy. Macrovascular: MI, stroke, PAD.'},
+    'I10':{ pt:{label:'Hipertensão arterial essencial',detail:'PA ≥130/80 mmHg. 1,28 bilhões de adultos. Principal causa de AVC e IAM. Geralmente assintomática. Tratamento escalonado: estilo de vida → IECA/BRA + tiazídico + BCC → espironolactona + beta-bloqueador. Meta <130/80.'},
+             en:{label:'Essential hypertension',detail:'BP ≥130/80 mmHg. 1.28 billion adults. #1 cause of stroke and MI. Usually asymptomatic. Treatment ladder: lifestyle → ACE inhibitor/ARB + thiazide + CCB → spironolactone + beta-blocker. Target <130/80.'},
+             es:{label:'Hipertensión arterial esencial',detail:'PA ≥130/80 mmHg. 1.280 millones de adultos. Principal causa de ACV e IAM. Tratamiento: estilo de vida + IECA/ARA2 + tiazida + BCC. Meta <130/80.'}},
+    'E11':{ pt:{label:'Diabetes tipo 2',detail:'Resistência insulínica + falência progressiva de células β. Diagnóstico: glicemia jejum ≥126 mg/dL ×2, HbA1c ≥6,5%. Metas: HbA1c <7%, PA <130/80, LDL <70. Tratamento: metformina (1ª linha) + SGLT2i (dapagliflozina) + GLP-1RA (semaglutida). Complicações: retinopatia, nefropatia, neuropatia, IAM, AVC.'},
+             en:{label:'Type 2 diabetes',detail:'Insulin resistance + progressive β-cell failure. Diagnosis: fasting glucose ≥126 mg/dL ×2, HbA1c ≥6.5%. Targets: HbA1c <7%, BP <130/80, LDL <70. Treatment: metformin (1st line) + SGLT2i (dapagliflozin) + GLP-1RA (semaglutide). Complications: retinopathy, nephropathy, neuropathy, MI, stroke.'},
              es:{label:'Diabetes tipo 2',detail:'Resistencia insulínica + falla progresiva de células β. Diagnóstico: glucemia ≥126 ×2, HbA1c ≥6,5%. Tratamiento: metformina + SGLT2i (dapagliflozina) + GLP-1RA (semaglutida). Complicaciones: retinopatía, nefropatía, neuropatía, IAM, ACV.'}},
-    'E10':{ pt:{label:'Diabetes tipo 1',detail:'Destruição autoimune das células β pancreáticas → deficiência absoluta de insulina. Anticorpos: anti-GAD65, anti-IA-2, anti-ZnT8. Início: infância/adolescência. Cetoacidose diabética (CAD) é a apresentação clássica em não diagnosticados. Tratamento: insulinoterapia intensiva basal-bolus (insulina glargina/detemir + insulina rápida ou análogo ultrarrápido pré-refeição), MCG (monitorização contínua de glicose), sistema de infusão contínua (bomba). Meta HbA1c <7%.'},
-             en:{label:'Type 1 diabetes',detail:'Autoimmune destruction of pancreatic β-cells → absolute insulin deficiency. Antibodies: anti-GAD65, anti-IA-2, anti-ZnT8. Onset: childhood/adolescence. Diabetic ketoacidosis (DKA) is classic presentation in undiagnosed. Treatment: intensive basal-bolus insulin therapy (glargine/detemir + rapid or ultra-rapid pre-meal), CGM (continuous glucose monitoring), insulin pump. HbA1c target <7%.'},
-             es:{label:'Diabetes tipo 1',detail:'Destrucción autoinmune células β → insulinopenia absoluta. Anticuerpos: anti-GAD65, anti-IA-2. Presentación clásica: cetoacidosis diabética. Tratamiento: insulinoterapia intensiva basal-bolo, MCG, bomba de insulina.'}},
-    'E03':{ pt:{label:'Hipotireoidismo',detail:'Produção insuficiente de T3/T4. Causas: tireoidite de Hashimoto (autoimune, mais comum no mundo desenvolvido), deficiência de iodo (causa global mais comum), pós-tireoidectomia, radioiodo, medicamentos (amiodarona, lítio). Sintomas: fadiga, ganho de peso, intolerância ao frio, constipação, bradicardia, lentidão cognitiva, mixedema (casos graves), TSH elevado + T4L baixo. Tratamento: levotiroxina VO em jejum (30min antes da refeição).'},
-             en:{label:'Hypothyroidism',detail:'Insufficient T3/T4 production. Causes: Hashimoto thyroiditis (autoimmune, most common in developed world), iodine deficiency (global leading cause), post-thyroidectomy, radioiodine, drugs (amiodarone, lithium). Symptoms: fatigue, weight gain, cold intolerance, constipation, bradycardia, cognitive slowing, myxedema (severe), elevated TSH + low free T4. Treatment: levothyroxine PO on empty stomach (30min before meal).'},
-             es:{label:'Hipotiroidismo',detail:'Producción insuficiente de T3/T4. Causas: tiroiditis de Hashimoto, deficiencia de yodo, post-tiroidectomía. Síntomas: fatiga, aumento de peso, intolerancia al frío, bradicardia. TSH elevado + T4L bajo. Tratamiento: levotiroxina en ayunas.'}},
-    'E05':{ pt:{label:'Hipertireoidismo',detail:'Excesso de hormônios tireoidianos. Causas: Doença de Graves (AcTRAb, mais comum), bócio multinodular tóxico, adenoma tóxico, tireoidite subaguda. Sintomas: palpitações, tremor fino, perda de peso com apetite aumentado, intolerância ao calor, diarreia, insônia, exoftalmia e mixedema pré-tibial (Graves). TSH suprimido + T4L/T3L elevados. Tratamento: metimazol (1ª linha), propiltiouracila (gestação 1º trimestre), radioiodo, tireoidectomia.'},
-             en:{label:'Hyperthyroidism',detail:'Excess thyroid hormones. Causes: Graves disease (TRAb antibodies, most common), toxic multinodular goiter, toxic adenoma, subacute thyroiditis. Symptoms: palpitations, fine tremor, weight loss with increased appetite, heat intolerance, diarrhea, insomnia, exophthalmos and pretibial myxedema (Graves). Suppressed TSH + elevated free T4/T3. Treatment: methimazole (1st line), propylthiouracil (1st trimester pregnancy), radioiodine, thyroidectomy.'},
-             es:{label:'Hipertiroidismo',detail:'Exceso de hormonas tiroideas. Causas: Enfermedad de Graves (más común), bocio multinodular tóxico. Síntomas: palpitaciones, pérdida de peso, exoftalmos (Graves). TSH suprimido. Tratamiento: metimazol, yodo radioactivo, tiroidectomía.'}},
-    'K21':{ pt:{label:'DRGE',detail:'Refluxo gastroesofágico com sintomas ou complicações. Sintomas típicos: pirose (>2×/semana) e regurgitação ácida. Atípicos: tosse crônica, rouquidão, asma não controlada, erosão dental. Diagnóstico: clínico; pH-metria 24h (padrão ouro); EDA se alarme (disfagia, odinofagia, emagrecimento, vômitos, hematemese). Tratamento: elevação da cabeceira 15cm, perda de peso, evitar refeições 3h antes de dormir, IBP (omeprazol, pantoprazol, esomeprazol). Complicação: esôfago de Barrett (metaplasia→adenocarcinoma).'},
-             en:{label:'GERD',detail:'Gastroesophageal reflux with symptoms or complications. Typical: heartburn (>2×/week) and acid regurgitation. Atypical: chronic cough, hoarseness, poorly controlled asthma, dental erosion. Diagnosis: clinical; 24h pH-metry (gold standard); EGD if alarm features (dysphagia, odynophagia, weight loss, vomiting, hematemesis). Treatment: head elevation 15cm, weight loss, avoid meals 3h before bed, PPIs (omeprazole, pantoprazole, esomeprazole). Complication: Barrett esophagus (metaplasia→adenocarcinoma).'},
-             es:{label:'ERGE',detail:'Reflujo gastroesofágico. Síntomas: pirosis (>2×/semana), regurgitación ácida. Diagnóstico: clínico, pH-metría 24h, EDA si alarma. Tratamiento: elevar cabecera, IBP. Complicación: esófago de Barrett.'}},
-    'K25':{ pt:{label:'Úlcera péptica',detail:'Erosão de mucosa gástrica (K25) ou duodenal (K26). Causas: H. pylori (70–90%), AINEs/aspirina, estresse (UTI/queimados). Sintomas: dor epigástrica em queimação (gástrica piora com alimentos, duodenal alivia). Complicações: hemorragia (melena, hematemese), perfuração (dor súbita intensa, abdome em tábua), obstrução. Diagnóstico: EDA + biópsia para H. pylori + urease rápido. Tratamento: erradicação H. pylori (terapia tripla: IBP + amoxicilina + claritromicina × 14d), suspender AINEs, IBP 4–8 semanas.'},
-             en:{label:'Peptic ulcer',detail:'Gastric (K25) or duodenal (K26) mucosal erosion. Causes: H. pylori (70–90%), NSAIDs/aspirin, stress (ICU/burns). Symptoms: burning epigastric pain (gastric worsens with food, duodenal relieves). Complications: bleeding (melena, hematemesis), perforation (sudden severe pain, rigid abdomen), obstruction. Diagnosis: EGD + biopsy for H. pylori + rapid urease. Treatment: H. pylori eradication (triple therapy: PPI + amoxicillin + clarithromycin × 14d), stop NSAIDs, PPI 4–8 weeks.'},
-             es:{label:'Úlcera péptica',detail:'Erosión mucosa gástrica (K25) o duodenal (K26). Causas: H. pylori (70-90%), AINEs. Complicaciones: hemorragia, perforación. Diagnóstico: endoscopia + biopsia. Tratamiento: erradicación H. pylori (IBP + amoxicilina + claritromicina × 14d).'}},
-    'K35':{ pt:{label:'Apendicite aguda',detail:'Obstrução do lúmen apendicular → inflamação → perfuração. Epidemiologia: pico 10–30 anos. Sintomas: dor inicialmente periumbilical migrando para FID, náusea, vômito, febre baixa. Sinais: Blumberg (descompressão), McBurney, Rovsing, Psoas, Obturador. Escore de Alvarado ≥7: alta probabilidade. Diagnóstico: clínico + TC abdome (sensibilidade >95%) ou USG (preferir em crianças/gestantes). Tratamento: apendicectomia laparoscópica. ATB pré-op: cefazolina + metronidazol.'},
-             en:{label:'Acute appendicitis',detail:'Appendiceal lumen obstruction → inflammation → perforation. Peak: 10–30 years. Symptoms: periumbilical pain migrating to RLQ, nausea, vomiting, low-grade fever. Signs: Blumberg (rebound), McBurney, Rovsing, Psoas, Obturator. Alvarado score ≥7: high probability. Diagnosis: clinical + abdominal CT (sensitivity >95%) or US (prefer in children/pregnant). Treatment: laparoscopic appendectomy. Pre-op antibiotics: cefazolin + metronidazole.'},
-             es:{label:'Apendicitis aguda',detail:'Inflamación apendicular. Síntomas: dolor periumbilical migrando a FID, náusea, fiebre. Signos: Blumberg, McBurney. Diagnóstico: TC abdominal (sensibilidad >95%). Tratamiento: apendicectomía laparoscópica + antibióticos.'}},
-    'K40':{ pt:{label:'Hérnia inguinal',detail:'Direta (parede posterior enfraquecida, medial à artéria epigástrica inferior, adultos) vs Indireta (pelo anel inguinal profundo, lateral, congênita, mais comum em jovens e crianças). Mais comum em homens. Risco de encarceramento → isquemia → estrangulamento (emergência cirúrgica). Diagnóstico: clínico ± USG. Tratamento: cirurgia eletiva (hernioplastia de Lichtenstein com tela — menos recorrência; ou laparoscópica TAPP/TEP). Hérnia irredutível/estrangulada: cirurgia de urgência.'},
-             en:{label:'Inguinal hernia',detail:'Direct (weakened posterior wall, medial to inferior epigastric artery, adults) vs Indirect (through deep inguinal ring, lateral, congenital, more common in young/children). More common in men. Risk of incarceration → ischemia → strangulation (surgical emergency). Diagnosis: clinical ± US. Treatment: elective surgery (Lichtenstein mesh repair — lower recurrence; or laparoscopic TAPP/TEP). Irreducible/strangulated: emergency surgery.'},
-             es:{label:'Hernia inguinal',detail:'Directa (pared posterior, medial) vs Indirecta (anillo inguinal, lateral, congénita). Más común en hombres. Riesgo de estrangulación. Tratamiento: Lichtenstein (malla) o laparoscopia (TAPP/TEP). Hernia incarcerada/estrangulada: cirugía urgente.'}},
-    'N18':{ pt:{label:'Doença renal crônica',detail:'TFG <60 mL/min/1,73m² por >3 meses ou marcadores de lesão renal (proteinúria). Estadios G1–G5 (G5: TFG<15, indicação de terapia renal substitutiva). Causas: DM2 (40%), HAS (25%), glomerulopatias, rins policísticos. Sintomas tardios: uremia (náusea, prurido, encefalopatia), anemia (eritropoetina ↓), hiperfosfatemia, hipercalemia, osteodistrofia. Tratamento: IECA/BRA (proteção renal), SGLT2i (dapagliflozina), controle PA <130/80, HbA1c <7%, eritropoetina sintética, quelantes de fósforo, diálise (HD ou DP) ou transplante renal no G5.'},
-             en:{label:'Chronic kidney disease',detail:'GFR <60 mL/min/1.73m² for >3 months or kidney damage markers (proteinuria). Stages G1–G5 (G5: GFR<15, renal replacement therapy indication). Causes: T2DM (40%), hypertension (25%), glomerulopathies, polycystic kidney. Late symptoms: uremia (nausea, pruritus, encephalopathy), anemia (EPO↓), hyperphosphatemia, hyperkalemia, osteodystrophy. Treatment: ACE inhibitor/ARB (renal protection), SGLT2i (dapagliflozin), BP <130/80, HbA1c <7%, synthetic EPO, phosphate binders, dialysis (HD or PD) or kidney transplant at G5.'},
-             es:{label:'Enfermedad renal crónica',detail:'TFG <60 por >3 meses. Estadios G1–G5 (G5: diálisis/trasplante). Causas: DM2 (40%), HTA (25%). Tratamiento: IECA/ARA2, SGLT2i, control PA, eritropoyetina, hemodiálisis o trasplante renal en G5.'}},
-    'N39':{ pt:{label:'ITU e cistite',detail:'Cistite (baixa): disúria, urgência miccional, frequência, urina turva/fétida, sem febre. Pielonefrite (alta): sintomas sistêmicos, febre, calafrio, dor lombar, Giordano+. Agentes: E. coli 80%, Klebsiella, Staphylococcus saprophyticus (jovens). Diagnóstico: EAS (piúria, nitritos, bacteriúria) + urocultura (>10⁵ UFC/mL). Tratamento cistite não complicada: fosfomicina 3g dose única, nitrofurantoína 100mg 12/12h × 5d. Pielonefrite: ciprofloxacino 7–10d ou ceftriaxona IV. Profilaxia ITU recorrente: fosfomicina 3g quinzenal.'},
-             en:{label:'UTI and cystitis',detail:'Cystitis (lower): dysuria, urinary urgency, frequency, cloudy/malodorous urine, no fever. Pyelonephritis (upper): systemic symptoms, fever, chills, flank pain, CVA tenderness. Agents: E. coli 80%, Klebsiella, Staphylococcus saprophyticus (young women). Diagnosis: urinalysis (pyuria, nitrites, bacteriuria) + urine culture (>10⁵ CFU/mL). Treatment uncomplicated cystitis: fosfomycin 3g single dose, nitrofurantoin 100mg BID × 5d. Pyelonephritis: ciprofloxacin 7–10d or IV ceftriaxone. Recurrent UTI prophylaxis: fosfomycin 3g biweekly.'},
-             es:{label:'ITU y cistitis',detail:'Cistitis (baja): disuria, urgencia, frecuencia. Pielonefritis (alta): fiebre, dolor lumbar. E. coli 80%. Diagnóstico: EAS + urocultivo. Tratamiento cistitis: fosfomicina 3g dosis única. Pielonefritis: ciprofloxacino 7-10d.'}},
-    'C34':{ pt:{label:'Câncer de pulmão',detail:'85% CPNPC (adenocarcinoma — mais comum, periférico; escamoso — central, hemoptise; grande célula), 15% CPPC (neuroendócrino, paraneoplásico, muito agressivo, responde a quimio inicialmente). Principal causa: tabagismo (85%). Outros: asbesto, radônio, poluição. Triagem: TC baixa dose em fumantes 50–80a (>20 maços/ano). Tratamento: cirurgia (estágios I-II), quimioterapia à base de platina, radioterapia. Imunoterapia: pembrolizumabe/nivolumabe (PD-L1 expression). Terapias-alvo: osimertinibe (EGFR), alectinibe (ALK), entrectinibe (ROS1). Semaglutida não atua no câncer.'},
-             en:{label:'Lung cancer',detail:'85% NSCLC (adenocarcinoma — most common, peripheral; squamous — central, hemoptysis; large cell), 15% SCLC (neuroendocrine, paraneoplastic, aggressive, initially chemosensitive). Main cause: smoking (85%). Others: asbestos, radon, pollution. Screening: low-dose CT in smokers 50–80y (>20 pack-years). Treatment: surgery (stages I-II), platinum-based chemo, radiation. Immunotherapy: pembrolizumab/nivolumab (PD-L1). Targeted: osimertinib (EGFR), alectinib (ALK), entrectinib (ROS1).'},
-             es:{label:'Cáncer de pulmón',detail:'85% CPNCP (adenocarcinoma, escamoso, célula grande), 15% CPCP. Causa: tabaquismo (85%). Triaje: TC baja dosis en fumadores 50-80a. Tratamiento: cirugía, quimio, inmunoterapia (pembrolizumab), dirigida (osimertinib EGFR, alectinib ALK).'}},
-    'C18':{ pt:{label:'Câncer colorretal',detail:'3º tumor mais incidente e 2ª causa de morte por câncer no ocidente. Sequência adenoma→carcinoma (10–15 anos). Fatores de risco: dieta ocidental (carnes processadas, gordura saturada, álcool), obesidade, sedentarismo, tabagismo, síndromes hereditárias (FAP, Lynch), DII. Triagem: colonoscopia a partir de 45a (ou 40a com história familiar). Sintomas: mudança do hábito intestinal, hematoquezia, melena, dor abdominal, perda de peso, anemia ferropriva. Estadiamento: TNM, CEA. Tratamento: cirurgia ± FOLFOX/FOLFIRI ± cetuximabe/bevacizumabe.'},
-             en:{label:'Colorectal cancer',detail:'3rd most incident and 2nd cancer death cause in the West. Adenoma→carcinoma sequence (10–15 years). Risk: Western diet (processed meat, saturated fat, alcohol), obesity, sedentary, smoking, hereditary syndromes (FAP, Lynch), IBD. Screening: colonoscopy from age 45 (or 40 with family history). Symptoms: bowel habit change, hematochezia, melena, abdominal pain, weight loss, iron-deficiency anemia. Staging: TNM, CEA. Treatment: surgery ± FOLFOX/FOLFIRI ± cetuximab/bevacizumab.'},
-             es:{label:'Cáncer colorrectal',detail:'3er tumor más frecuente. Secuencia adenoma→carcinoma. Triaje: colonoscopia desde 45a. Síntomas: cambio del hábito intestinal, rectorragia, anemia. Tratamiento: cirugía ± FOLFOX ± cetuximab/bevacizumab.'}},
-    'C50':{ pt:{label:'Câncer de mama',detail:'Mais comum em mulheres (28% dos tumores femininos). Fatores: mutações BRCA1/2 (risco 70% ao longo da vida), história familiar, menarca precoce, menopausa tardia, nuliparidade, TRH prolongada. Tipos histológicos: carcinoma ductal invasivo (75%), lobular invasivo, inflamatório (pior prognóstico). Receptores: RE/RP+ (hormônio-responsivo), HER2+ (trastuzumabe), triplo-negativo (quimio). Triagem: mamografia anual (40-74a ACS) ou bianual (50-74a USPSTF). Tratamento: cirurgia (mastectomia ou conservadora+RT), quimioterapia, hormonioterapia (tamoxifeno pré-menopausa; inibidores de aromatase pós), CDK4/6i (palbociclibe), imunoterapia.'},
-             en:{label:'Breast cancer',detail:'Most common in women (28% of female tumors). Factors: BRCA1/2 mutations (70% lifetime risk), family history, early menarche, late menopause, nulliparity, prolonged HRT. Histological types: invasive ductal carcinoma (75%), lobular, inflammatory (worst prognosis). Receptors: ER/PR+ (hormone-responsive), HER2+ (trastuzumab), triple-negative (chemotherapy). Screening: annual mammogram (40-74y ACS) or biennial (50-74y USPSTF). Treatment: surgery (mastectomy or BCS+RT), chemotherapy, hormone therapy (tamoxifen pre-menopausal; aromatase inhibitors post), CDK4/6i (palbociclib), immunotherapy.'},
-             es:{label:'Cáncer de mama',detail:'Más común en mujeres. Factores: BRCA1/2, historia familiar, hormonas. Tipos: ductal invasivo (75%), lobular, inflamatorio. Receptores: RE/RP+ (hormonoterapia), HER2+ (trastuzumab), triple negativo. Triaje: mamografía anual/bianual. Tratamiento: cirugía, quimio, tamoxifeno/IAA, CDK4/6i.'}},
-    'C61':{ pt:{label:'Câncer de próstata',detail:'Mais comum em homens (29%). Adenocarcinoma periuretral em >95%. Fatores: idade >50a, raça negra (2× maior), história familiar (BRCA2). Rastreio: PSA + toque retal (controverso, decisão compartilhada 50–75a). Grau Gleason/ISUP: prognostico. Estágio localizado baixo risco: vigilância ativa. Risco intermediário/alto: prostatectomia radical ou radioterapia. Metastático: privação androgênica (análogos LHRH + antiandrógeno) + enzalutamida/abiraterona. Docetaxel em metastático de alto volume.'},
-             en:{label:'Prostate cancer',detail:'Most common in men (29%). Periurethral adenocarcinoma >95%. Factors: age >50y, Black race (2× higher risk), family history (BRCA2). Screening: PSA + rectal exam (controversial, shared decision 50-75y). Gleason/ISUP grade: prognosis. Localized low-risk: active surveillance. Intermediate/high risk: radical prostatectomy or radiation. Metastatic: androgen deprivation (LHRH agonists + antiandrogen) + enzalutamide/abiraterone. Docetaxel in high-volume metastatic.'},
-             es:{label:'Cáncer de próstata',detail:'Más frecuente en hombres. Factores: edad >50a, raza negra. Rastreo: PSA (controvertido). Localizado bajo riesgo: vigilancia activa. Metastásico: privación androgénica + enzalutamida/abiraterona.'}},
-    'M05':{ pt:{label:'Artrite reumatoide',detail:'Poliartrite simétrica autoimune: articulações MTC-F, IFP, punhos, joelhos, tornozelos com sinovite, destruição articular, rigidez matinal >1h. FR e anti-CCP (maior especificidade). Manifestações extra-articulares: nódulos, pleuropericardite, vasculite, síndrome de Sjögren secundária. Critérios ACR/EULAR 2010. Tratamento: metotrexato (âncora), leflunomida, hidroxicloroquina. Biológicos: anti-TNF (adalimumabe, etanercepte, infliximabe), anti-IL-6 (tocilizumabe), CTLA4-Ig (abatacepte), anti-CD20 (rituximabe). Pequenas moléculas: JAK-i (baricitinibe, upadacitinibe, tofacitinibe).'},
-             en:{label:'Rheumatoid arthritis',detail:'Symmetric autoimmune polyarthritis: MCP, PIP, wrist, knee, ankle joints with synovitis, joint destruction, morning stiffness >1h. RF and anti-CCP (higher specificity). Extra-articular: nodules, pleuropericarditis, vasculitis, secondary Sjögren syndrome. ACR/EULAR 2010 criteria. Treatment: methotrexate (anchor), leflunomide, hydroxychloroquine. Biologics: anti-TNF (adalimumab, etanercept, infliximab), anti-IL-6 (tocilizumab), CTLA4-Ig (abatacept), anti-CD20 (rituximab). Small molecules: JAK-i (baricitinib, upadacitinib, tofacitinib).'},
-             es:{label:'Artritis reumatoide',detail:'Poliartritis simétrica autoinmune. Rigidez matutina >1h. FR y anti-CCP positivos. Tratamiento: metotrexato + biológicos (anti-TNF, anti-IL-6, JAK-i).'}},
-    'M54':{ pt:{label:'Dor lombar',detail:'Causa #1 de incapacidade laboral no mundo. Inespecífica (90%): muscular/ligamentar, autolimitada. Específica (10%): hérnia de disco (L4-L5, L5-S1 — ciatalgia, lasègue+), estenose do canal lombar (claudicação neurogênica), espondilite anquilosante, fratura vertebral, infecção (Pott), metástase. Sinais de alarme (cauda equina): bexiga/intestino neurogênico → cirurgia de urgência. Tratamento inespecífica: manter atividade física, AINEs/paracetamol, relaxantes musculares, fisioterapia, exercício (reabilitação). Cirurgia: hérnia com déficit neurológico refratário.'},
-             en:{label:'Low back pain',detail:'#1 cause of occupational disability worldwide. Non-specific (90%): muscular/ligamentous, self-limiting. Specific (10%): disc herniation (L4-L5, L5-S1 — sciatica, positive straight leg raise), lumbar spinal stenosis (neurogenic claudication), ankylosing spondylitis, vertebral fracture, infection (Pott), metastasis. Red flags (cauda equina): bladder/bowel neurogenic → emergency surgery. Treatment non-specific: stay active, NSAIDs/paracetamol, muscle relaxants, physiotherapy, exercise. Surgery: herniation with refractory neurological deficit.'},
-             es:{label:'Dolor lumbar',detail:'Principal causa de discapacidad laboral. Inespecífica (90%): muscular/ligamentosa. Específica: hernia discal (L4-L5, L5-S1), estenosis, espondilitis. Señales de alarma: síndrome de cauda equina → cirugía urgente. Tratamiento: actividad, AINEs, fisioterapia.'}},
-    'B20':{ pt:{label:'HIV/SIDA',detail:'Retrovírus que destrói linfócitos TCD4+. Transmissão: sexual (50%), parenteral, vertical mãe-filho. CD4+ <200 células/mm³: SIDA (infecções oportunistas: pneumocistose, toxoplasmose cerebral, CMV, criptococose, tuberculose, Kaposi). Diagnóstico: ELISA + Western Blot, ou teste rápido. TARV: regime TDF+3TC+DTG (tenofovir+lamivudina+dolutegravir) — carga viral suprimida em >95%. PrEP: TDF/FTC diário (eficácia >99%). PEP: profilaxia pós-exposição em <72h (28d). Expectativa de vida quase normal com TARV.'},
-             en:{label:'HIV/AIDS',detail:'Retrovirus destroying TCD4+ lymphocytes. Transmission: sexual (50%), parenteral, mother-to-child. CD4+ <200 cells/mm³: AIDS (opportunistic infections: PCP, cerebral toxoplasmosis, CMV, cryptococcosis, tuberculosis, Kaposi). Diagnosis: ELISA + Western Blot, or rapid test. ART: TDF+3TC+DTG regimen (tenofovir+lamivudine+dolutegravir) — viral load suppressed in >95%. PrEP: daily TDF/FTC (>99% efficacy). PEP: post-exposure prophylaxis within 72h (28 days). Near-normal life expectancy with ART.'},
-             es:{label:'VIH/SIDA',detail:'Retrovirus que destruye TCD4+. CD4+ <200: SIDA (infecciones oportunistas). Diagnóstico: ELISA + Western Blot. TAR: TDF+3TC+DTG suprime carga viral en >95%. PrEP: TDF/FTC diario (>99%). Esperanza de vida casi normal con TAR.'}},
-    'B24':{ pt:{label:'Tuberculose',detail:'Mycobacterium tuberculosis. Pulmonar (80%): tosse >2–3 semanas, hemoptise, sudorese noturna, febre vespertina, perda de peso. Extrapulmonar: pleural, ganglionar (escrófula), meníngea (mais grave), miliar. Diagnóstico: baciloscopia (ZN), cultura (Löwenstein-Jensen), GeneXpert MTB/RIF, Rx tórax (cavitações, infiltrado apical). ILTB: PPD ≥5mm (imunossuprimido), ≥10mm (geral), IGRA. Tratamento ativo: RIPE × 2m + RI × 4m. Meníngea: +2m. MDR-TB: bedaquilina + levofloxacino + outros. Notificação compulsória.'},
-             en:{label:'Tuberculosis',detail:'Mycobacterium tuberculosis. Pulmonary (80%): cough >2–3 weeks, hemoptysis, night sweats, evening fever, weight loss. Extrapulmonary: pleural, lymph node (scrofula), meningeal (most severe), miliary. Diagnosis: sputum smear (ZN stain), culture (Löwenstein-Jensen), GeneXpert MTB/RIF, chest X-ray (cavitations, apical infiltrate). LTBI: TST ≥5mm (immunosuppressed), ≥10mm (general), IGRA. Active treatment: HRZE × 2m + HR × 4m. Meningeal: +2m. MDR-TB: bedaquiline + levofloxacin + others. Mandatory reporting.'},
-             es:{label:'Tuberculosis',detail:'M. tuberculosis. Pulmonar (80%): tos >2-3 semanas, hemoptisis, sudores nocturnos, pérdida de peso. Diagnóstico: baciloscopia, GeneXpert, Rx tórax. Tratamiento activo: RIPE × 2m + RI × 4m. TB-MDR: bedaquilina. Notificación obligatoria.'}},
-    'G40':{ pt:{label:'Epilepsia',detail:'≥2 crises epilépticas não provocadas com >24h de intervalo. Crises focais (um hemisfério, com/sem alteração de consciência, com/sem generalização secundária) vs generalizadas (todo cérebro — ausência, mioclônica, tônico-clônica). Diagnóstico: EEG + RM cerebral. Tratamento por síndrome: ausência (etossuximida, valproato), tônico-clônica generalizada (valproato, levetiracetam, lamotrigina), focal (carbamazepina, oxcarbazepina, lacosamida). Epilepsia refratária (>2 FAEs): avaliar cirurgia, estimulação do nervo vago, dieta cetogênica, neuromodulação. Mulheres: valproato evitar na gravidez (teratogênico).'},
-             en:{label:'Epilepsy',detail:'≥2 unprovoked seizures >24h apart. Focal (one hemisphere, with/without impaired awareness, with/without secondary generalization) vs generalized (whole brain — absence, myoclonic, tonic-clonic). Diagnosis: EEG + brain MRI. Treatment by syndrome: absence (ethosuximide, valproate), generalized tonic-clonic (valproate, levetiracetam, lamotrigine), focal (carbamazepine, oxcarbazepine, lacosamide). Refractory epilepsy (>2 ASMs): evaluate surgery, vagus nerve stimulation, ketogenic diet, neuromodulation. Women: avoid valproate in pregnancy (teratogenic).'},
-             es:{label:'Epilepsia',detail:'≥2 crisis no provocadas. Focales vs generalizadas. Diagnóstico: EEG + RM cerebral. Tratamiento: ausencias (etosuccimida, valproato), tónico-clónicas (valproato, levetiracetam), focales (carbamazepina, lacosamida). Refractaria: cirugía, estimulación nervio vago.'}},
-    'G20':{ pt:{label:'Doença de Parkinson',detail:'Neurodegeneração dopaminérgica da substância negra (pars compacta). Patologia: corpos de Lewy (α-sinucleína). Tétrade cardinal: tremor de repouso (pill-rolling, 4–6 Hz), rigidez (roda denteada/cano de chumbo), bradicinesia (fenômeno cardinal), instabilidade postural (tardio). Sintomas não motores: hiposmia, constipação, distúrbio comportamental do sono REM (precede o motor), depressão, demência (tardia). Diagnóstico: clínico (UK Brain Bank). Tratamento: levodopa+carbidopa (gold standard — discinesias tardias), agonistas dopaminérgicos (pramipexol, ropinirol — alucinações), MAO-B (rasagilina, selegilina), COMT (entacapona). Avançado: DBS (estimulação cerebral profunda) em núcleo subtalâmico.'},
-             en:{label:"Parkinson's disease",detail:'Dopaminergic neurodegeneration in substantia nigra (pars compacta). Pathology: Lewy bodies (α-synuclein). Cardinal tetrad: resting tremor (pill-rolling, 4–6 Hz), rigidity (cogwheel/lead pipe), bradykinesia (cardinal feature), postural instability (late). Non-motor: hyposmia, constipation, REM sleep behavior disorder (precedes motor), depression, dementia (late). Diagnosis: clinical (UK Brain Bank criteria). Treatment: levodopa+carbidopa (gold standard — late dyskinesias), dopamine agonists (pramipexole, ropinirole — hallucinations), MAO-B inhibitors (rasagiline, selegiline), COMT inhibitors (entacapone). Advanced: DBS (deep brain stimulation) of subthalamic nucleus.'},
-             es:{label:'Enfermedad de Parkinson',detail:'Neurodegeneración dopaminérgica. Cuerpos de Lewy (α-sinucleína). Tétrada: temblor en reposo (pill-rolling), rigidez (rueda dentada), bradicinesia, inestabilidad postural. Diagnóstico: clínico. Tratamiento: levodopa+carbidopa, agonistas dopaminérgicos, MAO-B. Avanzado: DBS (núcleo subtalámico).'}},
-    'G30':{ pt:{label:'Doença de Alzheimer',detail:'Causa de 60–70% das demências. Patologia: placas de β-amiloide (Aβ42) + emaranhados neurofibrilares de proteína tau hiperfosforilada → perda sináptica e neuronal. Genética: APOE ε4 (fator de risco), mutações APP, PS1, PS2 (formas familiares raras <1%). Clínica: início insidioso, perda de memória episódica recente, desorientação temporo-espacial, afasia, apraxia, agnosia, alterações de comportamento. Diagnóstico: clínico + neuroimagem (RM: atrofia hipocampal) + biomarcadores (PET amiloide/tau, proteínas LCR/plasma). Tratamento sintomático: donepezila, rivastigmina, galantamina (IAChE); memantina (NMDA). Novos modificadores de doença: lecanemabe, donanemabe (anticorpos anti-amiloide, aprovados FDA 2023–2024).'},
-             en:{label:"Alzheimer's disease",detail:'Cause of 60–70% of dementias. Pathology: β-amyloid plaques (Aβ42) + neurofibrillary tangles of hyperphosphorylated tau protein → synaptic and neuronal loss. Genetics: APOE ε4 (risk factor), APP, PS1, PS2 mutations (rare familial forms <1%). Clinical: insidious onset, recent episodic memory loss, temporo-spatial disorientation, aphasia, apraxia, agnosia, behavioral changes. Diagnosis: clinical + neuroimaging (MRI: hippocampal atrophy) + biomarkers (amyloid/tau PET, CSF/plasma proteins). Symptomatic treatment: donepezil, rivastigmine, galantamine (AChEI); memantine (NMDA). New disease-modifiers: lecanemab, donanemab (anti-amyloid antibodies, FDA-approved 2023–2024).'},
-             es:{label:'Enfermedad de Alzheimer',detail:'60-70% de las demencias. Placas de β-amiloide + ovillos de tau. APOE ε4: factor de riesgo. Clínica: pérdida de memoria reciente, desorientación, afasia, apraxia. Diagnóstico: clínico + RM (atrofia hipocampal) + biomarcadores. Tratamiento: donepezilo, rivastigmina, memantina. Lecanemab/donanemab (modificadores de la enfermedad, aprobados FDA).'}},
-    'G43':{ pt:{label:'Enxaqueca/Migrânea',detail:'Cefaleia primária: unilateral (60%), pulsátil, intensidade moderada-grave, náusea/vômito, fono/fotofobia, piora com atividade física, duração 4–72h. Aura (30%): sintomas neurológicos focais reversíveis (visual, sensitivo, motor, afasia) que precedem ou acompanham. Gatilhos: estresse, sono irregular, menstruação, álcool (vinho tinto), queijo, jejum, luzes. Tratamento agudo: triptanos (sumatriptano, rizatriptano) — 1ª linha; AINEs; anti-eméticos. Profilaxia (>4 crises/mês): propranolol, topiramato, amitriptilina, valproato, CGRP antagonistas (rimegepante) e anti-CGRP (erenumabe, fremanezumabe).'},
-             en:{label:'Migraine',detail:'Primary headache: unilateral (60%), pulsating, moderate-severe intensity, nausea/vomiting, phono/photophobia, worsens with activity, duration 4–72h. Aura (30%): reversible focal neurological symptoms (visual, sensory, motor, aphasia) preceding or accompanying. Triggers: stress, irregular sleep, menstruation, alcohol (red wine), cheese, fasting, lights. Acute treatment: triptans (sumatriptan, rizatriptan) — 1st line; NSAIDs; anti-emetics. Prophylaxis (>4 attacks/month): propranolol, topiramate, amitriptyline, valproate, CGRP antagonists (rimegepant) and anti-CGRP antibodies (erenumab, fremanezumab).'},
-             es:{label:'Migraña',detail:'Cefalea primaria: unilateral, pulsátil, náuseas, foto/fonofobia, 4-72h. Aura (30%): síntomas neurológicos focales reversibles. Tratamiento agudo: triptanos (sumatriptán), AINEs. Profilaxis (>4 crisis/mes): propranolol, topiramato, anticuerpos anti-CGRP (erenumab).'}},
-    'L40':{ pt:{label:'Psoríase',detail:'Dermatose inflamatória crônica imunomediada (Th17, IL-17, IL-23). Placas eritematosas com escamas prateadas, bem delimitadas, preferencialmente cotovelos, joelhos, couro cabeludo, região sacra. Formas: vulgar (placa, 85%), gutata, pustulosa, eritrodérmica. Artrite psoriásica (30%): assimétrica, dactilite, entesite. Tratamento tópico: corticoides, calcipotriol. Sistêmico: metotrexato, ciclosporina, acitretina. Biológicos: anti-TNF (adalimumabe), anti-IL-17 (secuquinumabe, ixequizumabe), anti-IL-23 (guselcumabe, risanquizumabe), JAKi (deucravacitinibe).'},
-             en:{label:'Psoriasis',detail:'Chronic immune-mediated inflammatory dermatosis (Th17, IL-17, IL-23). Erythematous plaques with silvery scales, well-demarcated, preferentially on elbows, knees, scalp, sacral region. Types: plaque (85%), guttate, pustular, erythrodermic. Psoriatic arthritis (30%): asymmetric, dactylitis, enthesitis. Topical treatment: corticosteroids, calcipotriol. Systemic: methotrexate, cyclosporine, acitretin. Biologics: anti-TNF (adalimumab), anti-IL-17 (secukinumab, ixekizumab), anti-IL-23 (guselkumab, risankizumab), JAKi (deucravacitinib).'},
-             es:{label:'Psoriasis',detail:'Dermatosis inflamatoria crónica (Th17, IL-17, IL-23). Placas eritematosas con escamas plateadas. Artritis psoriásica (30%). Tratamiento: tópico (corticoides), sistémico (metotrexato), biológicos (anti-TNF, anti-IL-17, anti-IL-23).'}},
-    'Z23':{ pt:{label:'Vacinação',detail:'Imunização ativa: antígeno estimula produção de anticorpos e memória imunológica. Tipos de vacinas: vivas atenuadas (MMR, varicela, febre amarela, rotavírus, pólio oral — contraindicadas em imunossuprimidos), inativadas (influenza, hepatite A, raiva, IPV), subunidades/recombinantes (hepatite B, HPV Gardasil/Cervarix, pertussis acelular), polissacarídicas conjugadas (PCV15 pneumocócica, MenACWY meningocócica), toxoide (difteria-tétano-pertussis), mRNA (COVID-19 Pfizer-BioNTech/Moderna — tecnologia revolucionária). Calendário vacinal: PNI (Brasil) ou ACIP (EUA). Efeito coletivo: imunidade de rebanho. Vacinas NÃO causam autismo (estudo Wakefield 1998 foi fraudulento e retratado).'},
-             en:{label:'Vaccination',detail:'Active immunization: antigen stimulates antibody production and immunological memory. Types: live-attenuated (MMR, varicella, yellow fever, rotavirus, oral polio — contraindicated in immunosuppressed), inactivated (influenza, hepatitis A, rabies, IPV), subunit/recombinant (hepatitis B, HPV Gardasil/Cervarix, acellular pertussis), conjugate polysaccharide (PCV15 pneumococcal, MenACWY meningococcal), toxoid (diphtheria-tetanus-pertussis), mRNA (COVID-19 Pfizer-BioNTech/Moderna). Schedules: ACIP (US) or country NIP. Herd immunity threshold varies (measles 95%). Vaccines do NOT cause autism (Wakefield 1998 study was fraudulent and retracted).'},
-             es:{label:'Vacunación',detail:'Inmunización activa. Tipos: viva atenuada (MMR, varicela), inactivada (influenza), subunidades (HBV, HPV), conjugada (PCV15, MenACWY), toxoide (dT), ARNm (COVID-19). Las vacunas NO causan autismo (estudio Wakefield fraudulento). Inmunidad de rebaño.'}}
+    'J44':{ pt:{label:'DPOC',detail:'Obstrução irreversível do fluxo aéreo. Causa: tabagismo (85%). VEF₁/CVF <0,70. Tratamento estável: cessação tabágica, broncodilatadores (LAMA>LABA), reabilitação pulmonar, O₂ domiciliar. Exacerbação: corticoide + broncodilatador + ATB se infecção.'},
+             en:{label:'COPD',detail:'Irreversible airflow obstruction. Cause: smoking (85%). FEV₁/FVC <0.70. Stable treatment: smoking cessation, bronchodilators (LAMA>LABA), pulmonary rehabilitation, home O₂. Exacerbation: systemic corticosteroid + bronchodilator + antibiotic if infection.'},
+             es:{label:'EPOC',detail:'Obstrucción irreversible. Causa: tabaquismo (85%). FEV₁/FVC <0,70. Tratamiento: cese tabáquico, LAMA, LABA, rehabilitación pulmonar. Exacerbación: corticoide + broncodilatador + antibiótico.'}},
+    'I50':{ pt:{label:'Insuficiência cardíaca',detail:'IC sistólica: FEVE<40%. IC diastólica: FEVE≥50%. Sintomas: dispneia, ortopneia, edema MMII, BNP elevado. NYHA I–IV. Tratamento FEVEr (4 pilares): IECA/sacubitril-valsartana + betabloqueador + espironolactona + SGLT2i (dapagliflozina).'},
+             en:{label:'Heart failure',detail:'Systolic HF: EF<40%. Diastolic HF: EF≥50%. Symptoms: exertional→resting dyspnea, orthopnea, lower limb edema, elevated BNP/NT-proBNP. NYHA I–IV. HFrEF treatment (4 pillars): ACE inhibitor/sacubitril-valsartan + beta-blocker + spironolactone + SGLT2i (dapagliflozin).'},
+             es:{label:'Insuficiencia cardíaca',detail:'IC sistólica: FEVI<40%. Síntomas: disnea, ortopnea, edema. NYHA I–IV. Tratamiento FEVIr: IECA/sacubitril-valsartán + betabloqueador + espironolactona + SGLT2i.'}},
+    'B20':{ pt:{label:'HIV/SIDA',detail:'Retrovírus que destrói linfócitos TCD4+. CD4+ <200: SIDA. TARV: TDF+3TC+DTG — carga viral suprimida em >95%. PrEP: TDF/FTC diário (>99%). PEP: profilaxia pós-exposição em <72h.'},
+             en:{label:'HIV/AIDS',detail:'Retrovirus destroying TCD4+ lymphocytes. CD4+ <200: AIDS. ART: TDF+3TC+DTG regimen — viral load suppressed in >95%. PrEP: daily TDF/FTC (>99% efficacy). PEP: post-exposure prophylaxis within 72h.'},
+             es:{label:'VIH/SIDA',detail:'Retrovirus que destruye TCD4+. CD4+ <200: SIDA. TAR: TDF+3TC+DTG suprime carga viral en >95%. PrEP: TDF/FTC diario (>99%). Esperanza de vida casi normal con TAR.'}}
   };
 
-  W.lookupICDCode = function(code, lang) {
+  /* Enhanced lookupICDCode — tries detail map first, then JSON */
+  var _origLookup = W.lookupICDCode;
+  W.lookupICDCode = function(rawCode, lang) {
     var lc = lang || 'pt';
-    var entry = ICD[code.toUpperCase()];
-    if (!entry) return null;
-    var data = entry[lc] || entry['pt'];
-    if (!data) return null;
-    return { label: data.label, detail: data.detail };
+    var code = normalizeCode(rawCode);
+    /* 1. Check curated detail map (3-char base code) */
+    var base = code.slice(0, 3);
+    if (ICD_DETAIL[base]) {
+      var d = ICD_DETAIL[base][lc] || ICD_DETAIL[base]['pt'];
+      if (d) return { label: d.label, detail: d.detail };
+    }
+    /* 2. Fall back to JSON map */
+    return _origLookup ? _origLookup(rawCode, lang) : null;
   };
 
+  /* ── chat.js integration: async ICD handler ── */
+  /* Override the synchronous path to support async loading */
+  W.__icdLookupAsync = function(rawCode, lang, deliverFn) {
+    if (_loadState === 'ready') {
+      return W.lookupICDCode(rawCode, lang);
+    }
+    /* Data not ready — deliver loading message, then real answer */
+    var lc = lang || 'pt';
+    var loading = lc === 'pt' ? '⏳ Carregando base CID-10 (72.748 códigos)…' :
+                  lc === 'es' ? '⏳ Cargando base CIE-10 (72.748 códigos)…' :
+                                '⏳ Loading ICD-10 database (72,748 codes)…';
+    loadICD(function(ok) {
+      if (!ok) {
+        var err = lc === 'pt' ? '❌ Falha ao carregar dados CID-10. Verifique: https://icd.who.int' :
+                  lc === 'es' ? '❌ Error al cargar datos CIE-10. Consulte: https://icd.who.int' :
+                                '❌ Failed to load ICD-10 data. See: https://icd.who.int';
+        if (deliverFn) deliverFn(err);
+        return;
+      }
+      var r = W.lookupICDCode(rawCode, lang);
+      if (!r) {
+        var nf = lc === 'pt' ? 'Código não encontrado na base CID-10 2022.' :
+                 lc === 'es' ? 'Código no encontrado en la base CIE-10 2022.' :
+                               'Code not found in ICD-10 2022 database.';
+        if (deliverFn) deliverFn(nf);
+        return;
+      }
+      var txt = (lc === 'pt' ? 'CID-10: ' : lc === 'es' ? 'CIE-10: ' : 'ICD-10: ') +
+                normalizeCode(rawCode) + ' — ' + r.label;
+      if (r.detail) txt += '\n\n' + r.detail;
+      txt += '\n\n⚠ ' + (lc === 'pt' ? 'Informação educacional. Consulte um profissional de saúde.' :
+                         lc === 'es' ? 'Solo educativo. Consulte a un profesional de salud.' :
+                                       'Educational only. Consult a healthcare professional.');
+      if (deliverFn) deliverFn(txt);
+    });
+    return loading; /* returned synchronously while loading */
+  };
+
+  /* ── Knowledge base plugin ── */
   if (!W.EduardoKB) W.EduardoKB = [];
   W.EduardoKB.push({
     id: 'medicine',
     priority: 8,
     lang: {
       pt: {
-        'cid10': 'CID-10 (Classificação Internacional de Doenças, 10ª revisão, OMS 1994). Estrutura: letra (capítulo) + 2 dígitos + subdivisão decimal. Exemplos por capítulo: A-B infecciosas, C-D neoplasias, E endócrinas, F mentais, G neurológicas, H olho/ouvido, I cardiovasculares, J respiratórias, K digestivas, L pele, M osteomusculares, N geniturinárias, O gravidez, P perinatal, Q congênitas, R sintomas/sinais, S-T traumas, Z fatores influenciando saúde. Digite qualquer código (ex: F20, I21, E11, J45) para informações detalhadas.',
-        'anatomia': 'Corpo humano: ~37 trilhões de células. Sistemas: cardiovascular, respiratório, digestivo, nervoso, endócrino, imune, musculoesquelético, urinário, reprodutor, tegumentar, linfático. Planos anatômicos: sagital (D/E), coronal/frontal (ant/post), transversal (sup/inf). Posição anatômica: em pé, face e palmas para frente, pés juntos. Termos: anterior/posterior, medial/lateral, proximal/distal, superior/inferior.',
-        'sinais_vitais': 'PA normal: <120/80 mmHg. FC: 60-100 bpm (bradicardia <60, taquicardia >100). FR: 12-20 irpm (taquipneia >20, bradipneia <12). SpO₂: ≥95% (hipoxemia <90%). Temperatura: 36-37,5°C (febre >37,8°C oral, >38°C retal; hipotermia <35°C). Glasgow: 15 = normal, 13-14 = leve, 9-12 = moderado, ≤8 = grave. Dor: escala visual analógica 0–10. Diurese: >0,5 mL/kg/h normal.',
-        'hemograma': 'Eritrócitos: 4,5-5,5×10⁶/mm³ (H), 4-5×10⁶ (M). Hb: 13-17 g/dL (H), 12-16 (M). Ht: 40-52% (H), 37-47% (M). VCM: 80-100 fL. CHCM: 32-36 g/dL. RDW: 11,5-14,5%. Leucócitos: 4.000-11.000/mm³ — neutrófilos 50-70%, linfócitos 20-40%, monócitos 2-8%, eosinófilos 1-4%, basófilos <1%. Plaquetas: 150.000-400.000/mm³.',
-        'bioquimica': 'Glicemia jejum: 70-99 (normal), 100-125 (pré-DM), ≥126 (DM). HbA1c: <5,7% normal, 5,7-6,4% pré-DM, ≥6,5% DM. Ureia: 15-40 mg/dL. Creatinina: 0,7-1,2 (H), 0,5-1,0 (M) mg/dL. TFG (CKD-EPI). TGO/AST: <40 U/L. TGP/ALT: <41 U/L. GGT: <60 (H), <40 (M) U/L. Bilirrubina total: <1,2 mg/dL. Amilase: 25-125 U/L. TSH: 0,4-4,0 mUI/L. T4L: 0,8-1,8 ng/dL.',
-        'lipidograma': 'Colesterol total: <200 desejável, 200-239 limítrofe, ≥240 alto. LDL: <100 ótimo (risco alto <70, muito alto <50). HDL: >40 (H), >50 (M) — protetor. TG: <150 normal, 150-199 limítrofe, 200-499 alto, ≥500 muito alto. Não-HDL: LDL+VLDL+IDL — meta = LDL-meta + 30. Estatinas: atorvastatina, rosuvastatina (alta intensidade: ≥50% de redução LDL). PCSK9i: redução adicional ≥50%. Ezetimiba: +15-20%.',
-        'farmacologia_geral': 'Farmacocinética (ADME): Absorção (biodisponibilidade), Distribuição (volume de distribuição, ligação proteica), Metabolismo (fígado — CYP450, fase I oxidação/redução, fase II conjugação), Excreção (renal — filtração + secreção tubular). Farmacodinâmica: receptores (agonista/antagonista/parcial/inverso), EC50, Emáx, curva dose-resposta, índice terapêutico estreito (digoxina, varfarina, lítio, fenitoína). Interações: farmacocinéticas (indutores/inibidores CYP) e farmacodinâmicas.',
-        'antibioticos': 'Mecanismos de ação: 1) Parede celular — β-lactâmicos (penicilinas, cefalosporinas, carbapenemas, aztreonam), glicopeptídeos (vancomicina, teicoplanina); 2) Membrana celular — polimixinas (E, B), lipopeptídeos (daptomicina); 3) Síntese proteica — 50S: macrolídeos (azitromicina, claritromicina), lincosamidas (clindamicina), oxazolidinonas (linezolida), 30S: aminoglicosídeos (gentamicina, amicacina), tetraciclinas (doxiciclina), gliclciclinas (tigeciclina); 4) DNA — quinolonas (ciprofloxacino, levofloxacino), nitroimidazóis (metronidazol); 5) Folato — TMP-SMX. Resistência: β-lactamases (ESBL, KPC, metalo-β-lactamases), bombas de efluxo, modificação alvo.',
-        'sistema_imune': 'Imunidade inata: 1ª linha — barreiras físicas (pele, mucosas), células (neutrófilos, macrófagos, NK, células dendríticas), moléculas (complemento, interferon, citocinas pró-inflamatórias IL-1, IL-6, TNF-α). Imunidade adaptativa: linfócitos B (produção de anticorpos IgM→IgG→IgA→IgE por switch de classe) + linfócitos T CD4+ (helper — Th1/Th2/Th17/Treg, ajuda B e CD8+) + CD8+ (citotóxicos, perforina+granzima, apoptose). Memória imunológica: base das vacinas. Imunossupressão: HIV, quimioterapia, corticoides crônicos, transplante.',
-        'ecg': 'ECG 12 derivações padrão. Ritmo sinusal: FC 60-100/min, onda P positiva em D1/D2 precedendo cada QRS. Intervalos: PR 120-200ms (BAV se prolongado), QRS ≤120ms (BRD/BRE se alargado), QTc ≤440ms(H)/460ms(M) — prolongado: risco de TdP. Morfologia: onda P (despolarização atrial), QRS (ventricular), onda T (repolarização ventricular), onda U (hipocalemia). Achados importantes: supra ST (IAM/pericardite), infra ST (isquemia subendocárdica), inversão T, ondas Q patológicas, bloqueios de ramo, arritmias.',
-        'emergencias': 'PCR: ausência de pulso/respiração → RCP 30:2 (100-120/min, 5-6cm profundidade) + DEA. Anafilaxia: adrenalina IM 0,5mg imediato. Sepse: hemoculturas + ATB + fluidos 30mL/kg + vasopressores. AVC: alteplase IV até 4,5h + trombectomia até 24h. CAD: insulina IV + hidratação + KCl. IAMCSST: cateterismo primário <90min. Status epilepticus: diazepam → fenitoína → fenobarbital → anestesia geral. Crise hipertensiva: nitroprussiato, labetalol IV. TEP maciço: trombólise sistêmica.',
-        'dor': 'Classificação: aguda (<3m, função protetora) vs crônica (≥3m, sem função adaptativa). Mecanismo: nociceptiva (tecidual — somática/visceral), neuropática (lesão neural — queimação, choque, alodínea), nociplástica (sensibilização central — fibromialgia). Escala: 0-10 (EVA). Tratamento escalonado (OMS): AINEs/paracetamol → opioides fracos (codeína, tramadol) → opioides fortes (morfina, oxicodona, fentanil). Adjuvantes: antidepressivos (amitriptilina, duloxetina), anticonvulsivantes (gabapentina, pregabalina), ketamina.',
-        'nutricao': 'Macronutrientes: carboidratos (4 kcal/g, 45-65% VET), proteínas (4 kcal/g, 10-35% VET, RDA 0,8 g/kg/d; 1,2-2g atletas), gorduras (9 kcal/g, 20-35% VET — saturadas <10%, trans <1%). Micronutrientes críticos: ferro (heme x não heme — vitamina C aumenta absorção), vitamina D (síntese cutânea UVB + dieta), vitamina B12 (animal — veganos em risco), folato (gestação 400-800 μg/d, deficiência: defeitos do tubo neural), cálcio (1000-1200 mg/d), iodo (tireoide), zinco (imunidade). Dieta mediterrânea: nível de evidência A para redução de DCV.',
-        'saude_mental': 'Saúde mental integral: ausência de transtorno + bem-estar psicológico, emocional e social. Prevalência global: 1 em 4 pessoas terá transtorno mental ao longo da vida. Mais comuns: depressão (#1 causa de incapacidade, 280M), ansiedade (284M), tabagismo/álcool. Estigma: principal barreira ao tratamento — apenas 1/3 dos afetados recebe cuidado. Recursos: terapia (TCC, psicanálise, ACT, DBT), medicação, estilo de vida (exercício: eficácia comparável a antidepressivos em depressão leve-moderada).',
-        'obesidade': 'IMC ≥25 sobrepeso, ≥30 obeso, ≥35 obeso grave, ≥40 obeso mórbido. Circunferência abdominal: >88cm (M) e >102cm (H): risco cardiovascular elevado. Epidemia: 1 bilhão de adultos obesos (2022 Lancet). Complicações metabólicas: DM2, HAS, dislipidemia, NASH/NAFLD, apneia obstrutiva, doença articular degenerativa, câncer (mama, endométrio, cólon, rim). Farmacoterapia: semaglutida (GLP-1RA, Wegovy) -15%, tirzepatida (GLP-1+GIP, Mounjaro) -22,5%. Cirurgia: bypass em Y de Roux (mais eficaz, -30%), sleeve gastrectomia (-25%).',
-        'tabagismo': 'Tabaco: 8 milhões de mortes/ano (OMS 2023). Nicotina: agonista nAChR → dopamina (recompensa) + noradrenalina (alerta) → dependência. Compostos tóxicos: CO, alcatrão, hidrocarbonetos aromáticos. Câncer: pulmão, boca, faringe, laringe, esôfago, estômago, pâncreas, rim, bexiga, colo uterino, leucemia. DCV: aterosclerose acelerada, vasoespasmo. DPOC: quase exclusivo. Cessação: taxa espontânea 5%/ano. Combinações eficazes: vareniclina (agonista parcial nAChR, mais eficaz) > bupropiona (dopamina+noradrenalina) > TRN (adesivo, pastilha, goma, inalador). Consulta + farmacoterapia: 25-35% de abstinência em 1 ano.',
-        'sono': 'Sono saudável: adultos 7-9h/noite. Fases: NREM 1 (sonolência), NREM 2 (80%), NREM 3 (sono profundo/restaurador), REM (sonhos, memória, 20-25%). Ciclo: 90min, ~5 ciclos/noite. Insônia: dificuldade de início/manutenção ≥3×/semana por ≥3m + prejuízo diurno. TCC-I (ouro): restrição de sono, controle de estímulos, higiene do sono. Farmacológico: benzodiazepínicos (curto prazo), não-BZD (zolpidem), antagonistas orexina (suvorexant, lemborexant). Apneia obstrutiva: ronco, hipersonolência, eventos apneicos → CPAP.',
+        'cid10': 'CID-10 (Classificação Internacional de Doenças, 10ª revisão, OMS). Base completa com 72.748 códigos. Estrutura: letra (capítulo) + 2 dígitos + subdivisão. Exemplos: A-B infecciosas, C-D neoplasias, E endócrinas, F mentais, G neurológicas, I cardiovasculares, J respiratórias, K digestivas, L pele, M osteomusculares, N geniturinárias, O gravidez, S-T traumas. Digite qualquer código (ex: F20, I21, E11, J45, F20.0, F200) para consulta.',
+        'sinais_vitais': 'PA normal: <120/80 mmHg. FC: 60-100 bpm. FR: 12-20 irpm. SpO₂: ≥95%. Temperatura: 36-37,5°C (febre >37,8°C). Glasgow: 15=normal, ≤8=grave. Dor: EVA 0–10. Diurese: >0,5 mL/kg/h.',
+        'hemograma': 'Hb: 13-17 g/dL (H), 12-16 (M). Leucócitos: 4.000-11.000/mm³. Plaquetas: 150.000-400.000/mm³. VCM: 80-100 fL.',
+        'bioquimica': 'Glicemia jejum: 70-99 normal, 100-125 pré-DM, ≥126 DM. HbA1c: <5,7% normal, ≥6,5% DM. Creatinina: 0,7-1,2 (H) mg/dL. TGP/ALT: <41 U/L. TSH: 0,4-4,0 mUI/L.',
+        'lipidograma': 'Colesterol total: <200 desejável. LDL: <100 ótimo (risco alto <70). HDL: >40 (H), >50 (M). TG: <150 normal. Estatinas alta intensidade: ≥50% redução LDL.',
+        'antibioticos': 'Mecanismos: parede celular (β-lactâmicos, vancomicina), membrana (polimixinas), proteína 50S (macrolídeos, clindamicina), 30S (aminoglicosídeos, tetraciclinas), DNA (quinolonas, metronidazol), folato (TMP-SMX). Resistência: β-lactamases (ESBL, KPC).',
+        'emergencias': 'PCR: RCP 30:2 + DEA. Anafilaxia: adrenalina IM 0,5mg. Sepse: hemoculturas + ATB + fluidos 30mL/kg. AVC: alteplase IV até 4,5h + trombectomia até 24h. CAD: insulina IV + hidratação. IAMCSST: cateterismo primário <90min.',
+        'vacinas': 'Tipos: vivas atenuadas (MMR, varicela, FA — contraindicadas em imunossuprimidos), inativadas (influenza, hepatite A), subunidades (HBV, HPV), conjugadas (PCV15, MenACWY), toxoide (dT), mRNA (COVID-19). Vacinas NÃO causam autismo (estudo Wakefield 1998 foi fraudulento e retratado).',
+        'obesidade': 'IMC ≥25 sobrepeso, ≥30 obeso, ≥40 obeso mórbido. Farmacoterapia: semaglutida (GLP-1RA) -15%, tirzepatida (GLP-1+GIP) -22,5%. Cirurgia: bypass em Y de Roux -30%, sleeve -25%.',
       },
       en: {
-        'icd10': 'ICD-10 (International Classification of Diseases, 10th revision, WHO 1994). Structure: letter (chapter) + 2 digits + decimal subdivision. Main chapters: A-B infectious, C-D neoplasms, E endocrine, F mental, G neurological, H eye/ear, I cardiovascular, J respiratory, K digestive, L skin, M musculoskeletal, N genitourinary, O pregnancy, P perinatal, Q congenital, R symptoms/signs, S-T injuries, Z health-influencing factors. Type any code (e.g. F20, I21, E11, J45) for detailed information.',
-        'vital_signs': 'Normal BP: <120/80 mmHg. HR: 60-100 bpm (bradycardia <60, tachycardia >100). RR: 12-20 breaths/min. SpO₂: ≥95% (hypoxemia <90%). Temperature: 36-37.5°C (fever >37.8°C oral, >38°C rectal; hypothermia <35°C). Glasgow Coma Scale: 15 = normal, 13-14 = mild, 9-12 = moderate, ≤8 = severe. Pain: VAS 0–10. Urine output: >0.5 mL/kg/h normal.',
-        'blood_tests': 'CBC — RBC: 4.5-5.5×10⁶/mm³ (M), 4-5×10⁶ (F). Hgb: 13-17 g/dL (M), 12-16 (F). Hct: 40-52% (M), 37-47% (F). MCV: 80-100 fL. WBC: 4,000-11,000/mm³. Platelets: 150,000-400,000/mm³. Chemistry: fasting glucose 70-99 mg/dL, creatinine 0.7-1.2 (M) / 0.5-1.0 (F) mg/dL, ALT <41 U/L, TSH 0.4-4.0 mIU/L. Lipids: total cholesterol <200, LDL <100, HDL >40 (M)/>50 (F), TG <150 mg/dL.',
-        'pharmacology': 'Pharmacokinetics (ADME): Absorption (bioavailability), Distribution (Vd, protein binding), Metabolism (liver, CYP450 — inducers: rifampicin, carbamazepine, St. John\'s wort; inhibitors: ketoconazole, clarithromycin, grapefruit), Excretion (renal filtration + tubular secretion). Pharmacodynamics: receptors (agonist/antagonist/partial agonist/inverse agonist), EC50, Emax, dose-response, narrow therapeutic index drugs (digoxin, warfarin, lithium, phenytoin). First-pass effect reduces oral bioavailability.',
-        'antibiotics': 'Mechanisms: 1) Cell wall — β-lactams (penicillins, cephalosporins, carbapenems), glycopeptides (vancomycin); 2) Cell membrane — polymyxins, lipopeptides (daptomycin); 3) Protein synthesis — 50S: macrolides (azithromycin), lincosamides (clindamycin), oxazolidinones (linezolid), 30S: aminoglycosides (gentamicin), tetracyclines (doxycycline); 4) DNA — quinolones (ciprofloxacin), nitroimidazoles (metronidazole); 5) Folate — TMP-SMX. Resistance: β-lactamases (ESBL, KPC, MBL), efflux pumps, target modification.',
-        'sepsis': 'Life-threatening organ dysfunction from infection (Sepsis-3 definition). SOFA score ≥2. Septic shock: sepsis + vasopressor + lactate >2 mmol/L. Hour-1 Bundle: blood cultures → broad-spectrum antibiotics (within 1h) → 30mL/kg crystalloids → vasopressors (norepinephrine) if MAP <65. Lactate >4 mmol/L: aggressive resuscitation. Procalcitonin guides de-escalation. Sepsis mortality ~25%, septic shock ~40%.',
-        'emergency_medicine': 'Cardiac arrest: no pulse → CPR 30:2 (100-120/min, 5-6cm depth) + AED. Anaphylaxis: epinephrine IM 0.5mg immediately. STEMI: primary PCI <90min. Ischemic stroke: alteplase IV up to 4.5h + thrombectomy up to 24h. DKA: IV insulin + fluids + KCl. Status epilepticus: benzodiazepine → phenytoin/levetiracetam → phenobarbital → general anesthesia. Hypertensive emergency: IV nitroprusside, labetalol. Massive PE: systemic thrombolysis.',
-        'nutrition': 'Macronutrients: carbohydrates (4 kcal/g, 45-65% TDEI), proteins (4 kcal/g, 10-35% TDEI, RDA 0.8 g/kg/d; 1.2-2g athletes), fats (9 kcal/g, 20-35% TDEI — saturated <10%, trans <1%). Critical micronutrients: iron (heme vs non-heme — vitamin C increases absorption), vitamin D (cutaneous UVB synthesis + diet), vitamin B12 (animal foods — vegans at risk), folate (pregnancy 400-800 μg/d, deficiency: neural tube defects), calcium (1000-1200 mg/d), iodine (thyroid), zinc (immunity). Mediterranean diet: level A evidence for CVD reduction.',
-        'vaccination': 'Active immunization: antigen → immune response with memory. Types: live-attenuated (MMR, varicella, yellow fever, rotavirus, oral polio — contraindicated immunosuppressed), inactivated (influenza, hepatitis A, rabies, IPV), subunit/recombinant (hepatitis B, HPV Gardasil/Cervarix, acellular pertussis), conjugate polysaccharide (PCV15 pneumococcal, MenACWY meningococcal), toxoid (diphtheria-tetanus-pertussis), mRNA (COVID-19 Pfizer-BioNTech/Moderna). Herd immunity threshold: measles 95%, polio 80-85%, COVID-19 ~70%. Vaccines do NOT cause autism (Wakefield 1998 was fraudulent and retracted).',
-        'obesity': 'BMI ≥25 overweight, ≥30 obese, ≥35 severely obese, ≥40 morbidly obese. Waist circumference >88cm (F) and >102cm (M): elevated cardiovascular risk. 1 billion adults obese globally (2022). Metabolic complications: T2DM, hypertension, dyslipidemia, NAFLD/NASH, obstructive sleep apnea, osteoarthritis, cancer. Pharmacotherapy: semaglutide (GLP-1RA, Wegovy) -15%, tirzepatide (GLP-1+GIP, Mounjaro) -22.5%. Surgery: Roux-en-Y gastric bypass (most effective, -30%), sleeve gastrectomy (-25%).',
-        'mental_health': 'Global prevalence: 1 in 4 people will experience mental disorder in their lifetime. Most common: depression (#1 cause of disability, 280M), anxiety (284M), substance use. Stigma: main barrier — only 1/3 of those affected receive care. Major treatments: CBT (gold standard for anxiety/depression), DBT (borderline), EMDR (PTSD), pharmacotherapy (SSRIs, SNRIs, antipsychotics, mood stabilizers). Exercise: comparable efficacy to antidepressants in mild-moderate depression. Early intervention improves outcomes.',
-        'sleep': 'Healthy sleep: adults 7-9h/night. Stages: NREM 1 (drowsiness), NREM 2 (80%), NREM 3 (deep restorative sleep), REM (dreams, memory consolidation, 20-25%). Cycle: 90min, ~5 cycles/night. Insomnia: difficulty initiating/maintaining sleep ≥3×/week for ≥3m + daytime impairment. CBT-I (gold standard): sleep restriction, stimulus control, sleep hygiene. Pharmacologic: benzodiazepines (short-term), non-BZD (zolpidem), orexin antagonists (suvorexant, lemborexant). Obstructive sleep apnea: snoring, hypersomnia, apneic events → CPAP.',
+        'icd10': 'ICD-10 (International Classification of Diseases, 10th revision, WHO). Full database with 72,748 codes. Structure: letter (chapter) + 2 digits + subdivision. Type any code (e.g. F20, I21, E11, J45, F20.0, F200) for lookup.',
+        'vital_signs': 'Normal BP: <120/80 mmHg. HR: 60-100 bpm. RR: 12-20 breaths/min. SpO₂: ≥95%. Temperature: 36-37.5°C (fever >37.8°C). Glasgow: 15=normal, ≤8=severe. Pain: VAS 0–10.',
+        'blood_tests': 'Hgb: 13-17 g/dL (M), 12-16 (F). WBC: 4,000-11,000/mm³. Platelets: 150,000-400,000/mm³. Fasting glucose 70-99 mg/dL. TSH 0.4-4.0 mIU/L.',
+        'antibiotics': 'Mechanisms: cell wall (β-lactams, vancomycin), membrane (polymyxins), protein 50S (macrolides, clindamycin), 30S (aminoglycosides, tetracyclines), DNA (quinolones, metronidazole), folate (TMP-SMX). Resistance: β-lactamases (ESBL, KPC).',
+        'emergency_medicine': 'Cardiac arrest: CPR 30:2 + AED. Anaphylaxis: epinephrine IM 0.5mg. STEMI: primary PCI <90min. Ischemic stroke: alteplase IV up to 4.5h + thrombectomy up to 24h. DKA: IV insulin + fluids. Sepsis: blood cultures + antibiotics + 30mL/kg crystalloids.',
+        'vaccination': 'Types: live-attenuated (MMR, varicella, yellow fever), inactivated (influenza, hep A), subunit (HBV, HPV), conjugate (PCV15, MenACWY), toxoid (dT), mRNA (COVID-19). Vaccines do NOT cause autism (Wakefield 1998 was fraudulent and retracted).',
+        'obesity': 'BMI ≥25 overweight, ≥30 obese, ≥40 morbidly obese. Pharmacotherapy: semaglutide (GLP-1RA) -15%, tirzepatide (GLP-1+GIP) -22.5%. Surgery: Roux-en-Y gastric bypass -30%, sleeve gastrectomy -25%.',
       },
       es: {
-        'cie10': 'CIE-10 (Clasificación Internacional de Enfermedades, 10ª revisión, OMS). Estructura: letra (capítulo) + 2 dígitos + subdivisión decimal. Capítulos: A-B infecciosas, C-D neoplasias, E endocrinas, F mentales, G neurológicas, I cardiovasculares, J respiratorias, K digestivas, M osteomusculares, N genitourinarias. Escriba cualquier código (ej: F20, I21, E11, J45) para información detallada.',
-        'signos_vitales': 'PA normal: <120/80 mmHg. FC: 60-100 lpm. FR: 12-20 rpm. SpO₂: ≥95% (hipoxemia <90%). Temperatura: 36-37,5°C (fiebre >37,8°C oral; hipotermia <35°C). Glasgow: 15 = normal, ≤8 = grave. Dolor: EVA 0-10.',
-        'farmacologia': 'Farmacocinética (ADME): Absorción, Distribución (Vd, unión proteínas), Metabolismo (hígado, CYP450 — inductores: rifampicina; inhibidores: ketoconazol, claritromicina), Excreción (renal). Farmacodinámica: receptores (agonista/antagonista), EC50, Emáx, índice terapéutico (digitálicos, warfarina, litio, fenitoína). Efecto de primer paso: reduce biodisponibilidad oral.',
-        'antibioticos': 'Mecanismos: pared celular (β-lactámicos: penicilinas, cefalosporinas, carbapenemas; glucopéptidos: vancomicina), membrana (polimixinas, daptomicina), síntesis proteica 50S (macrólidos, clindamicina, linezolid), 30S (aminoglucósidos, tetraciclinas), ADN (quinolonas, metronidazol), folato (TMP-SMX). Resistencia: β-lactamasas (BLEE, KPC), bombas de eflujo.',
-        'sepsis': 'Disfunción orgánica amenazante por infección. SOFA ≥2. Shock séptico: sepsis + vasopresor + lactato >2. Paquete 1 hora: hemocultivos → antibióticos de amplio espectro → cristaloides 30mL/kg → noradrenalina si PAM <65. Mortalidad: sepsis ~25%, shock ~40%.',
-        'vacunas': 'Tipos: viva atenuada (SRP, varicela — contraindicada en inmunosuprimidos), inactivada (influenza, hepatitis A), subunidades (hepatitis B, VPH), conjugada (neumocócica PCV15, MenACWY), toxoide (difteria-tétanos), ARNm (COVID-19). Inmunidad de rebaño: sarampión 95%, COVID ~70%. Las vacunas NO causan autismo (estudio Wakefield fraudulento y retractado).',
-        'nutricion': 'Macronutrientes: hidratos (4 kcal/g, 45-65% VET), proteínas (4 kcal/g, 0,8 g/kg/d; 1,2-2g deportistas), grasas (9 kcal/g, 20-35%). Micronutrientes críticos: hierro, vitamina D, B12 (veganos en riesgo), folato (gestación 400-800 μg/d), calcio, yodo, zinc. Dieta mediterránea: nivel A para reducción de ECV.',
-        'salud_mental': 'Prevalencia global: 1 de cada 4 personas tendrá un trastorno mental. Más comunes: depresión (#1 causa de discapacidad, 280M), ansiedad (284M). Estigma: principal barrera. Tratamientos: TCC (estándar de oro), medicación (ISRS, antipsicóticos), ejercicio (eficacia comparable a antidepresivos en depresión leve-moderada).',
-        'obesidad': 'IMC ≥25 sobrepeso, ≥30 obeso, ≥35 grave, ≥40 mórbido. CC >88cm (M) y >102cm (H): riesgo cardiovascular. Complicaciones: DM2, HTA, dislipidemia, NAFLD, apnea del sueño. Farmacoterapia: semaglutida (GLP-1RA, -15%), tirzepatida (-22,5%). Cirugía: bypass en Y de Roux (-30%), sleeve (-25%).',
-        'tabaquismo': 'Tabaco: 8 millones de muertes/año. Nicotina: agonista nAChR → dopamina → dependencia. Enfermedades: cáncer (pulmón, boca, esófago), EPOC, ECV. Cese: vareniclina (agonista parcial nAChR, más eficaz), bupropión, TRN (parche, comprimido, chicle). Combinación consulta + farmacoterapia: 25-35% abstinencia al año.',
+        'cie10': 'CIE-10 (Clasificación Internacional de Enfermedades, 10ª revisión, OMS). Base completa con 72.748 códigos. Escriba cualquier código (ej: F20, I21, E11, J45, F20.0, F200) para consultar.',
+        'signos_vitales': 'PA normal: <120/80 mmHg. FC: 60-100 lpm. FR: 12-20 rpm. SpO₂: ≥95%. Temperatura: 36-37,5°C (fiebre >37,8°C). Glasgow: 15=normal, ≤8=grave. Dolor: EVA 0-10.',
+        'antibioticos': 'Mecanismos: pared celular (β-lactámicos, vancomicina), membrana (polimixinas), proteína 50S (macrólidos, clindamicina), 30S (aminoglucósidos, tetraciclinas), ADN (quinolonas, metronidazol), folato (TMP-SMX). Resistencia: β-lactamasas (BLEE, KPC).',
+        'emergencias': 'PCR: RCP 30:2 + DEA. Anafilaxia: adrenalina IM 0,5mg. IAMCEST: angioplastia primaria <90min. ACV isquémico: alteplasa IV hasta 4,5h + trombectomía hasta 24h. CAD: insulina IV + hidratación. Sepsis: hemocultivos + antibióticos + cristaloides 30mL/kg.',
+        'vacunas': 'Tipos: viva atenuada (SRP, varicela), inactivada (influenza, hepatitis A), subunidades (HBV, VPH), conjugada (PCV15, MenACWY), toxoide (dT), ARNm (COVID-19). Las vacunas NO causan autismo (estudio Wakefield fraudulento y retractado).',
+        'obesidad': 'IMC ≥25 sobrepeso, ≥30 obeso, ≥40 mórbido. Farmacoterapia: semaglutida (GLP-1RA) -15%, tirzepatida (GLP-1+GIP) -22,5%. Cirugía: bypass en Y de Roux -30%, sleeve -25%.',
       }
     }
   });
