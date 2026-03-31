@@ -332,22 +332,62 @@ document.getElementById('toggleSidebar').addEventListener('click', () => {
 });
 
 /* ══════════════ SEARCH ══════════════════════════════════ */
-document.getElementById('searchInput').addEventListener('keydown', e => {
+const searchInput = document.getElementById('searchInput');
+let firstMatch = null;
+
+searchInput.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
+  e.preventDefault();
+  performSearch();
+});
+
+searchInput.addEventListener('input', e => {
   const q = e.target.value.trim().toLowerCase();
-  if (!q) return;
+  if (!q) {
+    // Limpar destaque quando campo vazio
+    document.querySelectorAll('.verse.highlight').forEach(el => {
+      el.classList.remove('highlight');
+    });
+  }
+});
+
+function performSearch() {
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) {
+    alert('Por favor, digite algo para buscar.');
+    return;
+  }
+
+  // Limpar destaque anterior
+  document.querySelectorAll('.verse.highlight').forEach(el => {
+    el.classList.remove('highlight');
+  });
+
+  firstMatch = null;
+  let matchCount = 0;
 
   // Search in current chapter
   document.querySelectorAll('.verse').forEach(el => {
     const text = el.querySelector('.verse-text')?.textContent.toLowerCase() || '';
     if (text.includes(q)) {
       el.classList.add('highlight');
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else {
-      el.classList.remove('highlight');
+      matchCount++;
+      if (!firstMatch) {
+        firstMatch = el;
+      }
     }
   });
-});
+
+  if (matchCount > 0) {
+    firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    searchInput.style.borderColor = 'var(--gold)';
+    searchInput.style.boxShadow = '0 0 8px rgba(201,169,110,0.5)';
+  } else {
+    alert(`Nenhum resultado encontrado para "${q}" neste capítulo.`);
+    searchInput.style.borderColor = 'var(--red-bible)';
+    searchInput.style.boxShadow = '0 0 8px rgba(139,26,26,0.5)';
+  }
+}
 
 /* ══════════════ FONT SIZE ═══════════════════════════════ */
 function applyFontSize() {

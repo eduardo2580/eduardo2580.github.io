@@ -78,7 +78,7 @@
       font-family: 'EB Garamond', serif;
       font-size: .95rem;
       width: 100%;
-      transition: border-color .25s, background .25s;
+      transition: border-color .25s, background .25s, box-shadow .25s;
     }
     .search-wrap input::placeholder { color: rgba(201,169,110,.4); }
     .search-wrap input:focus {
@@ -279,17 +279,19 @@
       gap: .5rem;
     }
     .font-controls button {
-      background: rgba(201,169,110,.15);
-      border: 1px solid var(--gold-dark);
+      background: var(--gold);
+      border: 1.5px solid var(--gold-dark);
       color: var(--ink);
       border-radius: 5px;
-      width: 30px; height: 30px;
-      font-size: .95rem;
+      width: 38px; height: 38px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: background .15s;
+      transition: background .15s, box-shadow .15s;
       display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
     }
-    .font-controls button:hover { background: var(--gold-dark); color: #fff; }
+    .font-controls button:hover { background: var(--gold-dark); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
 
     /* loading spinner */
     #loader {
@@ -336,15 +338,43 @@
 
     /* responsive */
     @media (max-width: 768px) {
+      header .brand {
+        font-size: 1.1rem;
+      }
+      header .brand small {
+        font-size: .5rem;
+      }
+      .font-controls {
+        gap: .3rem;
+      }
+      .font-controls button {
+        width: 36px; 
+        height: 36px;
+        font-size: .9rem;
+      }
       #sidebar {
         position: fixed;
         top: 66px;
         left: 0;
-        height: calc(100% - 66px);
+        width: var(--sidebar-w);
+        height: calc(100vh - 66px);
+        max-height: calc(100vh - 66px);
         z-index: 950;
+        overflow-y: auto;
+        overflow-x: hidden;
       }
-      #main { padding: 1.5rem 1rem 3rem; }
+      #sidebar::-webkit-scrollbar { width: 8px; }
+      #sidebar::-webkit-scrollbar-thumb { background: var(--gold); }
+      #main { 
+        padding: 1.5rem 1rem 3rem;
+        width: 100%;
+      }
       .bible-heading { font-size: 1.3rem; }
+      .search-wrap { max-width: 100%; }
+      header .d-flex {
+        flex-wrap: wrap;
+        gap: .5rem;
+      }
     }
 
     /* custom scrollbar */
