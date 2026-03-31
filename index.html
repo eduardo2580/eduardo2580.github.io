@@ -36,6 +36,14 @@
       <button id="fontDown" title="Diminuir fonte"><i class="bi bi-type"></i>−</button>
       <button id="fontUp"   title="Aumentar fonte"><i class="bi bi-type-bold"></i>+</button>
     </div>
+
+    <!-- TTS button — injected by JS only when API is supported -->
+    <div id="tts-wrap" style="display:none; flex-shrink:0;">
+      <button id="ttsBtn" class="btn-tts" title="Ouvir a Palavra">
+        <i class="bi bi-volume-up-fill" id="ttsIcon"></i>
+        <span id="ttsLabel">Ouvir</span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -53,6 +61,9 @@
       <div id="ntBooks"></div>
     </div>
   </nav>
+
+  <!-- ── BACKDROP (mobile overlay) ── -->
+  <div id="backdrop"></div>
 
   <!-- ── MAIN ── -->
   <main id="main">
@@ -188,7 +199,6 @@ function updateActiveBook() {
   document.querySelectorAll('.book-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.id === state.bookId);
   });
-  // scroll active book into view in sidebar
   const active = document.querySelector('.book-btn.active');
   if (active) active.scrollIntoView({ block: 'nearest' });
 }
@@ -208,15 +218,11 @@ function buildChapterSelector(bookId, currentChap) {
   return row;
 }
 
-/* ══════════════ API FETCH ════════════════════════════════
-   Using api.bible (BSB) as a free, CORS-friendly source.
-   Fallback to static sample if network unavailable.
-══════════════════════════════════════════════════════════ */
+/* ══════════════ API FETCH ════════════════════════════════ */
 const API_BASE = 'https://bible-api.com/';
 
 async function fetchChapter(bookId, chapter) {
   const book = ALL_BOOKS.find(b => b.id === bookId);
-  // bible-api uses book name (English) — map common ones
   const nameMap = {
     GEN:'genesis',EXO:'exodus',LEV:'leviticus',NUM:'numbers',DEU:'deuteronomy',
     JOS:'joshua',JDG:'judges',RUT:'ruth','1SA':'1+samuel','2SA':'2+samuel',
@@ -240,20 +246,31 @@ async function fetchChapter(bookId, chapter) {
   const res  = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
-  return data.verses; // [{book_name, chapter, verse, text}]
+  return data.verses;
 }
 
 /* ══════════════ RENDER ══════════════════════════════════ */
-function showLoader()  { document.getElementById('loader').classList.remove('d-none'); document.getElementById('content').classList.add('d-none'); document.getElementById('error-msg').classList.add('d-none'); }
-function showContent() { document.getElementById('loader').classList.add('d-none'); document.getElementById('content').classList.remove('d-none'); }
-function showError(msg){ document.getElementById('loader').classList.add('d-none'); const el=document.getElementById('error-msg'); el.classList.remove('d-none'); el.innerHTML=`<i class="bi bi-exclamation-circle" style="font-size:2rem;display:block;margin-bottom:.8rem"></i>${msg}`; }
+function showLoader()  {
+  document.getElementById('loader').classList.remove('d-none');
+  document.getElementById('content').classList.add('d-none');
+  document.getElementById('error-msg').classList.add('d-none');
+}
+function showContent() {
+  document.getElementById('loader').classList.add('d-none');
+  document.getElementById('content').classList.remove('d-none');
+}
+function showError(msg){
+  document.getElementById('loader').classList.add('d-none');
+  const el = document.getElementById('error-msg');
+  el.classList.remove('d-none');
+  el.innerHTML = `<i class="bi bi-exclamation-circle" style="font-size:2rem;display:block;margin-bottom:.8rem"></i>${msg}`;
+}
 
 function renderVerses(verses, bookName, chapter) {
   const content = document.getElementById('content');
   content.innerHTML = '';
   content.className = 'fade-in';
 
-  // heading
   const h = document.createElement('div');
   h.innerHTML = `
     <h1 class="bible-heading">${bookName}</h1>
@@ -262,10 +279,8 @@ function renderVerses(verses, bookName, chapter) {
   `;
   content.appendChild(h);
 
-  // chapter selector
   content.appendChild(buildChapterSelector(state.bookId, chapter));
 
-  // verses
   const verseContainer = document.createElement('div');
   verses.forEach(v => {
     const row = document.createElement('div');
@@ -277,7 +292,6 @@ function renderVerses(verses, bookName, chapter) {
   });
   content.appendChild(verseContainer);
 
-  // prev/next navigation
   const book = ALL_BOOKS.find(b => b.id === state.bookId);
   const nav  = document.createElement('div');
   nav.className = 'chap-nav';
@@ -294,7 +308,6 @@ function renderVerses(verses, bookName, chapter) {
   document.getElementById('prevChap')?.addEventListener('click', () => loadChapter(state.bookId, state.chapter - 1));
   document.getElementById('nextChap')?.addEventListener('click', () => loadChapter(state.bookId, state.chapter + 1));
 
-  // close sidebar on mobile after selection
   if (window.innerWidth < 768) closeSidebar();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -323,13 +336,26 @@ function loadBook(bookId, chapter) {
 }
 
 /* ══════════════ SIDEBAR TOGGLE ══════════════════════════ */
-function closeSidebar() { document.getElementById('sidebar').classList.add('collapsed'); }
-function openSidebar()  { document.getElementById('sidebar').classList.remove('collapsed'); }
+const sidebar  = document.getElementById('sidebar');
+const backdrop = document.getElementById('backdrop');
+
+function openSidebar() {
+  sidebar.classList.add('open');
+  backdrop.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('visible');
+  document.body.style.overflow = '';
+}
 
 document.getElementById('toggleSidebar').addEventListener('click', () => {
-  const s = document.getElementById('sidebar');
-  s.classList.toggle('collapsed');
+  sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
 });
+
+backdrop.addEventListener('click', closeSidebar);
 
 /* ══════════════ SEARCH ══════════════════════════════════ */
 const searchInput = document.getElementById('searchInput');
@@ -344,7 +370,6 @@ searchInput.addEventListener('keydown', e => {
 searchInput.addEventListener('input', e => {
   const q = e.target.value.trim().toLowerCase();
   if (!q) {
-    // Limpar destaque quando campo vazio
     document.querySelectorAll('.verse.highlight').forEach(el => {
       el.classList.remove('highlight');
     });
@@ -358,7 +383,6 @@ function performSearch() {
     return;
   }
 
-  // Limpar destaque anterior
   document.querySelectorAll('.verse.highlight').forEach(el => {
     el.classList.remove('highlight');
   });
@@ -366,15 +390,12 @@ function performSearch() {
   firstMatch = null;
   let matchCount = 0;
 
-  // Search in current chapter
   document.querySelectorAll('.verse').forEach(el => {
     const text = el.querySelector('.verse-text')?.textContent.toLowerCase() || '';
     if (text.includes(q)) {
       el.classList.add('highlight');
       matchCount++;
-      if (!firstMatch) {
-        firstMatch = el;
-      }
+      if (!firstMatch) firstMatch = el;
     }
   });
 
@@ -409,9 +430,113 @@ window.addEventListener('scroll', () => {
 });
 scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
+/* ══════════════ WEB SPEECH TTS ══════════════════════
+   Reads the full chapter fetched from the API.
+   Each verse is its own utterance to work around the
+   Chrome 15-second TTS truncation bug.
+   Button is only injected when speechSynthesis exists.
+══════════════════════════════════════════════════════ */
+(function initTTS() {
+  if (!('speechSynthesis' in window)) return;
+
+  const wrap  = document.getElementById('tts-wrap');
+  const btn   = document.getElementById('ttsBtn');
+  const icon  = document.getElementById('ttsIcon');
+  const label = document.getElementById('ttsLabel');
+
+  wrap.style.display = 'flex';
+
+  let speaking = false;
+
+  function getPreferredVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    return voices.find(v => v.lang === 'pt-BR') ||
+           voices.find(v => v.lang.startsWith('pt')) ||
+           null;
+  }
+
+  function makeUtt(text) {
+    const utt  = new SpeechSynthesisUtterance(text);
+    utt.lang   = 'pt-BR';
+    utt.rate   = 0.92;
+    utt.pitch  = 1.0;
+    const voice = getPreferredVoice();
+    if (voice) utt.voice = voice;
+    return utt;
+  }
+
+  function setIdle() {
+    speaking = false;
+    icon.className    = 'bi bi-volume-up-fill';
+    label.textContent = 'Ouvir';
+    btn.classList.remove('tts-speaking');
+    btn.title = 'Ouvir capítulo';
+  }
+
+  function setSpeaking() {
+    speaking = true;
+    icon.className    = 'bi bi-stop-fill';
+    label.textContent = 'Parar';
+    btn.classList.add('tts-speaking');
+    btn.title = 'Parar leitura';
+  }
+
+  function stopAll() {
+    window.speechSynthesis.cancel();
+    setIdle();
+  }
+
+  function speakVerses(verses) {
+    if (!verses || verses.length === 0) return;
+
+    window.speechSynthesis.cancel();
+    setSpeaking();
+
+    /* Queue one utterance per verse so Chrome never hits its 15s limit */
+    verses.forEach((v, i) => {
+      const text = `Versículo ${v.verse}. ${v.text.trim()}`;
+      const utt  = makeUtt(text);
+
+      /* Only the last verse resets the UI on end */
+      if (i === verses.length - 1) {
+        utt.onend   = setIdle;
+        utt.onerror = setIdle;
+      } else {
+        utt.onerror = stopAll; /* abort queue on any error mid-chapter */
+      }
+
+      window.speechSynthesis.speak(utt);
+    });
+  }
+
+  btn.addEventListener('click', () => {
+    if (speaking) {
+      stopAll();
+      return;
+    }
+
+    if (!state.verses || state.verses.length === 0) {
+      alert('Nenhum capítulo carregado para leitura.');
+      return;
+    }
+
+    speakVerses(state.verses);
+  });
+
+  /* Chrome loads voices async — re-resolve on each speak() call above */
+  window.speechSynthesis.onvoiceschanged = () => {};
+
+  /* Stop and reset whenever the user navigates to a new chapter */
+  const _origLoad = loadChapter;
+  window.loadChapter = function(bookId, chapter) {
+    stopAll();
+    return _origLoad(bookId, chapter);
+  };
+})();
+
 /* ══════════════ INIT ════════════════════════════════════ */
 buildSidebar();
-loadChapter('JHN', 1);  // default: João 1
+loadChapter('JHN', 1);
 </script>
 </body>
 </html>
