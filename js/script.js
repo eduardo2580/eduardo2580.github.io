@@ -89,10 +89,7 @@ const ALL_BOOKS = [...BOOKS.ot, ...BOOKS.nt];
 /* ══════════════════════════ STATE ══════════════════════════════ */
 let state = { bookId:'JHN', chapter:1, fontSize:1.1, verses:[] };
 
-/* ═══════════════════════ INDEXEDDB CACHE ═══════════════════════
- * Optional warm cache — avoids re-parsing the 4.5MB JS file on
- * every chapter access after the first visit.
- * ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════ INDEXEDDB CACHE ═══════════════════════ */
 const DB_NAME    = 'BibleDB_local';
 const DB_VERSION = 1;
 const STORE      = 'chapters';
@@ -131,10 +128,7 @@ function dbPut(key, verses) {
     } catch {}
 }
 
-/* ═══════════════════ CHAPTER LOADING ═══════════════════════════
- * 1. IndexedDB (fastest on repeat visits)
- * 2. window.BIBLE_DATA (always available — bundled in bible-data.js)
- * ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════ CHAPTER LOADING ═══════════════════════════ */
 async function fetchChapter(bookId, chapter) {
     const key = `${bookId}_${chapter}`;
 
@@ -145,7 +139,7 @@ async function fetchChapter(bookId, chapter) {
     // 2 — Bundled data (always present)
     const verses = window.BIBLE_DATA?.[key];
     if (verses) {
-        dbPut(key, verses); // warm cache for next time
+        dbPut(key, verses);
         return verses;
     }
 
@@ -292,6 +286,10 @@ function renderVerses(verses, bookName, chapter) {
 
 /* ═══════════════════ LOAD CHAPTER ═════════════════════════════ */
 async function loadChapter(bookId, chapter) {
+    // Stop any ongoing TTS when navigating to a new chapter
+    window.speechSynthesis?.cancel();
+    ttsSetPlaying(false);
+
     state.bookId  = bookId;
     state.chapter = chapter;
     updateActiveBook();
@@ -332,6 +330,95 @@ function closeSidebar() {
     document.getElementById('backdrop')?.classList.remove('visible');
 }
 
+/* ═══════════════════════ TEXT-TO-SPEECH ════════════════════════
+ * Uses the Web Speech API (SpeechSynthesis).
+ * The button #tts-wrap is hidden by default in HTML; we reveal it
+ * here only if the browser supports the API.
+ *
+ * Flow:
+ *  • Click Ouvir  → reads all verse text of the current chapter
+ *  • Click Parar  → cancels immediately
+ *  • Navigate     → auto-cancelled at the top of loadChapter()
+ *  • Voices       → prefers pt-BR, falls back to any pt-* voice
+ * ════════════════════════════════════════════════════════════════ */
+let _ttsSpeaking = false;
+
+function ttsSetPlaying(on) {
+    _ttsSpeaking = on;
+    const btn   = document.getElementById('ttsBtn');
+    const icon  = document.getElementById('ttsIcon');
+    const label = document.getElementById('ttsLabel');
+    if (!btn) return;
+    btn.classList.toggle('tts-speaking', on);
+    if (icon)  icon.className    = on ? 'bi bi-stop-fill' : 'bi bi-volume-up-fill';
+    if (label) label.textContent = on ? 'Parar' : 'Ouvir';
+}
+
+function initTTS() {
+    const synth = window.speechSynthesis;
+    if (!synth) return;                          // API not available — leave button hidden
+
+    const wrap = document.getElementById('tts-wrap');
+    const btn  = document.getElementById('ttsBtn');
+    if (!wrap || !btn) return;
+
+    wrap.style.display = 'flex';                 // reveal the button now that we know it works
+
+    function getChapterText() {
+        // Read verse text directly from the DOM so it always matches
+        // whatever is currently displayed (chapter OR search results).
+        return Array.from(document.querySelectorAll('#content .verse-text'))
+            .map(el => el.innerText.trim())
+            .filter(Boolean)
+            .join(' ');
+    }
+
+    function pickVoice() {
+        const voices = synth.getVoices();
+        return voices.find(v => v.lang === 'pt-BR')
+            || voices.find(v => v.lang.startsWith('pt'))
+            || null;
+    }
+
+    function speak() {
+        const text = getChapterText();
+        if (!text) return;
+
+        // Chrome sometimes keeps a stale "speaking" state — cancel first
+        synth.cancel();
+
+        const utt   = new SpeechSynthesisUtterance(text);
+        utt.lang    = 'pt-BR';
+        utt.rate    = 0.92;   // slightly slower than default — better for formal text
+        utt.pitch   = 1;
+
+        const voice = pickVoice();
+        if (voice) utt.voice = voice;
+
+        utt.onstart = () => ttsSetPlaying(true);
+        utt.onend   = () => ttsSetPlaying(false);
+        utt.onerror = () => ttsSetPlaying(false);
+
+        synth.speak(utt);
+    }
+
+    btn.addEventListener('click', () => {
+        if (_ttsSpeaking) {
+            synth.cancel();
+            ttsSetPlaying(false);
+            return;
+        }
+
+        // Voices load asynchronously on first call in some browsers (Chrome).
+        // If the list is empty, wait for the voiceschanged event then speak.
+        if (synth.getVoices().length === 0) {
+            synth.addEventListener('voiceschanged', speak, { once: true });
+        } else {
+            speak();
+        }
+    });
+}
+
 /* ═══════════════════════ INIT ══════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
 
@@ -356,6 +443,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     buildSidebar();
     await initDB();
+    initTTS();
 
     // Sidebar toggle
     document.getElementById('toggleSidebar')?.addEventListener('click', () => {
