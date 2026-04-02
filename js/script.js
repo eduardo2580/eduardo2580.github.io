@@ -445,13 +445,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     await initDB();
     initTTS();
 
-    // Sidebar toggle
-    document.getElementById('toggleSidebar')?.addEventListener('click', () => {
-        document.getElementById('sidebar')?.classList.toggle('open');
-        document.getElementById('backdrop')?.classList.toggle('visible');
-    });
-    document.getElementById('backdrop')?.addEventListener('click', closeSidebar);
-
     // Font controls
     document.getElementById('fontUp')?.addEventListener('click', () => {
         state.fontSize = Math.min(2, +(state.fontSize+0.1).toFixed(1));
