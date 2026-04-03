@@ -103,11 +103,21 @@
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script>
     new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('SW registered:', reg))
+          .catch(err => console.error('SW registration failed:', err));
+      });
+    }
   </script>
-  <script src="js/bible-data.js"></script>
-  <script src="js/script.js"></script>
-  <script src="js/sidebar.js"></script>
-  <script src="js/daily.js"></script>
+
+<script src="js/bible-data.js"></script>
+<script src="js/script.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/daily.js"></script>
+<script src="js/notifications.js"></script>
 </body>
 
 </html>
