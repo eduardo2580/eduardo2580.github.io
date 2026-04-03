@@ -2,7 +2,7 @@
    Service Worker – Bíblia Sagrada PWA
    =========================================================== */
 
-const CACHE_NAME    = 'bible-sagrada-v2';
+const CACHE_NAME    = 'bible-sagrada-v3';
 const PRECACHE_NAME = `${CACHE_NAME}-precache`;
 const RUNTIME_NAME  = `${CACHE_NAME}-runtime`;
 
