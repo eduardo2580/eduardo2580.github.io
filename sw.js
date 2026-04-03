@@ -2,7 +2,7 @@
    Service Worker – Bíblia Sagrada PWA
    =========================================================== */
 
-const CACHE_NAME    = 'bible-sagrada-v3';
+const CACHE_NAME    = 'bible-sagrada-v4';
 const PRECACHE_NAME = `${CACHE_NAME}-precache`;
 const RUNTIME_NAME  = `${CACHE_NAME}-runtime`;
 
@@ -21,8 +21,10 @@ const PRECACHE_URLS = [
   '/favicon-32x32.png',
   '/favicon.ico',
   '/css/style.css',
+  '/css/bootstrap.min.css',
   '/js/daily.js',
   '/js/bible-data.js',
+  '/js/bootstrap.min.js',
   '/js/script.js',
   '/js/sidebar.js'
 ];
