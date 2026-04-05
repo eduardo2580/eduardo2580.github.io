@@ -494,24 +494,58 @@ window.addEventListener('DOMContentLoaded', async () => {
     await loadChapter('JHN', 1);
 });
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then(reg => {
-    reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          newWorker.postMessage({ type: 'SKIP_WAITING' });
-        }
-      });
-    });
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
-    });
-  });
+// ===========================================================
+// Service Worker Registration – FORCE UPDATE ON ALL BROWSERS
+// Cole isso no script.js, substituindo qualquer registro SW existente
+// ===========================================================
 
+// ===========================================================
+// Service Worker Registration – GITHUB PAGES COMPATIBLE
+// Substitui qualquer registro SW existente no script.js
+// ===========================================================
+
+if ('serviceWorker' in navigator) {
+
+  // Timestamp na URL impede que o GitHub Pages sirva sw.js do cache CDN
+  const swUrl = `/sw.js?v=${Date.now()}`;
+
+  navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' })
+    .then(reg => {
+
+      // Checa por update imediatamente ao carregar a página
+      reg.update();
+
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed') {
+            if (navigator.serviceWorker.controller) {
+              console.log('[SW] Nova versão encontrada, forçando ativação...');
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+            } else {
+              console.log('[SW] Primeira instalação completa');
+            }
+          }
+        });
+      });
+
+      // Recarrega a página quando o novo SW assumir o controle
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('[SW] Novo SW ativo, recarregando página...');
+        window.location.reload();
+      });
+
+    })
+    .catch(err => console.error('[SW] Registro falhou:', err));
+
+  // Fallback: SW avisa diretamente para recarregar
   navigator.serviceWorker.addEventListener('message', event => {
     if (event.data?.type === 'SW_UPDATED') {
+      console.log('[SW] SW_UPDATED recebido, recarregando...');
       window.location.reload();
     }
   });
+
 }
