@@ -2,7 +2,7 @@
    Service Worker – Bíblia Sagrada PWA
    =========================================================== */
 
-const CACHE_NAME    = 'bible-sagrada-v23';
+const CACHE_NAME    = 'bible-sagrada-v24'; // ← incremente a cada deploy
 const PRECACHE_NAME = `${CACHE_NAME}-precache`;
 const RUNTIME_NAME  = `${CACHE_NAME}-runtime`;
 
@@ -47,13 +47,16 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(PRECACHE_NAME)
       .then(cache => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
+      .then(() => {
+        log('Precache complete, calling skipWaiting()');
+        return self.skipWaiting(); // força passar de "waiting" para "activating"
+      })
       .catch(err => console.error('Precache failed:', err))
   );
 });
 
 // ------------------------------
-// 4. ACTIVATE – limpa caches antigos
+// 4. ACTIVATE – limpa caches antigos e assume controle imediato
 // ------------------------------
 self.addEventListener('activate', event => {
   log('Activating...');
@@ -61,8 +64,23 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
       .then(keys => keys.filter(k => !expected.includes(k)))
-      .then(old  => Promise.all(old.map(k => { log('Deleting old cache:', k); return caches.delete(k); })))
-      .then(() => self.clients.claim())
+      .then(old => {
+        return Promise.all(
+          old.map(k => {
+            log('Deleting old cache:', k);
+            return caches.delete(k);
+          })
+        );
+      })
+      .then(() => self.skipWaiting()) // garante skipWaiting também no activate
+      .then(() => self.clients.claim()) // assume controle de todas as abas abertas
+      .then(() => {
+        // Notifica todos os clientes que o SW foi atualizado → dispara reload
+        return self.clients.matchAll({ type: 'window' }).then(clients => {
+          log(`Notifying ${clients.length} client(s) of SW update`);
+          clients.forEach(client => client.postMessage({ type: 'SW_UPDATED' }));
+        });
+      })
   );
 });
 
@@ -168,7 +186,17 @@ async function networkFirstFallbackToCache(request) {
 }
 
 // ------------------------------
-// 7. Background Sync (para anotações futuras)
+// 7. MESSAGE – recebe comandos do cliente
+// ------------------------------
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    log('Received SKIP_WAITING message from client');
+    self.skipWaiting();
+  }
+});
+
+// ------------------------------
+// 8. Background Sync (para anotações futuras)
 // ------------------------------
 self.addEventListener('sync', event => {
   if (event.tag === 'sync-bible-notes') {
