@@ -15,14 +15,16 @@
   <link href="css/bootstrap.min.css" rel="stylesheet" />
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <!-- App styles -->
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-  <!-- ═══ HEADER ═══════════════════════════════════════════ -->
+  <!-- ═══ HEADER ══════════════════════════════════════════ -->
   <header>
     <div class="d-flex align-items-center gap-3">
+
       <button class="btn-menu" id="toggleSidebar" title="Menu de livros">
         <i class="bi bi-list"></i>
       </button>
@@ -38,16 +40,17 @@
 
       <div class="font-controls ms-2">
         <button id="fontDown" title="Diminuir fonte"><i class="bi bi-type"></i>−</button>
-        <button id="fontUp" title="Aumentar fonte"><i class="bi bi-type-bold"></i>+</button>
+        <button id="fontUp"   title="Aumentar fonte"><i class="bi bi-type-bold"></i>+</button>
       </div>
 
-      <!-- TTS button — injected by JS only when API is supported -->
+      <!-- TTS — shown by JS only when Web Speech API is supported -->
       <div id="tts-wrap" style="display:none; flex-shrink:0;">
         <button id="ttsBtn" class="btn-tts" title="Ouvir a Palavra">
           <i class="bi bi-volume-up-fill" id="ttsIcon"></i>
           <span id="ttsLabel">Ouvir</span>
         </button>
       </div>
+
     </div>
   </header>
 
@@ -56,21 +59,29 @@
 
     <!-- ── SIDEBAR ── -->
     <nav id="sidebar">
+
+      <!-- Plans section -->
       <div class="sidebar-section">
-        <div class="sidebar-title">✦ Daily</div>
-        <div id="dailyBooks"></div>
+        <div class="sidebar-title">✦ Planos</div>
+        <div id="dailyBooks"></div>   <!-- populated by daily.js -->
+        <div id="teensBooks"></div>   <!-- populated by teens.js -->
       </div>
+
+      <!-- Old Testament -->
       <div class="sidebar-section">
         <div class="sidebar-title">✦ Antigo Testamento</div>
         <div id="otBooks"></div>
       </div>
+
+      <!-- New Testament -->
       <div class="sidebar-section">
         <div class="sidebar-title">✦ Novo Testamento</div>
         <div id="ntBooks"></div>
       </div>
+
     </nav>
 
-    <!-- ── BACKDROP (mobile overlay) ── -->
+    <!-- ── BACKDROP (mobile sidebar overlay) ── -->
     <div id="backdrop"></div>
 
     <!-- ── MAIN ── -->
@@ -80,16 +91,20 @@
         Carregando a Palavra…
       </div>
       <div id="error-msg" class="d-none"></div>
-      <div id="content" class="d-none"></div>
+      <div id="content"  class="d-none"></div>
     </main>
-  </div>
 
-  <!-- scroll-to-top -->
-  <button id="scrollTop" title="Voltar ao topo"><i class="bi bi-chevron-up"></i></button>
+  </div><!-- /.layout -->
+
+  <!-- Scroll-to-top button -->
+  <button id="scrollTop" title="Voltar ao topo">
+    <i class="bi bi-chevron-up"></i>
+  </button>
 
   <!-- Bootstrap JS -->
   <script src="js/bootstrap.min.js"></script>
 
+  <!-- VLibras accessibility widget -->
   <div vw class="enabled">
     <div vw-access-button class="active"></div>
     <div vw-plugin-wrapper>
@@ -100,6 +115,7 @@
   <script>
     new window.VLibras.Widget('https://vlibras.gov.br/app');
 
+    // Service Worker (PWA / offline support)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
@@ -109,11 +125,20 @@
     }
   </script>
 
+  <!--
+    SCRIPT LOAD ORDER (important — each file depends on the previous):
+      1. bible-data.js  → defines window.BIBLE_DATA
+      2. script.js      → defines ALL_BOOKS, state, fetchChapter, loadChapter, ttsSetPlaying
+      3. sidebar.js     → defines closeSidebar, wires toggle button
+      4. daily.js       → uses ALL_BOOKS, fetchChapter, state, closeSidebar
+      5. teens.js       → uses ALL_BOOKS, fetchChapter, state, closeSidebar
+      6. notifications.js → standalone, runs after DOMContentLoaded
+  -->
   <script src="js/bible-data.js"></script>
   <script src="js/script.js"></script>
   <script src="js/sidebar.js"></script>
   <script src="js/daily.js"></script>
-  <script src="js/notifications.js"></script>
-</body>
+  <script src="js/teens.js"></script>
 
+</body>
 </html>
