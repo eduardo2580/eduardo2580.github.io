@@ -3,31 +3,31 @@
    v25 – FORCE UPDATE / GITHUB PAGES COMPATIBLE
    =========================================================== */
 
-const CACHE_VERSION = 'v26'; // ← INCREMENTE SEMPRE QUE FIZER DEPLOY
+const CACHE_VERSION = 'v27'; // ← INCREMENTE SEMPRE QUE FIZER DEPLOY
 const CACHE_NAME    = `bible-sagrada-${CACHE_VERSION}`;
 const PRECACHE_NAME = `${CACHE_NAME}-precache`;
 const RUNTIME_NAME  = `${CACHE_NAME}-runtime`;
 
 const PRECACHE_URLS = [
-  '/',
-  '/index.html',
-  '/offline.html',
-  '/site.webmanifest',
-  '/android-chrome-192x192.png',
-  '/android-chrome-512x512.png',
-  '/apple-touch-icon.png',
-  '/favicon-16x16.png',
-  '/favicon-32x32.png',
-  '/favicon.ico',
-  '/css/style.css',
-  '/css/bootstrap.min.css',
-  '/js/daily.js',
-  '/js/bible-data.js',
-  '/js/bootstrap.min.js',
-  '/js/script.js',
-  '/js/sidebar.js',
-  '/js/teens.js',
-  '/js/splash.js'
+  './',
+  'index.html',
+  'offline.html',
+  'site.webmanifest',
+  'android-chrome-192x192.png',
+  'android-chrome-512x512.png',
+  'apple-touch-icon.png',
+  'favicon-16x16.png',
+  'favicon-32x32.png',
+  'favicon.ico',
+  'css/style.css',
+  'css/bootstrap.min.css',
+  'js/daily.js',
+  'js/bible-data.js',
+  'js/bootstrap.min.js',
+  'js/script.js',
+  'js/sidebar.js',
+  'js/teens.js',
+  'js/splash.js'
 ];
 
 const DEBUG = true;
@@ -65,13 +65,6 @@ self.addEventListener('activate', event => {
         })
       ))
       .then(() => self.clients.claim())
-      .then(() => self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
-      .then(clients => {
-        log(`Notifying ${clients.length} client(s) to reload`);
-        clients.forEach(client =>
-          client.postMessage({ type: 'SW_UPDATED', version: CACHE_VERSION })
-        );
-      })
   );
 });
 

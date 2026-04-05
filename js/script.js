@@ -501,7 +501,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 if ('serviceWorker' in navigator) {
     // Timestamp impede que o navegador sirva um SW antigo do cache CDN
-    const swUrl = `/sw.js?v=${Date.now()}`;
+    const swUrl = 'sw.js';
     let isRefreshing = false; // Trava para evitar múltiplos reloads
 
     navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' })
@@ -533,13 +533,4 @@ if ('serviceWorker' in navigator) {
         window.location.reload();
     });
 
-    // Escuta mensagens de atualização do SW
-    navigator.serviceWorker.addEventListener('message', event => {
-        if (event.data?.type === 'SW_UPDATED') {
-            if (isRefreshing) return;
-            isRefreshing = true;
-            console.log('[SW] Mensagem de atualização recebida. Recarregando...');
-            window.location.reload();
-        }
-    });
 }
