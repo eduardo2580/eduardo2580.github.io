@@ -3,7 +3,7 @@
    v25 – FORCE UPDATE / GITHUB PAGES COMPATIBLE
    =========================================================== */
 
-const CACHE_VERSION = 'v25'; // ← INCREMENTE SEMPRE QUE FIZER DEPLOY
+const CACHE_VERSION = 'v26'; // ← INCREMENTE SEMPRE QUE FIZER DEPLOY
 const CACHE_NAME    = `bible-sagrada-${CACHE_VERSION}`;
 const PRECACHE_NAME = `${CACHE_NAME}-precache`;
 const RUNTIME_NAME  = `${CACHE_NAME}-runtime`;

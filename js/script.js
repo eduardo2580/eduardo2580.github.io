@@ -13,86 +13,86 @@
 /* ══════════════════════════ BOOK DATA ═══════════════════════════ */
 const BOOKS = {
     ot: [
-        { id:'GEN', name:'Gênesis',       chapters:50  },
-        { id:'EXO', name:'Êxodo',         chapters:40  },
-        { id:'LEV', name:'Levítico',      chapters:27  },
-        { id:'NUM', name:'Números',       chapters:36  },
-        { id:'DEU', name:'Deuteronômio',  chapters:34  },
-        { id:'JOS', name:'Josué',         chapters:24  },
-        { id:'JDG', name:'Juízes',        chapters:21  },
-        { id:'RUT', name:'Rute',          chapters:4   },
-        { id:'1SA', name:'1 Samuel',      chapters:31  },
-        { id:'2SA', name:'2 Samuel',      chapters:24  },
-        { id:'1KI', name:'1 Reis',        chapters:22  },
-        { id:'2KI', name:'2 Reis',        chapters:25  },
-        { id:'1CH', name:'1 Crônicas',    chapters:29  },
-        { id:'2CH', name:'2 Crônicas',    chapters:36  },
-        { id:'EZR', name:'Esdras',        chapters:10  },
-        { id:'NEH', name:'Neemias',       chapters:13  },
-        { id:'EST', name:'Ester',         chapters:10  },
-        { id:'JOB', name:'Jó',            chapters:42  },
-        { id:'PSA', name:'Salmos',        chapters:150 },
-        { id:'PRO', name:'Provérbios',    chapters:31  },
-        { id:'ECC', name:'Eclesiastes',   chapters:12  },
-        { id:'SNG', name:'Cânticos',      chapters:8   },
-        { id:'ISA', name:'Isaías',        chapters:66  },
-        { id:'JER', name:'Jeremias',      chapters:52  },
-        { id:'LAM', name:'Lamentações',   chapters:5   },
-        { id:'EZK', name:'Ezequiel',      chapters:48  },
-        { id:'DAN', name:'Daniel',        chapters:12  },
-        { id:'HOS', name:'Oséias',        chapters:14  },
-        { id:'JOL', name:'Joel',          chapters:3   },
-        { id:'AMO', name:'Amós',          chapters:9   },
-        { id:'OBA', name:'Obadias',       chapters:1   },
-        { id:'JON', name:'Jonas',         chapters:4   },
-        { id:'MIC', name:'Miquéias',      chapters:7   },
-        { id:'NAM', name:'Naum',          chapters:3   },
-        { id:'HAB', name:'Habacuque',     chapters:3   },
-        { id:'ZEP', name:'Sofonias',      chapters:3   },
-        { id:'HAG', name:'Ageu',          chapters:2   },
-        { id:'ZEC', name:'Zacarias',      chapters:14  },
-        { id:'MAL', name:'Malaquias',     chapters:4   },
+        { id: 'GEN', name: 'Gênesis', chapters: 50 },
+        { id: 'EXO', name: 'Êxodo', chapters: 40 },
+        { id: 'LEV', name: 'Levítico', chapters: 27 },
+        { id: 'NUM', name: 'Números', chapters: 36 },
+        { id: 'DEU', name: 'Deuteronômio', chapters: 34 },
+        { id: 'JOS', name: 'Josué', chapters: 24 },
+        { id: 'JDG', name: 'Juízes', chapters: 21 },
+        { id: 'RUT', name: 'Rute', chapters: 4 },
+        { id: '1SA', name: '1 Samuel', chapters: 31 },
+        { id: '2SA', name: '2 Samuel', chapters: 24 },
+        { id: '1KI', name: '1 Reis', chapters: 22 },
+        { id: '2KI', name: '2 Reis', chapters: 25 },
+        { id: '1CH', name: '1 Crônicas', chapters: 29 },
+        { id: '2CH', name: '2 Crônicas', chapters: 36 },
+        { id: 'EZR', name: 'Esdras', chapters: 10 },
+        { id: 'NEH', name: 'Neemias', chapters: 13 },
+        { id: 'EST', name: 'Ester', chapters: 10 },
+        { id: 'JOB', name: 'Jó', chapters: 42 },
+        { id: 'PSA', name: 'Salmos', chapters: 150 },
+        { id: 'PRO', name: 'Provérbios', chapters: 31 },
+        { id: 'ECC', name: 'Eclesiastes', chapters: 12 },
+        { id: 'SNG', name: 'Cânticos', chapters: 8 },
+        { id: 'ISA', name: 'Isaías', chapters: 66 },
+        { id: 'JER', name: 'Jeremias', chapters: 52 },
+        { id: 'LAM', name: 'Lamentações', chapters: 5 },
+        { id: 'EZK', name: 'Ezequiel', chapters: 48 },
+        { id: 'DAN', name: 'Daniel', chapters: 12 },
+        { id: 'HOS', name: 'Oséias', chapters: 14 },
+        { id: 'JOL', name: 'Joel', chapters: 3 },
+        { id: 'AMO', name: 'Amós', chapters: 9 },
+        { id: 'OBA', name: 'Obadias', chapters: 1 },
+        { id: 'JON', name: 'Jonas', chapters: 4 },
+        { id: 'MIC', name: 'Miquéias', chapters: 7 },
+        { id: 'NAM', name: 'Naum', chapters: 3 },
+        { id: 'HAB', name: 'Habacuque', chapters: 3 },
+        { id: 'ZEP', name: 'Sofonias', chapters: 3 },
+        { id: 'HAG', name: 'Ageu', chapters: 2 },
+        { id: 'ZEC', name: 'Zacarias', chapters: 14 },
+        { id: 'MAL', name: 'Malaquias', chapters: 4 },
     ],
     nt: [
-        { id:'MAT', name:'Mateus',            chapters:28 },
-        { id:'MRK', name:'Marcos',            chapters:16 },
-        { id:'LUK', name:'Lucas',             chapters:24 },
-        { id:'JHN', name:'João',              chapters:21 },
-        { id:'ACT', name:'Atos',              chapters:28 },
-        { id:'ROM', name:'Romanos',           chapters:16 },
-        { id:'1CO', name:'1 Coríntios',       chapters:16 },
-        { id:'2CO', name:'2 Coríntios',       chapters:13 },
-        { id:'GAL', name:'Gálatas',           chapters:6  },
-        { id:'EPH', name:'Efésios',           chapters:6  },
-        { id:'PHP', name:'Filipenses',        chapters:4  },
-        { id:'COL', name:'Colossenses',       chapters:4  },
-        { id:'1TH', name:'1 Tessalonicenses', chapters:5  },
-        { id:'2TH', name:'2 Tessalonicenses', chapters:3  },
-        { id:'1TI', name:'1 Timóteo',         chapters:6  },
-        { id:'2TI', name:'2 Timóteo',         chapters:4  },
-        { id:'TIT', name:'Tito',              chapters:3  },
-        { id:'PHM', name:'Filemom',           chapters:1  },
-        { id:'HEB', name:'Hebreus',           chapters:13 },
-        { id:'JAS', name:'Tiago',             chapters:5  },
-        { id:'1PE', name:'1 Pedro',           chapters:5  },
-        { id:'2PE', name:'2 Pedro',           chapters:3  },
-        { id:'1JN', name:'1 João',            chapters:5  },
-        { id:'2JN', name:'2 João',            chapters:1  },
-        { id:'3JN', name:'3 João',            chapters:1  },
-        { id:'JUD', name:'Judas',             chapters:1  },
-        { id:'REV', name:'Apocalipse',        chapters:22 },
+        { id: 'MAT', name: 'Mateus', chapters: 28 },
+        { id: 'MRK', name: 'Marcos', chapters: 16 },
+        { id: 'LUK', name: 'Lucas', chapters: 24 },
+        { id: 'JHN', name: 'João', chapters: 21 },
+        { id: 'ACT', name: 'Atos', chapters: 28 },
+        { id: 'ROM', name: 'Romanos', chapters: 16 },
+        { id: '1CO', name: '1 Coríntios', chapters: 16 },
+        { id: '2CO', name: '2 Coríntios', chapters: 13 },
+        { id: 'GAL', name: 'Gálatas', chapters: 6 },
+        { id: 'EPH', name: 'Efésios', chapters: 6 },
+        { id: 'PHP', name: 'Filipenses', chapters: 4 },
+        { id: 'COL', name: 'Colossenses', chapters: 4 },
+        { id: '1TH', name: '1 Tessalonicenses', chapters: 5 },
+        { id: '2TH', name: '2 Tessalonicenses', chapters: 3 },
+        { id: '1TI', name: '1 Timóteo', chapters: 6 },
+        { id: '2TI', name: '2 Timóteo', chapters: 4 },
+        { id: 'TIT', name: 'Tito', chapters: 3 },
+        { id: 'PHM', name: 'Filemom', chapters: 1 },
+        { id: 'HEB', name: 'Hebreus', chapters: 13 },
+        { id: 'JAS', name: 'Tiago', chapters: 5 },
+        { id: '1PE', name: '1 Pedro', chapters: 5 },
+        { id: '2PE', name: '2 Pedro', chapters: 3 },
+        { id: '1JN', name: '1 João', chapters: 5 },
+        { id: '2JN', name: '2 João', chapters: 1 },
+        { id: '3JN', name: '3 João', chapters: 1 },
+        { id: 'JUD', name: 'Judas', chapters: 1 },
+        { id: 'REV', name: 'Apocalipse', chapters: 22 },
     ]
 };
 
 const ALL_BOOKS = [...BOOKS.ot, ...BOOKS.nt];
 
 /* ══════════════════════════ STATE ══════════════════════════════ */
-let state = { bookId:'JHN', chapter:1, fontSize:1.1, verses:[] };
+let state = { bookId: 'JHN', chapter: 1, fontSize: 1.1, verses: [] };
 
 /* ═══════════════════════ INDEXEDDB CACHE ═══════════════════════ */
-const DB_NAME    = 'BibleDB_local';
+const DB_NAME = 'BibleDB_local';
 const DB_VERSION = 1;
-const STORE      = 'chapters';
+const STORE = 'chapters';
 let db = null;
 
 function initDB() {
@@ -102,10 +102,10 @@ function initDB() {
         req.onupgradeneeded = e => {
             const d = e.target.result;
             if (!d.objectStoreNames.contains(STORE))
-                d.createObjectStore(STORE, { keyPath:'id' });
+                d.createObjectStore(STORE, { keyPath: 'id' });
         };
-        req.onsuccess  = e => { db = e.target.result; resolve(true); };
-        req.onerror    = () => resolve(false);
+        req.onsuccess = e => { db = e.target.result; resolve(true); };
+        req.onerror = () => resolve(false);
     });
 }
 
@@ -113,9 +113,9 @@ function dbGet(key) {
     return new Promise(resolve => {
         if (!db) { resolve(null); return; }
         try {
-            const req = db.transaction(STORE,'readonly').objectStore(STORE).get(key);
+            const req = db.transaction(STORE, 'readonly').objectStore(STORE).get(key);
             req.onsuccess = () => resolve(req.result?.verses ?? null);
-            req.onerror   = () => resolve(null);
+            req.onerror = () => resolve(null);
         } catch { resolve(null); }
     });
 }
@@ -123,9 +123,9 @@ function dbGet(key) {
 function dbPut(key, verses) {
     if (!db) return;
     try {
-        db.transaction(STORE,'readwrite').objectStore(STORE)
-          .put({ id:key, verses });
-    } catch {}
+        db.transaction(STORE, 'readwrite').objectStore(STORE)
+            .put({ id: key, verses });
+    } catch { }
 }
 
 /* ═══════════════════ CHAPTER LOADING ═══════════════════════════ */
@@ -148,7 +148,7 @@ async function fetchChapter(bookId, chapter) {
 
 /* ══════════════════════════ SEARCH ════════════════════════════ */
 function normalise(s) {
-    return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
 function searchVerses(query) {
@@ -161,7 +161,7 @@ function searchVerses(query) {
             if (!verses) continue;
             for (const v of verses) {
                 if (normalise(v.text).includes(q)) {
-                    results.push({ book, chapter:c, verse:v.verse, text:v.text });
+                    results.push({ book, chapter: c, verse: v.verse, text: v.text });
                     if (results.length >= 60) return results;
                 }
             }
@@ -174,8 +174,8 @@ function renderSearch(query, results) {
     const content = document.getElementById('content');
     content.innerHTML = '';
     content.className = 'fade-in';
-    const esc = query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    const re  = new RegExp(`(${esc})`, 'gi');
+    const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(${esc})`, 'gi');
 
     content.innerHTML = `
         <h1 class="bible-heading">Busca</h1>
@@ -194,29 +194,29 @@ function renderSearch(query, results) {
         div.style.cursor = 'pointer';
         div.innerHTML = `
             <span class="verse-num" style="min-width:5rem;font-size:.75rem">
-                ${r.book.name.slice(0,3)} ${r.chapter}:${r.verse}
+                ${r.book.name.slice(0, 3)} ${r.chapter}:${r.verse}
             </span>
             <span class="verse-text" style="font-size:${state.fontSize}rem">
-                ${r.text.replace(re,'<mark>$1</mark>')}
+                ${r.text.replace(re, '<mark>$1</mark>')}
             </span>`;
         div.onclick = () => loadChapter(r.book.id, r.chapter);
         wrap.appendChild(div);
     }
     content.appendChild(wrap);
-    window.scrollTo({ top:0, behavior:'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 /* ═══════════════════════ RENDER UI ═════════════════════════════ */
 function buildSidebar() {
-    ['ot','nt'].forEach(section => {
+    ['ot', 'nt'].forEach(section => {
         const container = document.getElementById(section + 'Books');
         if (!container) return;
         BOOKS[section].forEach(book => {
             const btn = document.createElement('button');
-            btn.className   = 'book-btn';
+            btn.className = 'book-btn';
             btn.textContent = book.name;
-            btn.dataset.id  = book.id;
-            btn.onclick     = () => loadChapter(book.id, 1);
+            btn.dataset.id = book.id;
+            btn.onclick = () => loadChapter(book.id, 1);
             container.appendChild(btn);
         });
     });
@@ -246,9 +246,9 @@ function renderVerses(verses, bookName, chapter) {
     const row = header.querySelector('.chapter-row');
     for (let c = 1; c <= book.chapters; c++) {
         const btn = document.createElement('button');
-        btn.className   = 'chap-btn' + (c === chapter ? ' active' : '');
+        btn.className = 'chap-btn' + (c === chapter ? ' active' : '');
         btn.textContent = c;
-        btn.onclick     = () => loadChapter(state.bookId, c);
+        btn.onclick = () => loadChapter(state.bookId, c);
         row.appendChild(btn);
     }
 
@@ -269,19 +269,19 @@ function renderVerses(verses, bookName, chapter) {
     const nav = document.createElement('div');
     nav.className = 'chap-nav';
     nav.innerHTML = `
-        <button class="btn-nav" ${chapter<=1?'disabled':''} id="prevBtn">
-            <i class="bi bi-chevron-left"></i> Cap ${chapter-1}
+        <button class="btn-nav" ${chapter <= 1 ? 'disabled' : ''} id="prevBtn">
+            <i class="bi bi-chevron-left"></i> Cap ${chapter - 1}
         </button>
-        <button class="btn-nav" ${chapter>=book.chapters?'disabled':''} id="nextBtn">
-            Cap ${chapter+1} <i class="bi bi-chevron-right"></i>
+        <button class="btn-nav" ${chapter >= book.chapters ? 'disabled' : ''} id="nextBtn">
+            Cap ${chapter + 1} <i class="bi bi-chevron-right"></i>
         </button>`;
     content.appendChild(nav);
 
-    document.getElementById('prevBtn').onclick = () => loadChapter(state.bookId, chapter-1);
-    document.getElementById('nextBtn').onclick = () => loadChapter(state.bookId, chapter+1);
+    document.getElementById('prevBtn').onclick = () => loadChapter(state.bookId, chapter - 1);
+    document.getElementById('nextBtn').onclick = () => loadChapter(state.bookId, chapter + 1);
 
     if (window.innerWidth < 768) closeSidebar();
-    window.scrollTo({ top:0, behavior:'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 /* ═══════════════════ LOAD CHAPTER ═════════════════════════════ */
@@ -290,13 +290,13 @@ async function loadChapter(bookId, chapter) {
     window.speechSynthesis?.cancel();
     ttsSetPlaying(false);
 
-    state.bookId  = bookId;
+    state.bookId = bookId;
     state.chapter = chapter;
     updateActiveBook();
 
-    const loader  = document.getElementById('loader');
+    const loader = document.getElementById('loader');
     const content = document.getElementById('content');
-    const errMsg  = document.getElementById('error-msg');
+    const errMsg = document.getElementById('error-msg');
 
     loader?.classList.remove('d-none');
     content?.classList.add('d-none');
@@ -305,10 +305,10 @@ async function loadChapter(bookId, chapter) {
     try {
         const verses = await fetchChapter(bookId, chapter);
         state.verses = verses;
-        renderVerses(verses, ALL_BOOKS.find(b=>b.id===bookId).name, chapter);
+        renderVerses(verses, ALL_BOOKS.find(b => b.id === bookId).name, chapter);
         loader?.classList.add('d-none');
         content?.classList.remove('d-none');
-    } catch(e) {
+    } catch (e) {
         loader?.classList.add('d-none');
         if (errMsg) {
             errMsg.classList.remove('d-none');
@@ -345,12 +345,12 @@ let _ttsSpeaking = false;
 
 function ttsSetPlaying(on) {
     _ttsSpeaking = on;
-    const btn   = document.getElementById('ttsBtn');
-    const icon  = document.getElementById('ttsIcon');
+    const btn = document.getElementById('ttsBtn');
+    const icon = document.getElementById('ttsIcon');
     const label = document.getElementById('ttsLabel');
     if (!btn) return;
     btn.classList.toggle('tts-speaking', on);
-    if (icon)  icon.className    = on ? 'bi bi-stop-fill' : 'bi bi-volume-up-fill';
+    if (icon) icon.className = on ? 'bi bi-stop-fill' : 'bi bi-volume-up-fill';
     if (label) label.textContent = on ? 'Parar' : 'Ouvir';
 }
 
@@ -359,7 +359,7 @@ function initTTS() {
     if (!synth) return;                          // API not available — leave button hidden
 
     const wrap = document.getElementById('tts-wrap');
-    const btn  = document.getElementById('ttsBtn');
+    const btn = document.getElementById('ttsBtn');
     if (!wrap || !btn) return;
 
     wrap.style.display = 'flex';                 // reveal the button now that we know it works
@@ -387,16 +387,16 @@ function initTTS() {
         // Chrome sometimes keeps a stale "speaking" state — cancel first
         synth.cancel();
 
-        const utt   = new SpeechSynthesisUtterance(text);
-        utt.lang    = 'pt-BR';
-        utt.rate    = 0.92;   // slightly slower than default — better for formal text
-        utt.pitch   = 1;
+        const utt = new SpeechSynthesisUtterance(text);
+        utt.lang = 'pt-BR';
+        utt.rate = 0.92;   // slightly slower than default — better for formal text
+        utt.pitch = 1;
 
         const voice = pickVoice();
         if (voice) utt.voice = voice;
 
         utt.onstart = () => ttsSetPlaying(true);
-        utt.onend   = () => ttsSetPlaying(false);
+        utt.onend = () => ttsSetPlaying(false);
         utt.onerror = () => ttsSetPlaying(false);
 
         synth.speak(utt);
@@ -447,12 +447,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Font controls
     document.getElementById('fontUp')?.addEventListener('click', () => {
-        state.fontSize = Math.min(2, +(state.fontSize+0.1).toFixed(1));
-        document.querySelectorAll('.verse-text').forEach(el => el.style.fontSize = state.fontSize+'rem');
+        state.fontSize = Math.min(2, +(state.fontSize + 0.1).toFixed(1));
+        document.querySelectorAll('.verse-text').forEach(el => el.style.fontSize = state.fontSize + 'rem');
     });
     document.getElementById('fontDown')?.addEventListener('click', () => {
-        state.fontSize = Math.max(0.8, +(state.fontSize-0.1).toFixed(1));
-        document.querySelectorAll('.verse-text').forEach(el => el.style.fontSize = state.fontSize+'rem');
+        state.fontSize = Math.max(0.8, +(state.fontSize - 0.1).toFixed(1));
+        document.querySelectorAll('.verse-text').forEach(el => el.style.fontSize = state.fontSize + 'rem');
     });
 
     // Search (debounced — searches all 31k verses instantly from bundled data)
@@ -483,11 +483,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (scrollBtn) {
         window.addEventListener('scroll', () => {
             const show = window.scrollY > 300;
-            scrollBtn.style.opacity       = show ? '1' : '0';
+            scrollBtn.style.opacity = show ? '1' : '0';
             scrollBtn.style.pointerEvents = show ? 'auto' : 'none';
         });
         scrollBtn.addEventListener('click', () =>
-            window.scrollTo({ top:0, behavior:'smooth' }));
+            window.scrollTo({ top: 0, behavior: 'smooth' }));
     }
 
     // Load first chapter
@@ -495,57 +495,51 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ===========================================================
-// Service Worker Registration – FORCE UPDATE ON ALL BROWSERS
-// Cole isso no script.js, substituindo qualquer registro SW existente
-// ===========================================================
-
-// ===========================================================
 // Service Worker Registration – GITHUB PAGES COMPATIBLE
-// Substitui qualquer registro SW existente no script.js
+// Com trava de segurança contra loop de reload infinito
 // ===========================================================
 
 if ('serviceWorker' in navigator) {
+    // Timestamp impede que o navegador sirva um SW antigo do cache CDN
+    const swUrl = `/sw.js?v=${Date.now()}`;
+    let isRefreshing = false; // Trava para evitar múltiplos reloads
 
-  // Timestamp na URL impede que o GitHub Pages sirva sw.js do cache CDN
-  const swUrl = `/sw.js?v=${Date.now()}`;
+    navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' })
+        .then(reg => {
+            // Força verificação de nova versão
+            reg.update();
 
-  navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' })
-    .then(reg => {
+            reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                if (!newWorker) return;
 
-      // Checa por update imediatamente ao carregar a página
-      reg.update();
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed') {
+                        if (navigator.serviceWorker.controller) {
+                            console.log('[SW] Nova versão encontrada, atualizando...');
+                            newWorker.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                    }
+                });
+            });
+        })
+        .catch(err => console.error('[SW] Registro falhou:', err));
 
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        if (!newWorker) return;
-
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed') {
-            if (navigator.serviceWorker.controller) {
-              console.log('[SW] Nova versão encontrada, forçando ativação...');
-              newWorker.postMessage({ type: 'SKIP_WAITING' });
-            } else {
-              console.log('[SW] Primeira instalação completa');
-            }
-          }
-        });
-      });
-
-      // Recarrega a página quando o novo SW assumir o controle
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.log('[SW] Novo SW ativo, recarregando página...');
+    // Recarrega a página apenas uma vez quando o novo SW assume o controle
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (isRefreshing) return;
+        isRefreshing = true;
+        console.log('[SW] Novo Service Worker ativo! Recarregando app...');
         window.location.reload();
-      });
+    });
 
-    })
-    .catch(err => console.error('[SW] Registro falhou:', err));
-
-  // Fallback: SW avisa diretamente para recarregar
-  navigator.serviceWorker.addEventListener('message', event => {
-    if (event.data?.type === 'SW_UPDATED') {
-      console.log('[SW] SW_UPDATED recebido, recarregando...');
-      window.location.reload();
-    }
-  });
-
+    // Escuta mensagens de atualização do SW
+    navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data?.type === 'SW_UPDATED') {
+            if (isRefreshing) return;
+            isRefreshing = true;
+            console.log('[SW] Mensagem de atualização recebida. Recarregando...');
+            window.location.reload();
+        }
+    });
 }
