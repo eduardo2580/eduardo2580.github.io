@@ -151,6 +151,80 @@ function normalise(s) {
     return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
+/**
+ * Levenshtein Distance for fuzzy matching.
+ */
+function levenshtein(a, b) {
+    const tmp = [];
+    for (let i = 0; i <= a.length; i++) { tmp[i] = [i]; }
+    for (let j = 0; j <= b.length; j++) { tmp[0][j] = j; }
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            tmp[i][j] = Math.min(
+                tmp[i - 1][j] + 1,
+                tmp[i][j - 1] + 1,
+                tmp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+            );
+        }
+    }
+    return tmp[a.length][b.length];
+}
+
+/**
+ * Find the best book match using fuzzy search.
+ */
+function findBestBookMatch(query) {
+    const q = normalise(query);
+    if (q.length < 2) return null;
+
+    let best = null;
+    let minDistance = 3; // Max threshold for small typos
+
+    for (const book of ALL_BOOKS) {
+        const bookName = normalise(book.name);
+        // Direct prefix match is high priority
+        if (bookName.startsWith(q)) return book;
+
+        const distance = levenshtein(q, bookName.substring(0, q.length));
+        if (distance < minDistance) {
+            minDistance = distance;
+            best = book;
+        }
+    }
+    return best;
+}
+
+/**
+ * Parses queries like "João 3:16", "Gn 1", "Apocalipse 22" or just "Gênesis".
+ */
+function parseReference(query) {
+    const q = query.trim();
+    if (q.length < 2) return null;
+
+    // Try reference with chapter: Book Chapter(:Verse)
+    const refRegex = /^(\d?\s*[a-zA-Z\u00C0-\u017F\s]+)\s+(\d+)(?::(\d+))?$/i;
+    const match = q.match(refRegex);
+
+    if (match) {
+        const bookQuery = match[1].trim();
+        const chapter = parseInt(match[2]);
+        const verse = match[3] ? parseInt(match[3]) : null;
+        const book = findBestBookMatch(bookQuery);
+
+        if (book && chapter > 0 && chapter <= book.chapters) {
+            return { book, chapter, verse };
+        }
+    }
+
+    // Try just book name (if no numbers are present)
+    if (!/\d/.test(q)) {
+        const book = findBestBookMatch(q);
+        if (book) return { book, chapter: null, verse: null };
+    }
+
+    return null;
+}
+
 function searchVerses(query) {
     if (!query.trim() || !window.BIBLE_DATA) return [];
     const q = normalise(query.trim());
@@ -170,19 +244,38 @@ function searchVerses(query) {
     return results;
 }
 
-function renderSearch(query, results) {
+function renderSearch(query, results, directRef = null) {
     const content = document.getElementById('content');
     content.innerHTML = '';
     content.className = 'fade-in';
+
+    // XSS mitigation: escape user input
+    const cleanQuery = query.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const re = new RegExp(`(${esc})`, 'gi');
 
     content.innerHTML = `
         <h1 class="bible-heading">Busca</h1>
-        <div class="bible-subheading">"${query}" — ${results.length} resultado(s)</div>
+        <div class="bible-subheading">"${cleanQuery}" — ${results.length} resultado(s)</div>
         <div class="ornament">✦ ✦ ✦</div>`;
 
-    if (!results.length) {
+    if (directRef) {
+        const refDiv = document.createElement('div');
+        refDiv.className = 'note-card';
+        refDiv.style.cursor = 'pointer';
+        const chapStr = directRef.chapter ? ` ${directRef.chapter}` : '';
+        const vStr = directRef.verse ? `:${directRef.verse}` : '';
+        refDiv.innerHTML = `
+            <div class="note-label">IR PARA REFERÊNCIA</div>
+            <div style="font-family:'Cinzel'; font-size:1.1rem; color:var(--red-bible)">
+                ${directRef.book.name}${chapStr}${vStr}
+            </div>
+        `;
+        refDiv.onclick = () => loadChapter(directRef.book.id, directRef.chapter || 1, directRef.verse);
+        content.appendChild(refDiv);
+    }
+
+    if (!results.length && !directRef) {
         content.innerHTML += `<p style="text-align:center;opacity:.6;margin-top:2rem">Nenhum versículo encontrado.</p>`;
         return;
     }
@@ -194,12 +287,12 @@ function renderSearch(query, results) {
         div.style.cursor = 'pointer';
         div.innerHTML = `
             <span class="verse-num" style="min-width:5rem;font-size:.75rem">
-                ${r.book.name.slice(0, 3)} ${r.chapter}:${r.verse}
+                ${r.book.name} ${r.chapter}:${r.verse}
             </span>
             <span class="verse-text" style="font-size:${state.fontSize}rem">
                 ${r.text.replace(re, '<mark>$1</mark>')}
             </span>`;
-        div.onclick = () => loadChapter(r.book.id, r.chapter);
+        div.onclick = () => loadChapter(r.book.id, r.chapter, r.verse);
         wrap.appendChild(div);
     }
     content.appendChild(wrap);
@@ -227,7 +320,7 @@ function updateActiveBook() {
         btn.classList.toggle('active', btn.dataset.id === state.bookId));
 }
 
-function renderVerses(verses, bookName, chapter) {
+function renderVerses(verses, bookName, chapter, targetVerse = null) {
     const content = document.getElementById('content');
     content.innerHTML = '';
     content.className = 'fade-in';
@@ -257,6 +350,11 @@ function renderVerses(verses, bookName, chapter) {
     verses.forEach(v => {
         const div = document.createElement('div');
         div.className = 'verse';
+        div.dataset.verse = v.verse;
+        if (targetVerse && v.verse === targetVerse) {
+            div.classList.add('highlight-target');
+            div.id = 'target-verse';
+        }
         div.innerHTML = `
             <span class="verse-num">${v.verse}</span>
             <span class="verse-text" style="font-size:${state.fontSize}rem">${v.text}</span>`;
@@ -264,6 +362,18 @@ function renderVerses(verses, bookName, chapter) {
         verseWrap.appendChild(div);
     });
     content.appendChild(verseWrap);
+
+    // Auto-scroll to target verse
+    if (targetVerse) {
+        setTimeout(() => {
+            const el = document.getElementById('target-verse');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Remove highlight after 3 seconds
+                setTimeout(() => el.classList.remove('highlight-target'), 3000);
+            }
+        }, 500);
+    }
 
     // Prev / Next navigation
     const nav = document.createElement('div');
@@ -285,7 +395,7 @@ function renderVerses(verses, bookName, chapter) {
 }
 
 /* ═══════════════════ LOAD CHAPTER ═════════════════════════════ */
-async function loadChapter(bookId, chapter) {
+async function loadChapter(bookId, chapter, verse = null) {
     // Stop any ongoing TTS when navigating to a new chapter
     window.speechSynthesis?.cancel();
     ttsSetPlaying(false);
@@ -305,7 +415,7 @@ async function loadChapter(bookId, chapter) {
     try {
         const verses = await fetchChapter(bookId, chapter);
         state.verses = verses;
-        renderVerses(verses, ALL_BOOKS.find(b => b.id === bookId).name, chapter);
+        renderVerses(verses, ALL_BOOKS.find(b => b.id === bookId).name, chapter, verse);
         loader?.classList.add('d-none');
         content?.classList.remove('d-none');
     } catch (e) {
@@ -457,14 +567,24 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Search (debounced — searches all 31k verses instantly from bundled data)
     let searchTimer;
-    document.getElementById('searchInput')?.addEventListener('input', e => {
+    const searchInput = document.getElementById('searchInput');
+    searchInput?.addEventListener('input', e => {
         clearTimeout(searchTimer);
         const q = e.target.value.trim();
         if (!q) { loadChapter(state.bookId, state.chapter); return; }
         searchTimer = setTimeout(() => {
+            const directRef = parseReference(q);
             const results = searchVerses(q);
-            renderSearch(q, results);
+            renderSearch(q, results, directRef);
         }, 400);
+    });
+
+    // Enter key support for first result
+    searchInput?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            const firstResult = document.querySelector('.note-card, #content .verse');
+            if (firstResult) firstResult.click();
+        }
     });
 
     // Keyboard navigation ← →
