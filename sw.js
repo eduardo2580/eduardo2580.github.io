@@ -1,12 +1,11 @@
 /* ===========================================================
    Service Worker – Bíblia Sagrada PWA
-   v25 – FORCE UPDATE / GITHUB PAGES COMPATIBLE
+   v28 – FIXED
    =========================================================== */
 
-const CACHE_VERSION = 'v27'; // ← INCREMENTE SEMPRE QUE FIZER DEPLOY
-const CACHE_NAME    = `bible-sagrada-${CACHE_VERSION}`;
-const PRECACHE_NAME = `${CACHE_NAME}-precache`;
-const RUNTIME_NAME  = `${CACHE_NAME}-runtime`;
+const CACHE_VERSION = 'v28'; // ← INCREMENTE SEMPRE QUE FIZER DEPLOY
+const PRECACHE_NAME = `bible-sagrada-${CACHE_VERSION}-precache`;
+const RUNTIME_NAME  = `bible-sagrada-${CACHE_VERSION}-runtime`;
 
 const PRECACHE_URLS = [
   './',
@@ -36,49 +35,57 @@ function log(...args) {
 }
 
 // ------------------------------
-// INSTALL – skipWaiting imediato
+// INSTALL
 // ------------------------------
 self.addEventListener('install', event => {
   log('Installing version:', CACHE_VERSION);
-  self.skipWaiting(); // fora do waitUntil = mais agressivo
+  // FIX: skipWaiting inside waitUntil to avoid race conditions
   event.waitUntil(
     caches.open(PRECACHE_NAME)
       .then(cache => cache.addAll(PRECACHE_URLS))
-      .then(() => log('Precache complete'))
+      .then(() => {
+        log('Precache complete');
+        return self.skipWaiting();
+      })
       .catch(err => console.error('Precache failed:', err))
   );
 });
 
 // ------------------------------
-// ACTIVATE – limpa caches antigos e assume controle
+// ACTIVATE – delete old caches and claim clients
 // ------------------------------
 self.addEventListener('activate', event => {
   log('Activating version:', CACHE_VERSION);
+  const validCaches = new Set([PRECACHE_NAME, RUNTIME_NAME]);
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
         keys.map(k => {
-          if (k !== PRECACHE_NAME && k !== RUNTIME_NAME) {
+          // FIX: delete any cache NOT in the current version's set
+          if (!validCaches.has(k)) {
             log('Deleting old cache:', k);
             return caches.delete(k);
           }
         })
       ))
-      .then(() => self.clients.claim())
+      .then(() => {
+        log('Now controlling all clients');
+        return self.clients.claim();
+      })
   );
 });
 
 // ------------------------------
-// FETCH – estratégias de cache
+// FETCH
 // ------------------------------
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Ignora requisições externas e não-GET
-  if (request.method !== 'GET' || !url.origin.startsWith(self.location.origin)) return;
+  // FIX: strict equality, not startsWith
+  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  // Nunca faz cache do próprio sw.js
+  // Never cache the SW itself
   if (url.pathname.includes('sw.js')) return;
 
   if (['style', 'script', 'image', 'font'].includes(request.destination)) {
@@ -91,7 +98,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  if (url.pathname.startsWith('/data/') || url.pathname.startsWith('/api/') || url.pathname.includes('.json')) {
+  if (
+    url.pathname.startsWith('/data/') ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname.includes('.json')
+  ) {
     event.respondWith(staleWhileRevalidate(request));
     return;
   }
@@ -100,11 +111,14 @@ self.addEventListener('fetch', event => {
 });
 
 // ------------------------------
-// Estratégias
+// Strategies
 // ------------------------------
 async function cacheFirst(request) {
   const cached = await caches.match(request);
-  if (cached) { log('Cache hit:', request.url); return cached; }
+  if (cached) {
+    log('Cache hit:', request.url);
+    return cached;
+  }
   try {
     const response = await fetch(request);
     if (response?.status === 200) {
@@ -126,12 +140,15 @@ async function networkFirstWithOfflineFallback(request) {
       cache.put(request, response.clone());
       return response;
     }
-    throw new Error('Bad response');
-  } catch {
+    throw new Error(`Bad response: ${response?.status}`);
+  } catch (err) {
+    log('Network failed, falling back to cache:', err.message);
     const cached = await caches.match(request);
     if (cached) return cached;
-    const offline = await caches.match('/offline.html');
+
+    const offline = await caches.match('offline.html');
     if (offline) return offline;
+
     return new Response(`
       <!DOCTYPE html>
       <html lang="pt-BR">
@@ -146,11 +163,20 @@ async function networkFirstWithOfflineFallback(request) {
 async function staleWhileRevalidate(request) {
   const cache  = await caches.open(RUNTIME_NAME);
   const cached = await cache.match(request);
-  const revalidate = fetch(request).then(response => {
-    if (response?.status === 200) cache.put(request, response.clone());
-    return response;
-  }).catch(() => {});
-  return cached || revalidate;
+
+  // FIX: always kick off revalidation, but don't let it block the response
+  const revalidatePromise = fetch(request)
+    .then(response => {
+      if (response?.status === 200) cache.put(request, response.clone());
+      return response;
+    })
+    .catch(err => {
+      log('Revalidation failed:', request.url, err.message);
+      return null;
+    });
+
+  // FIX: if we have a cached copy, return it immediately; else await the network
+  return cached ?? revalidatePromise;
 }
 
 async function networkFirstFallbackToCache(request) {
@@ -161,8 +187,9 @@ async function networkFirstFallbackToCache(request) {
       cache.put(request, response.clone());
       return response;
     }
-    throw new Error('Bad response');
-  } catch {
+    throw new Error(`Bad response: ${response?.status}`);
+  } catch (err) {
+    log('Network failed, trying cache:', request.url, err.message);
     const cached = await caches.match(request);
     if (cached) return cached;
     return new Response('Recurso não disponível offline', { status: 404 });

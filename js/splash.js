@@ -15,7 +15,6 @@
   const FADE_DURATION = 800;     // Tempo do efeito de sumir
 
   const VERSES = [
-    { text: 'A tua palavra é lâmpada para os meus pés e luz para o meu caminho.', ref: 'Salmos 119:105' },
     { text: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito.', ref: 'João 3:16' },
     { text: 'Tudo posso naquele que me fortalece.', ref: 'Filipenses 4:13' },
     { text: 'O Senhor é o meu pastor e nada me faltará.', ref: 'Salmos 23:1' },
@@ -169,7 +168,7 @@
     const overlay = document.createElement('div');
     overlay.id = 'bs-splash';
     overlay.innerHTML = `
-      <div id="bs-logo-wrap"><div id="bs-ring"></div><div id="bs-logo-circle">📖</div></div>
+      <div id="bs-logo-wrap"><div id="bs-ring"></div><div id="bs-logo-circle">✦</div></div>
       <div id="bs-brand">Bíblia Sagrada</div>
       <div id="bs-subtitle">Palavra de Deus</div>
       <div id="bs-verse-block">
