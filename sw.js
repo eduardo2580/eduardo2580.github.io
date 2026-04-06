@@ -3,7 +3,7 @@
    v28 – FIXED
    =========================================================== */
 
-const CACHE_VERSION = 'v28'; // ← INCREMENTE SEMPRE QUE FIZER DEPLOY
+const CACHE_VERSION = 'v29; // ← INCREMENTE SEMPRE QUE FIZER DEPLOY
 const PRECACHE_NAME = `bible-sagrada-${CACHE_VERSION}-precache`;
 const RUNTIME_NAME  = `bible-sagrada-${CACHE_VERSION}-runtime`;
 
