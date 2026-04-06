@@ -485,9 +485,28 @@ function initTTS() {
 
     function pickVoice() {
         const voices = synth.getVoices();
-        return voices.find(v => v.lang === 'pt-BR')
-            || voices.find(v => v.lang.startsWith('pt'))
-            || null;
+        // Standardize lang tags to 'pt-BR'
+        const ptBR = voices.filter(v => v.lang.replace('_', '-') === 'pt-BR');
+
+        if (ptBR.length === 0) {
+            return voices.find(v => v.lang.startsWith('pt')) || null;
+        }
+
+        // Common male voice names/keywords in Brazilian Portuguese
+        const maleKeywords = ['daniel', 'antonio', 'ricardo', 'felipe', 'guilherme', 'thiago', 'male', 'masculino'];
+
+        const getScore = (v) => {
+            let score = 0;
+            const name = v.name.toLowerCase();
+            // Prioritize local (offline) voices
+            if (v.localService) score += 10;
+            // Prioritize masculine voices
+            if (maleKeywords.some(k => name.includes(k))) score += 5;
+            return score;
+        };
+
+        ptBR.sort((a, b) => getScore(b) - getScore(a));
+        return ptBR[0];
     }
 
     function speak() {
