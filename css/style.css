@@ -97,11 +97,11 @@ header .brand small {
 }
 .btn-menu:hover { background: var(--gold-dark); color: #fff; }
 
-/* search bar in header */
+/* search bar in sidebar */
 .search-wrap {
   position: relative;
-  max-width: 340px;
-  flex: 1;
+  padding: 0.8rem 1.1rem;
+  z-index: 10;
 }
 .search-wrap input {
   background: rgba(255,255,255,.07);
@@ -122,11 +122,12 @@ header .brand small {
 }
 .search-wrap .bi-search {
   position: absolute;
-  left: .75rem;
+  left: 1.85rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--gold-dark);
   font-size: 1rem;
+  pointer-events: none;
 }
 
 /* ── LAYOUT ───────────────────────────────────────── */
@@ -268,6 +269,7 @@ header .brand small {
 }
 .verse:hover     { background: rgba(201,169,110,.1); }
 .verse.highlight { background: rgba(201,169,110,.22); }
+.highlight-target { background: rgba(201,169,110,.4) !important; border-radius: 4px; }
 
 .verse-num {
   font-family: 'Cinzel', serif;
