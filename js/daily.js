@@ -38,10 +38,11 @@
         return Math.min(Math.floor(diff / oneDay), DAYS_IN_YEAR);
     }
 
-    function formatDatePtBR(doy) {
+    function formatDateLocalized(doy) {
         const year = new Date().getFullYear();
         const date = new Date(year, 0, doy);
-        return date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+        const locale = window.state.lang === 'pt' ? 'pt-BR' : 'en-US';
+        return date.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
     }
 
     /* ── confetti ──────────────────────────────────────────────── */
@@ -109,21 +110,24 @@
     /* ── conclude button ───────────────────────────────────────── */
     function appendConcludeButton(container, doy) {
         const progressPct = Math.round((doy / DAYS_IN_YEAR) * 100);
-        const QUOTES = [
+        const QUOTES = window.state.lang === 'pt' ? [
             '"A tua palavra é lâmpada que ilumina os meus passos." — Sl 119:105',
             '"Bem-aventurado o que lê, e os que ouvem as palavras desta profecia." — Ap 1:3',
+        ] : [
+            '"Your word is a lamp to my feet and a light to my path." — Ps 119:105',
+            '"Blessed is the one who reads aloud the words of this prophecy." — Rev 1:3',
         ];
 
         const wrap = document.createElement('div');
         wrap.className = 'daily-conclude-wrap';
         wrap.innerHTML = `
-            <div class="daily-progress-label">Progresso Anual</div>
+            <div class="daily-progress-label">${window.t('annualProgress', 'daily')}</div>
             <div class="daily-progress-track">
                 <div class="daily-progress-bar" style="width:${progressPct}%"></div>
             </div>
-            <div class="daily-progress-info">Dia ${doy} de ${DAYS_IN_YEAR} &nbsp;·&nbsp; ${progressPct}% concluído</div>
+            <div class="daily-progress-info">${window.t('day', 'daily')} ${doy} ${window.t('of', 'daily')} ${DAYS_IN_YEAR} &nbsp;·&nbsp; ${progressPct}% ${window.t('concluded', 'daily')}</div>
             <button class="btn-conclude" id="concludeBtn">
-                <i class="bi bi-check2-circle"></i> Concluir leitura de hoje
+                <i class="bi bi-check2-circle"></i> ${window.t('concludeBtn', 'daily')}
             </button>
             <div class="conclude-msg" id="concludeMsg"></div>
         `;
@@ -137,7 +141,7 @@
             launchConfetti();
             btn.disabled = true;
             btn.classList.add('done');
-            btn.innerHTML = `<i class="bi bi-check-circle-fill"></i>&nbsp;Concluído!`;
+            btn.innerHTML = `<i class="bi bi-check-circle-fill"></i>&nbsp;${window.t('done', 'daily')}`;
             if (bar) { bar.style.width = '100%'; bar.classList.add('bar-done'); }
             msg.textContent = QUOTES[Math.floor(Math.random() * QUOTES.length)];
             msg.classList.add('visible');
@@ -148,20 +152,20 @@
     /* ── render daily content ──────────────────────────────────── */
     function renderDailyContent(doy, portions, chapterData) {
         const content  = document.getElementById('content');
-        const dateStr  = formatDatePtBR(doy);
+        const dateStr  = formatDateLocalized(doy);
         const isToday  = doy === todayDayOfYear();
-        const dayLabel = isToday ? 'Hoje' : `Dia ${doy}`;
+        const dayLabel = isToday ? window.t('today', 'daily') : `${window.t('day', 'daily')} ${doy}`;
         const chapLabels = portions.map(p => `${p.bookName} ${p.chapter}`).join(' · ');
 
         content.innerHTML = '';
         content.className = 'fade-in';
 
         content.insertAdjacentHTML('beforeend', `
-            <h1 class="bible-heading">Leitura do Dia</h1>
+            <h1 class="bible-heading">${window.t('title', 'daily')}</h1>
             <div class="bible-subheading">${dateStr}</div>
             <div class="ornament">✦ ✦ ✦</div>
             <div class="note-card">
-                <div class="note-label">${dayLabel} de ${DAYS_IN_YEAR} · Bíblia em 1 Ano</div>
+                <div class="note-label">${dayLabel} ${window.t('of', 'daily')} ${DAYS_IN_YEAR} · ${window.t('planName', 'daily')}</div>
                 <div class="note-chapters">${chapLabels}</div>
             </div>
         `);
@@ -169,7 +173,7 @@
         portions.forEach((p, i) => {
             const verses = chapterData[i];
             content.insertAdjacentHTML('beforeend', `
-                <h2 class="daily-book-heading">${p.bookName} — Capítulo ${p.chapter}</h2>
+                <h2 class="daily-book-heading">${p.bookName} — ${window.t('chapter')} ${p.chapter}</h2>
                 <div class="daily-book-divider"></div>
             `);
             const verseWrap = document.createElement('div');
@@ -226,9 +230,9 @@
                 errMsg.innerHTML = `
                     <div style="text-align:center;padding:2rem">
                         <i class="bi bi-exclamation-circle" style="font-size:2.5rem;opacity:.5"></i>
-                        <p style="margin-top:1rem">${e.message || 'Erro ao carregar dados'}</p>
+                        <p style="margin-top:1rem">${window.t('errorGeneric')}</p>
                         <button onclick="loadDailyReading()" class="btn-nav" style="margin:auto">
-                            Tentar Novamente
+                            ${window.t('tryAgain', 'daily')}
                         </button>
                     </div>`;
             }
@@ -243,7 +247,7 @@
         const btn = document.createElement('button');
         btn.className   = 'book-btn';
         btn.id          = 'dailyBtn';
-        btn.innerHTML   = `<i class="bi bi-calendar-check"></i> Leitura de Hoje`;
+        btn.innerHTML   = `<i class="bi bi-calendar-check"></i> ${window.t('todayReading')}`;
         btn.onclick     = loadDailyReading;
         container.appendChild(btn);
     }
