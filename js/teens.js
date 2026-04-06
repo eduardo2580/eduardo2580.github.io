@@ -74,8 +74,9 @@
         const blob = new Blob([buildExportJson()], { type: 'application/json' });
         const url  = URL.createObjectURL(blob);
         const a    = document.createElement('a');
-        const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
-        a.href = url; a.download = `plano-adolescentes-backup-${date}.json`; a.click();
+        const isPt = window.state.lang === 'pt';
+        const date = new Date().toLocaleDateString(isPt ? 'pt-BR' : 'en-US').replace(/\//g, '-');
+        a.href = url; a.download = `${isPt ? 'plano-adolescentes' : 'teens-plan'}-backup-${date}.json`; a.click();
         URL.revokeObjectURL(url);
     }
 
@@ -85,7 +86,7 @@
             try {
                 const data = JSON.parse(e.target.result);
                 if (data.plan !== 'teensplan' || !Array.isArray(data.completed))
-                    throw new Error('Arquivo inválido.');
+                    throw new Error(window.t('invalidJson', 'teens'));
                 data.completed.forEach(k => completed.add(k));
                 saveCompleted();
                 // restore start date if present in backup
@@ -94,7 +95,7 @@
                     if (!isNaN(d.getTime())) { teensStart = d; saveStartDate(d); }
                 }
                 onDone(null, data.completed.length);
-            } catch (err) { onDone(err.message || 'Erro ao importar.'); }
+            } catch (err) { onDone(err.message || window.t('errorImport', 'teens')); }
         };
         reader.readAsText(file);
     }
@@ -117,7 +118,8 @@
         if (!teensStart) return '';
         const d = new Date(teensStart);
         d.setDate(d.getDate() + dayNum - 1);
-        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
+        const locale = window.state.lang === 'pt' ? 'pt-BR' : 'en-US';
+        return d.toLocaleDateString(locale, { day: '2-digit', month: 'short' }).replace('.', '');
     }
 
     function showToast(msg) {
@@ -143,22 +145,26 @@
         const overlay = document.createElement('div');
         overlay.id    = 'teensResetOverlay';
         overlay.className = 'teens-reset-overlay';
+        const isPt = window.state.lang === 'pt';
+        const count = completed.size;
+        const chapLabel = count === 1 ? window.t('chapter', 'teens') : window.t('chapterPlural', 'teens');
+        const readLabel = count === 1 ? window.t('read', 'teens') : window.t('readPlural', 'teens');
+
         overlay.innerHTML = `
             <div class="teens-reset-sheet" id="teensResetSheet">
                 <div class="teens-backup-handle"></div>
                 <div class="teens-reset-icon-wrap">
                     <i class="bi bi-exclamation-triangle-fill"></i>
                 </div>
-                <p class="teens-reset-title">Resetar Plano?</p>
+                <p class="teens-reset-title">${window.t('resetTitle', 'teens')}</p>
                 <p class="teens-reset-sub">
-                    Todo o seu progresso (${completed.size} capítulo${completed.size !== 1 ? 's' : ''} lido${completed.size !== 1 ? 's' : ''})
-                    será apagado permanentemente. Essa ação não pode ser desfeita.
+                    ${count} ${chapLabel} ${readLabel}. ${window.t('resetSub', 'teens')}
                 </p>
                 <button class="btn-backup-action primary" id="btnResetConfirm" style="background:linear-gradient(135deg,#dc2626,#ef4444);box-shadow:0 3px 14px rgba(220,38,38,.3)">
-                    <i class="bi bi-trash3-fill"></i> Sim, resetar tudo
+                    <i class="bi bi-trash3-fill"></i> ${window.t('resetConfirm', 'teens')}
                 </button>
                 <button class="btn-backup-action secondary" id="btnResetCancel" style="margin-top:.25rem">
-                    Cancelar
+                    ${window.t('cancel', 'teens')}
                 </button>
             </div>`;
         document.body.appendChild(overlay);
@@ -173,7 +179,7 @@
             teensStart = null;
             TEENS_PLAN = null;
             closeResetModal();
-            showToast('✓ Plano resetado com sucesso!');
+            showToast(window.t('resetSuccess', 'teens'));
             openWelcomeScreen();
         });
     }
@@ -219,11 +225,11 @@
         content.innerHTML = `
             <!-- Hero banner -->
             <div class="teens-banner" style="padding-bottom:2.5rem">
-                <p class="teens-banner-tag">Plano de Leitura</p>
-                <h2 class="teens-banner-title">Leitura<br>para<br>Adolescentes</h2>
+                <p class="teens-banner-tag">${window.t('tag', 'teens')}</p>
+                <h2 class="teens-banner-title">${window.t('bannerTitle', 'teens')}</h2>
                 <div class="teens-banner-meta">
-                    <span class="teens-badge"><i class="bi bi-lightning-charge-fill"></i> Bíblia Sagrada</span>
-                    <span class="teens-badge-days">${TEENS_DAYS} dias</span>
+                    <span class="teens-badge"><i class="bi bi-lightning-charge-fill"></i> ${window.t('brand')}</span>
+                    <span class="teens-badge-days">${TEENS_DAYS} ${window.t('days', 'teens')}</span>
                 </div>
             </div>
 
@@ -232,42 +238,41 @@
                 <div class="welcome-card">
                     <div class="welcome-card-icon"><i class="bi bi-calendar3"></i></div>
                     <div class="welcome-card-val">${TEENS_DAYS}</div>
-                    <div class="welcome-card-label">Dias</div>
+                    <div class="welcome-card-label">${window.t('daysTitle', 'teens')}</div>
                 </div>
                 <div class="welcome-card">
                     <div class="welcome-card-icon"><i class="bi bi-book-fill"></i></div>
                     <div class="welcome-card-val">${totalChapters}</div>
-                    <div class="welcome-card-label">Capítulos</div>
+                    <div class="welcome-card-label">${window.t('chapters', 'teens')}</div>
                 </div>
                 <div class="welcome-card">
                     <div class="welcome-card-icon"><i class="bi bi-bookmarks-fill"></i></div>
                     <div class="welcome-card-val">${ALL_BOOKS.length}</div>
-                    <div class="welcome-card-label">Livros</div>
+                    <div class="welcome-card-label">${window.t('books', 'teens')}</div>
                 </div>
             </div>
 
             <!-- Description -->
             <div class="welcome-desc-card">
-                <p class="welcome-desc-title"><i class="bi bi-info-circle"></i> Como funciona</p>
+                <p class="welcome-desc-title"><i class="bi bi-info-circle"></i> ${window.t('howItWorks', 'teens')}</p>
                 <p class="welcome-desc-text">
-                    Ao tocar em <strong>Iniciar</strong>, hoje vira o <strong>Dia 1</strong> do plano.
-                    A contagem avança automaticamente a cada dia — você só precisa marcar os capítulos
-                    à medida que lê. Seu progresso fica salvo no dispositivo.
+                    ${window.t('startDesc', 'teens')}
+                    ${window.t('startInfo', 'teens')}
                 </p>
             </div>
 
             <!-- Preview -->
-            <p class="welcome-section-label">Prévia do plano</p>
+            <p class="welcome-section-label">${window.t('preview', 'teens')}</p>
             <div class="welcome-preview-list">
                 ${previewRows}
                 <div class="welcome-preview-row" style="justify-content:center;opacity:.45;font-size:.78rem;padding:.6rem 1rem">
-                    … e mais ${TEENS_DAYS - 5} dias
+                    … ${window.t('andMore', 'teens')} ${TEENS_DAYS - 5} ${window.t('days', 'teens')}
                 </div>
             </div>
 
             <!-- CTA -->
             <button class="btn-teens-start" id="btnTeensIniciar" style="margin-top:1.5rem">
-                <i class="bi bi-play-fill"></i> Iniciar Plano
+                <i class="bi bi-play-fill"></i> ${window.t('startBtn', 'teens')}
             </button>
         `;
 
@@ -276,7 +281,7 @@
             teensStart = new Date();
             teensStart.setHours(0, 0, 0, 0);
             saveStartDate(teensStart);
-            showToast('✓ Plano iniciado! Bem-vindo(a)!');
+            showToast(window.t('planStarted', 'teens'));
             openDashboard(1);
         });
 
@@ -305,36 +310,36 @@
         overlay.innerHTML = `
             <div class="teens-backup-sheet" id="teensBackupSheet">
                 <div class="teens-backup-handle"></div>
-                <p class="teens-backup-sheet-title">Backup do Progresso</p>
-                <p class="teens-backup-sheet-sub">Exporte para salvar seu progresso ou importe um arquivo anterior.</p>
+                <p class="teens-backup-sheet-title">${window.t('backupTitle', 'teens')}</p>
+                <p class="teens-backup-sheet-sub">${window.t('backupDesc', 'teens')}</p>
                 <div class="teens-backup-stats">
                     <div class="teens-backup-stat">
                         <div class="teens-backup-stat-val">${completed.size}</div>
-                        <div class="teens-backup-stat-label">Capítulos</div>
+                        <div class="teens-backup-stat-label">${window.t('chapters', 'teens')}</div>
                     </div>
                     <div class="teens-backup-stat">
                         <div class="teens-backup-stat-val">${daysWithProgress}</div>
-                        <div class="teens-backup-stat-label">Dias lidos</div>
+                        <div class="teens-backup-stat-label">${window.t('daysRead', 'teens')}</div>
                     </div>
                     <div class="teens-backup-stat">
                         <div class="teens-backup-stat-val">${pct}%</div>
-                        <div class="teens-backup-stat-label">Concluído</div>
+                        <div class="teens-backup-stat-label">${window.t('concluded', 'teens')}</div>
                     </div>
                 </div>
                 <div class="teens-backup-card">
                     <div class="teens-backup-card-header">
                         <div class="teens-backup-card-icon export"><i class="bi bi-box-arrow-up"></i></div>
                         <div>
-                            <p class="teens-backup-card-title">Exportar progresso</p>
-                            <p class="teens-backup-card-desc">Baixe um arquivo .json para guardar ou transferir</p>
+                            <p class="teens-backup-card-title">${window.t('exportTitle', 'teens')}</p>
+                            <p class="teens-backup-card-desc">${window.t('exportDesc', 'teens')}</p>
                         </div>
                     </div>
                     <div class="teens-backup-card-body">
                         <button class="btn-backup-action primary" id="btnModalExportFile">
-                            <i class="bi bi-download"></i> Baixar arquivo .json
+                            <i class="bi bi-download"></i> ${window.t('downloadBtn', 'teens')}
                         </button>
                         <button class="btn-backup-action secondary" id="btnModalCopyJson">
-                            <i class="bi bi-clipboard"></i> Copiar JSON
+                            <i class="bi bi-clipboard"></i> ${window.t('copyBtn', 'teens')}
                         </button>
                     </div>
                 </div>
@@ -342,19 +347,19 @@
                     <div class="teens-backup-card-header">
                         <div class="teens-backup-card-icon import"><i class="bi bi-box-arrow-in-down"></i></div>
                         <div>
-                            <p class="teens-backup-card-title">Importar progresso</p>
-                            <p class="teens-backup-card-desc">Restaure a partir de um arquivo exportado</p>
+                            <p class="teens-backup-card-title">${window.t('importTitle', 'teens')}</p>
+                            <p class="teens-backup-card-desc">${window.t('importDesc', 'teens')}</p>
                         </div>
                     </div>
                     <div class="teens-backup-card-body">
                         <div class="teens-drop-zone" id="teensDropZone">
                             <input type="file" id="teensImportInput" accept=".json">
                             <div class="teens-drop-zone-icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
-                            <p class="teens-drop-zone-text">Toque para escolher o arquivo</p>
-                            <p class="teens-drop-zone-hint">ou arraste e solte aqui · apenas .json</p>
+                            <p class="teens-drop-zone-text">${window.t('tapChoose', 'teens')}</p>
+                            <p class="teens-drop-zone-hint">${window.t('dragDrop', 'teens')}</p>
                         </div>
                         <button class="btn-backup-action success" id="btnModalPasteJson">
-                            <i class="bi bi-clipboard-check"></i> Colar JSON
+                            <i class="bi bi-clipboard-check"></i> ${window.t('pasteBtn', 'teens')}
                         </button>
                     </div>
                 </div>
@@ -365,18 +370,18 @@
         overlay.addEventListener('click', e => { if (e.target === overlay) closeBackupModal(); });
 
         document.getElementById('btnModalExportFile')?.addEventListener('click', () => {
-            exportProgress(); showToast('✓ Arquivo exportado!');
+            exportProgress(); showToast(window.t('fileExported', 'teens'));
         });
         document.getElementById('btnModalCopyJson')?.addEventListener('click', async () => {
             const json = buildExportJson();
             try {
                 await navigator.clipboard.writeText(json);
-                showToast('✓ JSON copiado!');
+                showToast(window.t('jsonCopied', 'teens'));
             } catch (_) {
                 const ta = document.createElement('textarea');
                 ta.value = json; ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
                 document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-                showToast('✓ JSON copiado!');
+                showToast(window.t('jsonCopied', 'teens'));
             }
         });
         document.getElementById('teensImportInput')?.addEventListener('change', e => {
@@ -418,7 +423,7 @@
     function handleImport(file, dayNum) {
         importProgress(file, (err, count) => {
             if (err) { showToast(`⚠️ ${err}`); }
-            else { closeBackupModal(); showToast(`✓ ${count} capítulos restaurados!`); openDashboard(dayNum); }
+            else { closeBackupModal(); showToast(`✓ ${count} ${window.t('restored', 'teens')}`); openDashboard(dayNum); }
         });
     }
 
@@ -426,7 +431,7 @@
         try {
             const data = JSON.parse(text);
             if (data.plan !== 'teensplan' || !Array.isArray(data.completed))
-                throw new Error('JSON inválido.');
+                throw new Error(window.t('invalidJson', 'teens'));
             data.completed.forEach(k => completed.add(k));
             saveCompleted();
             if (data.startDate) {
@@ -434,9 +439,9 @@
                 if (!isNaN(d.getTime())) { teensStart = d; saveStartDate(d); }
             }
             closeBackupModal();
-            showToast(`✓ ${data.completed.length} capítulos restaurados!`);
+            showToast(`✓ ${data.completed.length} ${window.t('restored', 'teens')}`);
             openDashboard(dayNum);
-        } catch (err) { showToast(`⚠️ ${err.message || 'Erro ao importar JSON.'}`); }
+        } catch (err) { showToast(`⚠️ ${err.message || window.t('errorImport', 'teens')}`); }
     }
 
     /* ── confetti ───────────────────────────────────────────────── */
@@ -838,10 +843,10 @@
         }
 
         /* status badge */
-        let statusClass = 'status-future', statusLabel = 'Futuro';
-        if (allDone)           { statusClass = 'status-done';   statusLabel = '✦ Completo!'; }
-        else if (dayNum === today) { statusClass = 'status-today';  statusLabel = 'Hoje'; }
-        else if (dayNum < today)   { statusClass = 'status-late';   statusLabel = 'Atrasado'; }
+        let statusClass = 'status-future', statusLabel = window.t('future', 'teens');
+        if (allDone)           { statusClass = 'status-done';   statusLabel = window.t('complete', 'teens'); }
+        else if (dayNum === today) { statusClass = 'status-today';  statusLabel = window.t('today', 'teens'); }
+        else if (dayNum < today)   { statusClass = 'status-late';   statusLabel = window.t('late', 'teens'); }
 
         const chapLabels = portions.map(p => `${p.bookName} ${p.chapter}`).join(' · ');
 
@@ -862,19 +867,19 @@
         const celebCard = allDone ? `
             <div class="teens-complete-card">
                 <div class="teens-complete-emoji">🎉</div>
-                <p class="teens-complete-title">Dia ${dayNum} concluído!</p>
-                <p class="teens-complete-sub">Você está indo muito bem. Continue firme!</p>
+                <p class="teens-complete-title">${window.t('day', 'teens')} ${dayNum} ${window.t('completedDay', 'teens')}</p>
+                <p class="teens-complete-sub">${window.t('keepItUp', 'teens')}</p>
             </div>` : '';
 
         content.innerHTML = '';
         content.className = 'teens-fade';
         content.innerHTML = `
             <div class="teens-banner">
-                <p class="teens-banner-tag">Plano</p>
-                <h2 class="teens-banner-title">Leitura<br>para<br>Adolescentes</h2>
+                <p class="teens-banner-tag">${window.t('tag', 'teens')}</p>
+                <h2 class="teens-banner-title">${window.t('bannerTitle', 'teens')}</h2>
                 <div class="teens-banner-meta">
-                    <span class="teens-badge"><i class="bi bi-lightning-charge-fill"></i> Bíblia Sagrada</span>
-                    <span class="teens-badge-days">${TEENS_DAYS} dias</span>
+                    <span class="teens-badge"><i class="bi bi-lightning-charge-fill"></i> ${window.t('brand')}</span>
+                    <span class="teens-badge-days">${TEENS_DAYS} ${window.t('days', 'teens')}</span>
                 </div>
                 <div class="teens-banner-progress">
                     <div class="teens-banner-track">
@@ -890,7 +895,7 @@
 
             <div class="teens-day-header">
                 <div>
-                    <h3 class="teens-day-label">Dia ${dayNum} <span style="font-weight:400;font-size:1rem;opacity:.45">de ${TEENS_DAYS}</span></h3>
+                    <h3 class="teens-day-label">${window.t('day', 'teens')} ${dayNum} <span style="font-weight:400;font-size:1rem;opacity:.45">${window.t('of', 'teens')} ${TEENS_DAYS}</span></h3>
                     <p class="teens-day-date-text">${formatDayDate(dayNum)}</p>
                 </div>
                 <span class="teens-status-badge ${statusClass}">${statusLabel}</span>
@@ -899,7 +904,7 @@
             <div class="teens-note-card">
                 <i class="bi bi-book teens-note-icon"></i>
                 <div>
-                    <div class="teens-note-label">Capítulos de hoje</div>
+                    <div class="teens-note-label">${window.t('todayChapters', 'teens')}</div>
                     <div class="teens-note-chapters">${chapLabels || '—'}</div>
                 </div>
             </div>
@@ -908,8 +913,8 @@
                 <div class="teens-backup-trigger-left">
                     <div class="teens-backup-trigger-icon"><i class="bi bi-shield-check"></i></div>
                     <div class="teens-backup-trigger-text">
-                        <strong>Backup do Progresso</strong>
-                        <span>${completed.size} capítulo${completed.size !== 1 ? 's' : ''} salvo${completed.size !== 1 ? 's' : ''} · Toque para exportar ou importar</span>
+                        <strong>${window.t('backupTitle', 'teens')}</strong>
+                        <span>${completed.size} ${completed.size === 1 ? window.t('chapter', 'teens') : window.t('chapterPlural', 'teens')} ${completed.size === 1 ? window.t('saved', 'teens') : window.t('savedPlural', 'teens')} · ${window.t('tapExport', 'teens')}</span>
                     </div>
                 </div>
                 <i class="bi bi-chevron-right teens-backup-trigger-chevron"></i>
@@ -919,15 +924,15 @@
 
             <button class="btn-teens-start ${allDone ? 'all-done' : ''}" id="btnTeensStart">
                 ${allDone
-                    ? '<i class="bi bi-arrow-repeat"></i> Reler o dia'
-                    : '<i class="bi bi-play-fill"></i> Começar Leitura'}
+                    ? `<i class="bi bi-arrow-repeat"></i> ${window.t('reRead', 'teens')}`
+                    : `<i class="bi bi-play-fill"></i> ${window.t('startReading', 'teens')}`}
             </button>
 
             ${celebCard}
 
             <!-- ── Reset button at the bottom ── -->
             <button class="btn-teens-reset" id="btnTeensReset">
-                <i class="bi bi-arrow-counterclockwise"></i> Resetar Plano
+                <i class="bi bi-arrow-counterclockwise"></i> ${window.t('resetBtn', 'teens')}
             </button>
         `;
 
@@ -1013,8 +1018,8 @@
                 errMsg.innerHTML = `
                     <div style="text-align:center;padding:2rem">
                         <i class="bi bi-exclamation-circle" style="font-size:2.5rem;opacity:.5"></i>
-                        <p style="margin-top:1rem">${e.message}</p>
-                        <button class="btn-nav" style="margin:auto" onclick="window._teensOpenDash()">Voltar</button>
+                        <p style="margin-top:1rem">${window.t('errorLoad', 'teens')}</p>
+                        <button class="btn-nav" style="margin:auto" onclick="window._teensOpenDash()">${window.t('back', 'teens')}</button>
                     </div>`;
                 window._teensOpenDash = () => openDashboard(dayNum);
             }
@@ -1048,24 +1053,24 @@
 
         content.innerHTML = `
             <button class="teens-back-btn" id="teensBackBtn">
-                <i class="bi bi-arrow-left"></i> Plano do Dia ${dayNum}
+                <i class="bi bi-arrow-left"></i> ${window.t('backToPlan', 'teens')} ${dayNum}
             </button>
             <h1 class="bible-heading">${p.bookName}</h1>
-            <div class="bible-subheading">Capítulo ${p.chapter}</div>
+            <div class="bible-subheading">${window.t('chapter')} ${p.chapter}</div>
             <div class="ornament">✦ ✦ ✦</div>
             <div class="chapter-row">${chapPills}</div>
             <div id="teensVerses">${verseRows}</div>
             <div class="chap-nav">
                 <button class="btn-nav" id="teensPrev" ${chapterIdx === 0 ? 'disabled' : ''}>
-                    <i class="bi bi-chevron-left"></i> Anterior
+                    <i class="bi bi-chevron-left"></i> ${window.t('prev', 'teens')}
                 </button>
                 <button class="btn-nav btn-teens-done ${isDone ? 'btn-done-active' : ''}" id="teensDone">
                     ${isDone
-                        ? '<i class="bi bi-check-circle-fill"></i> Concluído'
-                        : '<i class="bi bi-check2-circle"></i> Concluir'}
+                        ? `<i class="bi bi-check-circle-fill"></i> ${window.t('concluded', 'teens')}`
+                        : `<i class="bi bi-check2-circle"></i> ${window.t('conclude', 'teens')}`}
                 </button>
                 <button class="btn-nav" id="teensNext" ${chapterIdx === portions.length - 1 ? 'disabled' : ''}>
-                    Próximo <i class="bi bi-chevron-right"></i>
+                    ${window.t('next', 'teens')} <i class="bi bi-chevron-right"></i>
                 </button>
             </div>
         `;
@@ -1108,7 +1113,7 @@
         const btn = document.createElement('button');
         btn.className = 'book-btn';
         btn.id        = 'teensBtn';
-        btn.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> Plano Adolescentes`;
+        btn.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${window.t('title', 'teens')}`;
         btn.addEventListener('click', () => {
             document.querySelectorAll('.book-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');

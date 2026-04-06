@@ -61,7 +61,7 @@
 
         sidebar.classList.add('open');
         toggleBtn.setAttribute('aria-expanded', 'true');
-        toggleBtn.setAttribute('aria-label', 'Fechar menu');
+        updateAria();
 
         if (isMobile) {
             trapFocus();
@@ -79,7 +79,7 @@
 
         sidebar.classList.remove('open');
         toggleBtn.setAttribute('aria-expanded', 'false');
-        toggleBtn.setAttribute('aria-label', 'Abrir menu');
+        updateAria();
 
         if (isMobile) {
             releaseFocus();
@@ -89,6 +89,12 @@
         }
 
         setToggleIcon(false);
+    }
+
+    function updateAria() {
+        const closeLabel = window.t?.('closeMenu') || 'Fechar menu';
+        const openLabel = window.t?.('openMenu') || 'Abrir menu';
+        toggleBtn.setAttribute('aria-label', isOpen ? closeLabel : openLabel);
     }
 
     function toggle() {
@@ -320,7 +326,7 @@
         // ARIA
         toggleBtn.setAttribute('aria-controls', 'sidebar');
         toggleBtn.setAttribute('aria-expanded', 'false');
-        toggleBtn.setAttribute('aria-label', 'Abrir menu');
+        updateAria();
         sidebar.setAttribute('aria-label', 'Menu de navegação');
         sidebar.setAttribute('role', 'navigation');
 
@@ -360,7 +366,7 @@
     }
 
     /* ── expose a minimal public API (optional) ─────────────── */
-    window.SidebarMenu = { open, close, toggle };
+    window.SidebarMenu = { open, close, toggle, updateAria };
 
     /* ── wait for DOM ────────────────────────────────────────── */
     if (document.readyState === 'loading') {

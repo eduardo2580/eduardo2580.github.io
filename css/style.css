@@ -153,6 +153,7 @@ header .brand small {
   padding: .5rem 0;
   border-bottom: 1px solid rgba(201,169,110,.15);
 }
+.sidebar-section.border-0 { border-bottom: 0 !important; }
 
 .sidebar-title {
   font-family: 'Cinzel', serif;

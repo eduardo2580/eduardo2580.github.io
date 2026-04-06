@@ -86,8 +86,248 @@ const BOOKS = {
 
 const ALL_BOOKS = [...BOOKS.ot, ...BOOKS.nt];
 
+/* ════════════════════════ TRANSLATIONS ═════════════════════════ */
+const TRANSLATIONS = {
+    pt: {
+        brand: '✦ Bíblia Sagrada',
+        searchPlaceholder: 'Buscar na Bíblia...',
+        daily: '✦ Daily',
+        todayReading: 'Leitura de Hoje',
+        ot: '✦ Antigo Testamento',
+        nt: '✦ Novo Testamento',
+        listen: 'Ouvir',
+        stop: 'Parar',
+        search: 'Busca',
+        results: 'resultado(s)',
+        goToRef: 'IR PARA REFERÊNCIA',
+        noResults: 'Nenhum versículo encontrado.',
+        chapter: 'Capítulo',
+        loading: 'Carregando a Palavra…',
+        tryAgain: 'Tentar Novamente',
+        errorData: 'Arquivo de dados não encontrado',
+        errorChapter: 'Capítulo não encontrado',
+        errorGeneric: 'Erro ao carregar dados',
+        errorDataInstruction: 'Adicione ao index.html antes de script.js',
+        fontDown: 'Diminuir fonte',
+        fontUp: 'Aumentar fonte',
+        listenTitle: 'Ouvir a Palavra',
+        scrollTop: 'Voltar ao topo',
+        menuTitle: 'Menu de livros',
+        closeMenu: 'Fechar menu',
+        openMenu: 'Abrir menu',
+        prev: 'Cap',
+        next: 'Cap',
+        langBtn: 'Português'
+    },
+    en: {
+        brand: '✦ Holy Bible',
+        searchPlaceholder: 'Search the Bible...',
+        daily: '✦ Daily',
+        todayReading: "Today's Reading",
+        ot: '✦ Old Testament',
+        nt: '✦ New Testament',
+        listen: 'Listen',
+        stop: 'Stop',
+        search: 'Search',
+        results: 'result(s)',
+        goToRef: 'GO TO REFERENCE',
+        noResults: 'No verses found.',
+        chapter: 'Chapter',
+        loading: 'Loading the Word...',
+        tryAgain: 'Try Again',
+        errorData: 'Data file not found',
+        errorChapter: 'Chapter not found',
+        errorGeneric: 'Error loading data',
+        errorDataInstruction: 'Add to index.html before script.js',
+        fontDown: 'Decrease font',
+        fontUp: 'Increase font',
+        listenTitle: 'Listen to the Word',
+        scrollTop: 'Back to top',
+        menuTitle: 'Book Menu',
+        closeMenu: 'Close menu',
+        openMenu: 'Open menu',
+        prev: 'Chap',
+        next: 'Chap',
+        langBtn: 'English'
+    },
+    daily: {
+        pt: {
+            title: 'Leitura do Dia',
+            today: 'Hoje',
+            day: 'Dia',
+            of: 'de',
+            planName: 'Bíblia em 1 Ano',
+            annualProgress: 'Progresso Anual',
+            concluded: 'concluído',
+            concludeBtn: 'Concluir leitura de hoje',
+            done: 'Concluído!',
+            tryAgain: 'Tentar Novamente'
+        },
+        en: {
+            title: 'Daily Reading',
+            today: 'Today',
+            day: 'Day',
+            of: 'of',
+            planName: 'Bible in 1 Year',
+            annualProgress: 'Annual Progress',
+            concluded: 'completed',
+            concludeBtn: "Complete today's reading",
+            done: 'Done!',
+            tryAgain: 'Try Again'
+        }
+    },
+    teens: {
+        pt: {
+            title: 'Plano Adolescentes',
+            tag: 'Plano de Leitura',
+            bannerTitle: 'Leitura<br>para<br>Adolescentes',
+            days: 'dias',
+            howItWorks: 'Como funciona',
+            startDesc: 'Ao tocar em <strong>Iniciar</strong>, hoje vira o <strong>Dia 1</strong> do plano.',
+            startInfo: 'A contagem avança automaticamente a cada dia — você só precisa marcar os capítulos à medida que lê. Seu progresso fica salvo no dispositivo.',
+            preview: 'Prévia do plano',
+            andMore: 'e mais',
+            startBtn: 'Iniciar Plano',
+            backupTitle: 'Backup do Progresso',
+            resetBtn: 'Resetar Plano',
+            chapters: 'Capítulos',
+            books: 'Livros',
+            backToPlan: 'Plano do Dia',
+            conclude: 'Concluir',
+            concluded: 'Concluído',
+            prev: 'Anterior',
+            next: 'Próximo',
+            daysTitle: 'Dias',
+            planStarted: '✓ Plano iniciado! Bem-vindo(a)!',
+            resetTitle: 'Resetar Plano?',
+            resetConfirm: 'Sim, resetar tudo',
+            cancel: 'Cancelar',
+            resetSuccess: '✓ Plano resetado com sucesso!',
+            backupDesc: 'Exporte para salvar seu progresso ou importe um arquivo anterior.',
+            daysRead: 'Dias lidos',
+            exportTitle: 'Exportar progresso',
+            exportDesc: 'Baixe um arquivo .json para guardar ou transferir',
+            downloadBtn: 'Baixar arquivo .json',
+            copyBtn: 'Copiar JSON',
+            importTitle: 'Importar progresso',
+            importDesc: 'Restaure a partir de um arquivo exportado',
+            tapChoose: 'Toque para escolher o arquivo',
+            dragDrop: 'ou arraste e solte aqui · apenas .json',
+            pasteBtn: 'Colar JSON',
+            fileExported: '✓ Arquivo exportado!',
+            jsonCopied: '✓ JSON copiado!',
+            restored: 'capítulos restaurados!',
+            invalidJson: 'JSON inválido.',
+            errorImport: 'Erro ao importar JSON.',
+            day: 'Dia',
+            of: 'de',
+            todayChapters: 'Capítulos de hoje',
+            saved: 'salvo',
+            savedPlural: 'salvos',
+            tapExport: 'Toque para exportar ou importar',
+            reRead: 'Reler o dia',
+            startReading: 'Começar Leitura',
+            completedDay: 'concluído!',
+            keepItUp: 'Você está indo muito bem. Continue firme!',
+            errorLoad: 'Erro ao carregar capítulo',
+            back: 'Voltar',
+            future: 'Futuro',
+            complete: '✦ Completo!',
+            today: 'Hoje',
+            late: 'Atrasado',
+            chapter: 'capítulo',
+            chapterPlural: 'capítulos',
+            read: 'lido',
+            readPlural: 'lidos',
+            resetSub: 'Todo o seu progresso será apagado permanentemente. Essa ação não pode ser desfeita.'
+        },
+        en: {
+            title: 'Teens Plan',
+            tag: 'Reading Plan',
+            bannerTitle: 'Reading<br>for<br>Teens',
+            days: 'days',
+            howItWorks: 'How it works',
+            startDesc: 'When you tap <strong>Start</strong>, today becomes <strong>Day 1</strong> of the plan.',
+            startInfo: 'The count advances automatically each day — you just need to check off the chapters as you read. Your progress is saved on your device.',
+            preview: 'Plan Preview',
+            andMore: 'and',
+            startBtn: 'Start Plan',
+            backupTitle: 'Progress Backup',
+            resetBtn: 'Reset Plan',
+            chapters: 'Chapters',
+            books: 'Books',
+            backToPlan: 'Day Plan',
+            conclude: 'Complete',
+            concluded: 'Completed',
+            prev: 'Previous',
+            next: 'Next',
+            daysTitle: 'Days',
+            planStarted: '✓ Plan started! Welcome!',
+            resetTitle: 'Reset Plan?',
+            resetConfirm: 'Yes, reset everything',
+            cancel: 'Cancel',
+            resetSuccess: '✓ Plan reset successfully!',
+            backupDesc: 'Export to save your progress or import a previous file.',
+            daysRead: 'Days read',
+            exportTitle: 'Export progress',
+            exportDesc: 'Download a .json file to store or transfer',
+            downloadBtn: 'Download .json file',
+            copyBtn: 'Copy JSON',
+            importTitle: 'Import progress',
+            importDesc: 'Restore from an exported file',
+            tapChoose: 'Tap to choose file',
+            dragDrop: 'or drag and drop here · .json only',
+            pasteBtn: 'Paste JSON',
+            fileExported: '✓ File exported!',
+            jsonCopied: '✓ JSON copied!',
+            restored: 'chapters restored!',
+            invalidJson: 'Invalid JSON.',
+            errorImport: 'Error importing JSON.',
+            day: 'Day',
+            of: 'of',
+            todayChapters: "Today's Chapters",
+            saved: 'saved',
+            savedPlural: 'saved',
+            tapExport: 'Tap to export or import',
+            reRead: 'Re-read day',
+            startReading: 'Start Reading',
+            completedDay: 'completed!',
+            keepItUp: "You're doing great. Keep it up!",
+            errorLoad: 'Error loading chapter',
+            back: 'Back',
+            future: 'Future',
+            complete: '✦ Complete!',
+            today: 'Today',
+            late: 'Late',
+            chapter: 'chapter',
+            chapterPlural: 'chapters',
+            read: 'read',
+            readPlural: 'read',
+            resetSub: 'All your progress will be permanently deleted. This action cannot be undone.'
+        }
+    }
+};
+
+/**
+ * Global translation helper.
+ */
+window.t = function(key, section = null) {
+    const lang = window.state.lang;
+    if (section && TRANSLATIONS[section]) {
+        return TRANSLATIONS[section][lang][key] || key;
+    }
+    return TRANSLATIONS[lang][key] || key;
+};
+
 /* ══════════════════════════ STATE ══════════════════════════════ */
-let state = { bookId: 'JHN', chapter: 1, fontSize: 1.1, verses: [] };
+window.state = {
+    bookId: 'JHN',
+    chapter: 1,
+    fontSize: 1.1,
+    verses: [],
+    lang: localStorage.getItem('bible_lang') || 'pt'
+};
+const state = window.state;
 
 /* ═══════════════════════ INDEXEDDB CACHE ═══════════════════════ */
 const DB_NAME = 'BibleDB_local';
@@ -143,7 +383,7 @@ async function fetchChapter(bookId, chapter) {
         return verses;
     }
 
-    throw new Error(`Capítulo não encontrado: ${key}`);
+    throw new Error(`${window.t('errorChapter')}: ${key}`);
 }
 
 /* ══════════════════════════ SEARCH ════════════════════════════ */
@@ -255,8 +495,8 @@ function renderSearch(query, results, directRef = null) {
     const re = new RegExp(`(${esc})`, 'gi');
 
     content.innerHTML = `
-        <h1 class="bible-heading">Busca</h1>
-        <div class="bible-subheading">"${cleanQuery}" — ${results.length} resultado(s)</div>
+        <h1 class="bible-heading">${window.t('search')}</h1>
+        <div class="bible-subheading">"${cleanQuery}" — ${results.length} ${window.t('results')}</div>
         <div class="ornament">✦ ✦ ✦</div>`;
 
     if (directRef) {
@@ -266,7 +506,7 @@ function renderSearch(query, results, directRef = null) {
         const chapStr = directRef.chapter ? ` ${directRef.chapter}` : '';
         const vStr = directRef.verse ? `:${directRef.verse}` : '';
         refDiv.innerHTML = `
-            <div class="note-label">IR PARA REFERÊNCIA</div>
+            <div class="note-label">${window.t('goToRef')}</div>
             <div style="font-family:'Cinzel'; font-size:1.1rem; color:var(--red-bible)">
                 ${directRef.book.name}${chapStr}${vStr}
             </div>
@@ -276,7 +516,7 @@ function renderSearch(query, results, directRef = null) {
     }
 
     if (!results.length && !directRef) {
-        content.innerHTML += `<p style="text-align:center;opacity:.6;margin-top:2rem">Nenhum versículo encontrado.</p>`;
+        content.innerHTML += `<p style="text-align:center;opacity:.6;margin-top:2rem">${window.t('noResults')}</p>`;
         return;
     }
 
@@ -330,7 +570,7 @@ function renderVerses(verses, bookName, chapter, targetVerse = null) {
     const header = document.createElement('div');
     header.innerHTML = `
         <h1 class="bible-heading">${bookName}</h1>
-        <div class="bible-subheading">Capítulo ${chapter}</div>
+        <div class="bible-subheading">${window.t('chapter')} ${chapter}</div>
         <div class="ornament">✦ ✦ ✦</div>
         <div class="chapter-row"></div>`;
     content.appendChild(header);
@@ -380,10 +620,10 @@ function renderVerses(verses, bookName, chapter, targetVerse = null) {
     nav.className = 'chap-nav';
     nav.innerHTML = `
         <button class="btn-nav" ${chapter <= 1 ? 'disabled' : ''} id="prevBtn">
-            <i class="bi bi-chevron-left"></i> Cap ${chapter - 1}
+            <i class="bi bi-chevron-left"></i> ${window.t('prev')} ${chapter - 1}
         </button>
         <button class="btn-nav" ${chapter >= book.chapters ? 'disabled' : ''} id="nextBtn">
-            Cap ${chapter + 1} <i class="bi bi-chevron-right"></i>
+            ${window.t('next')} ${chapter + 1} <i class="bi bi-chevron-right"></i>
         </button>`;
     content.appendChild(nav);
 
@@ -425,9 +665,9 @@ async function loadChapter(bookId, chapter, verse = null) {
             errMsg.innerHTML = `
                 <div style="text-align:center;padding:2rem">
                     <i class="bi bi-exclamation-circle" style="font-size:2.5rem;opacity:.5"></i>
-                    <p style="margin-top:1rem">${e.message}</p>
+                    <p style="margin-top:1rem">${window.t('errorGeneric')}</p>
                     <button onclick="loadChapter('${bookId}',${chapter})" class="btn-nav" style="margin:auto">
-                        Tentar Novamente
+                        ${window.t('tryAgain')}
                     </button>
                 </div>`;
         }
@@ -461,7 +701,7 @@ function ttsSetPlaying(on) {
     if (!btn) return;
     btn.classList.toggle('tts-speaking', on);
     if (icon) icon.className = on ? 'bi bi-stop-fill' : 'bi bi-volume-up-fill';
-    if (label) label.textContent = on ? 'Parar' : 'Ouvir';
+    if (label) label.textContent = on ? window.t('stop') : window.t('listen');
 }
 
 function initTTS() {
@@ -548,6 +788,78 @@ function initTTS() {
     });
 }
 
+function updateInterfaceLanguage() {
+    // 1 — Brand
+    const brand = document.querySelector('.brand');
+    if (brand) brand.textContent = window.t('brand');
+
+    // 2 — Search Placeholder
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.placeholder = window.t('searchPlaceholder');
+
+    // 3 — Sidebar titles
+    const sections = document.querySelectorAll('.sidebar-section');
+    sections.forEach(sec => {
+        const title = sec.querySelector('.sidebar-title');
+        if (title) {
+            const text = title.textContent.trim();
+            if (text.includes('Daily')) title.textContent = window.t('daily');
+            else if (text.includes('Antigo') || text.includes('Old')) title.textContent = window.t('ot');
+            else if (text.includes('Novo') || text.includes('New')) title.textContent = window.t('nt');
+        }
+    });
+
+    // 4 — Daily button in sidebar
+    const dailyBtn = document.getElementById('dailyBtn');
+    if (dailyBtn) dailyBtn.innerHTML = `<i class="bi bi-calendar-check"></i> ${window.t('todayReading')}`;
+
+    // 5 — Teens button in sidebar
+    const teensBtn = document.getElementById('teensBtn');
+    if (teensBtn) teensBtn.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${window.t('title', 'teens')}`;
+
+    // 6 — TTS button
+    const ttsBtn = document.getElementById('ttsBtn');
+    if (ttsBtn) {
+        ttsBtn.title = window.t('listenTitle');
+        const label = document.getElementById('ttsLabel');
+        if (label) label.textContent = _ttsSpeaking ? window.t('stop') : window.t('listen');
+    }
+
+    // 7 — Language toggle button
+    const langToggle = document.getElementById('langToggle');
+    if (langToggle) langToggle.innerHTML = `<i class="bi bi-globe"></i> ${window.t('langBtn')}`;
+
+    // 8 — Loader
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.innerHTML = `
+            <div class="spinner-border" role="status" style="width:2.5rem;height:2.5rem;border-width:3px;"></div>
+            ${window.t('loading')}
+        `;
+    }
+
+    // 9 — Tooltips and ARIA
+    document.getElementById('fontDown').title = window.t('fontDown');
+    document.getElementById('fontUp').title = window.t('fontUp');
+    document.getElementById('scrollTop').title = window.t('scrollTop');
+    document.getElementById('toggleSidebar').title = window.t('menuTitle');
+
+    // 10 — Content (if currently viewing a chapter or daily)
+    // For Bible chapters, just re-render
+    const content = document.getElementById('content');
+    if (!content.classList.contains('d-none')) {
+        // If it's a Bible chapter
+        if (state.verses.length && state.bookId) {
+            renderVerses(state.verses, ALL_BOOKS.find(b => b.id === state.bookId).name, state.chapter);
+        }
+        // If it's search results, we'd need to re-run the search or store results
+        // If it's Daily/Teens, they have their own update logic which we trigger by re-loading
+        if (document.getElementById('dailyBtn')?.classList.contains('active')) {
+            window.loadDailyReading?.();
+        }
+    }
+}
+
 /* ═══════════════════════ INIT ══════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
 
@@ -560,8 +872,8 @@ window.addEventListener('DOMContentLoaded', async () => {
             errMsg.innerHTML = `
                 <div style="text-align:center;padding:3rem;line-height:2">
                     <i class="bi bi-file-earmark-x" style="font-size:3rem;opacity:.5"></i>
-                    <h3 style="margin-top:1rem">Arquivo de dados não encontrado</h3>
-                    <p>Adicione ao <code>index.html</code> antes de <code>script.js</code>:</p>
+                    <h3 style="margin-top:1rem">${window.t('errorData')}</h3>
+                    <p>${window.t('errorDataInstruction')}:</p>
                     <code style="background:rgba(0,0,0,.2);padding:.5rem 1.2rem;border-radius:6px">
                         &lt;script src="js/bible-data.js"&gt;&lt;/script&gt;
                     </code>
@@ -627,6 +939,21 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
         scrollBtn.addEventListener('click', () =>
             window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+
+    // Language toggle
+    const langToggle = document.getElementById('langToggle');
+    langToggle?.addEventListener('click', () => {
+        window.state.lang = window.state.lang === 'pt' ? 'en' : 'pt';
+        localStorage.setItem('bible_lang', window.state.lang);
+        updateInterfaceLanguage();
+        // Update sidebar as well if needed (for ARIA labels)
+        if (window.SidebarMenu?.updateAria) window.SidebarMenu.updateAria();
+    });
+
+    // Initial translation
+    if (window.state.lang !== 'pt') {
+        updateInterfaceLanguage();
     }
 
     // Load first chapter
