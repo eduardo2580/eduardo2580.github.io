@@ -1,6 +1,13 @@
 /**
  * BÍBLIA SAGRADA — 100% OFFLINE
- * Modern Re-design — Fixed Version
+ *
+ * Data source: js/bible-data.js (generated from por-almeida_usfx.xml)
+ * Add to index.html BEFORE this file:
+ *   <script src="js/bible-data.js"></script>
+ *
+ * No API calls. No network. No CORS. Works forever offline.
+ *
+ * window.BIBLE_DATA = { "GEN_1": [{verse:1, text:"..."}, ...], ... }
  */
 
 /* ══════════════════════════ BOOK DATA ═══════════════════════════ */
@@ -84,6 +91,7 @@ const TRANSLATIONS = {
     pt: {
         brand: '✦ Bíblia Sagrada',
         searchPlaceholder: 'Buscar na Bíblia...',
+        daily: '✦ Daily',
         todayReading: 'Leitura de Hoje',
         ot: '✦ Antigo Testamento',
         nt: '✦ Novo Testamento',
@@ -109,41 +117,12 @@ const TRANSLATIONS = {
         openMenu: 'Abrir menu',
         prev: 'Cap',
         next: 'Cap',
-        langBtn: 'Português',
-        hello: 'Olá',
-        feelingQuestion: 'Como está se sentindo hoje?',
-        verseOfDay: 'Versículo do Dia',
-        bible: 'Bíblia',
-        plans: 'Planos',
-        settings: 'Mais',
-        home: 'Início',
-        username: 'Nome do Usuário',
-        language: 'Idioma',
-        daily: {
-            title: "Leitura Diária",
-            planName: "Plano Bíblico Anual",
-            today: "Hoje",
-            day: "Dia",
-            of: "de",
-            annualProgress: "Progresso Anual",
-            concluded: "Concluído",
-            concludeBtn: "Concluir Leitura",
-            done: "Leitura Concluída!"
-        },
-        teens: {
-            title: "Plano Teens",
-            tag: "Jornada Bíblica",
-            bannerTitle: "Explorando<br>a Palavra",
-            startDesc: "Comece sua jornada de leitura bíblica hoje mesmo!",
-            startBtn: "Iniciar Plano",
-            concluded: "Concluído",
-            conclude: "Concluir Dia",
-            backToPlan: "Voltar ao Plano"
-        }
+        langBtn: 'Português'
     },
     en: {
         brand: '✦ Holy Bible',
         searchPlaceholder: 'Search the Bible...',
+        daily: '✦ Daily',
         todayReading: "Today's Reading",
         ot: '✦ Old Testament',
         nt: '✦ New Testament',
@@ -169,94 +148,186 @@ const TRANSLATIONS = {
         openMenu: 'Open menu',
         prev: 'Chap',
         next: 'Chap',
-        langBtn: 'English',
-        hello: 'Hello',
-        feelingQuestion: 'How are you feeling today?',
-        verseOfDay: 'Verse of the Day',
-        bible: 'Bible',
-        plans: 'Plans',
-        settings: 'More',
-        home: 'Home',
-        username: 'User Name',
-        language: 'Language',
-        daily: {
-            title: "Daily Reading",
-            planName: "Annual Bible Plan",
-            today: "Today",
-            day: "Day",
-            of: "of",
-            annualProgress: "Annual Progress",
-            concluded: "Concluded",
-            concludeBtn: "Conclude Reading",
-            done: "Reading Done!"
+        langBtn: 'English'
+    },
+    daily: {
+        pt: {
+            title: 'Leitura do Dia',
+            today: 'Hoje',
+            day: 'Dia',
+            of: 'de',
+            planName: 'Bíblia em 1 Ano',
+            annualProgress: 'Progresso Anual',
+            concluded: 'concluído',
+            concludeBtn: 'Concluir leitura de hoje',
+            done: 'Concluído!',
+            tryAgain: 'Tentar Novamente'
         },
-        teens: {
-            title: "Teens Plan",
-            tag: "Bible Journey",
-            bannerTitle: "Exploring<br>the Word",
-            startDesc: "Start your bible reading journey today!",
-            startBtn: "Start Plan",
-            concluded: "Concluded",
-            conclude: "Conclude Day",
-            backToPlan: "Back to Plan"
+        en: {
+            title: 'Daily Reading',
+            today: 'Today',
+            day: 'Day',
+            of: 'of',
+            planName: 'Bible in 1 Year',
+            annualProgress: 'Annual Progress',
+            concluded: 'completed',
+            concludeBtn: "Complete today's reading",
+            done: 'Done!',
+            tryAgain: 'Try Again'
+        }
+    },
+    teens: {
+        pt: {
+            title: 'Plano Adolescentes',
+            tag: 'Plano de Leitura',
+            bannerTitle: 'Leitura<br>para<br>Adolescentes',
+            days: 'dias',
+            howItWorks: 'Como funciona',
+            startDesc: 'Ao tocar em <strong>Iniciar</strong>, hoje vira o <strong>Dia 1</strong> do plano.',
+            startInfo: 'A contagem avança automaticamente a cada dia — você só precisa marcar os capítulos à medida que lê. Seu progresso fica salvo no dispositivo.',
+            preview: 'Prévia do plano',
+            andMore: 'e mais',
+            startBtn: 'Iniciar Plano',
+            backupTitle: 'Backup do Progresso',
+            resetBtn: 'Resetar Plano',
+            chapters: 'Capítulos',
+            books: 'Livros',
+            backToPlan: 'Plano do Dia',
+            conclude: 'Concluir',
+            concluded: 'Concluído',
+            prev: 'Anterior',
+            next: 'Próximo',
+            daysTitle: 'Dias',
+            planStarted: '✓ Plano iniciado! Bem-vindo(a)!',
+            resetTitle: 'Resetar Plano?',
+            resetConfirm: 'Sim, resetar tudo',
+            cancel: 'Cancelar',
+            resetSuccess: '✓ Plano resetado com sucesso!',
+            backupDesc: 'Exporte para salvar seu progresso ou importe um arquivo anterior.',
+            daysRead: 'Dias lidos',
+            exportTitle: 'Exportar progresso',
+            exportDesc: 'Baixe um arquivo .json para guardar ou transferir',
+            downloadBtn: 'Baixar arquivo .json',
+            copyBtn: 'Copiar JSON',
+            importTitle: 'Importar progresso',
+            importDesc: 'Restaure a partir de um arquivo exportado',
+            tapChoose: 'Toque para escolher o arquivo',
+            dragDrop: 'ou arraste e solte aqui · apenas .json',
+            pasteBtn: 'Colar JSON',
+            fileExported: '✓ Arquivo exportado!',
+            jsonCopied: '✓ JSON copiado!',
+            restored: 'capítulos restaurados!',
+            invalidJson: 'JSON inválido.',
+            errorImport: 'Erro ao importar JSON.',
+            day: 'Dia',
+            of: 'de',
+            todayChapters: 'Capítulos de hoje',
+            saved: 'salvo',
+            savedPlural: 'salvos',
+            tapExport: 'Toque para exportar ou importar',
+            reRead: 'Reler o dia',
+            startReading: 'Começar Leitura',
+            completedDay: 'concluído!',
+            keepItUp: 'Você está indo muito bem. Continue firme!',
+            errorLoad: 'Erro ao carregar capítulo',
+            back: 'Voltar',
+            future: 'Futuro',
+            complete: '✦ Completo!',
+            today: 'Hoje',
+            late: 'Atrasado',
+            chapter: 'capítulo',
+            chapterPlural: 'capítulos',
+            read: 'lido',
+            readPlural: 'lidos',
+            resetSub: 'Todo o seu progresso será apagado permanentemente. Essa ação não pode ser desfeita.'
+        },
+        en: {
+            title: 'Teens Plan',
+            tag: 'Reading Plan',
+            bannerTitle: 'Reading<br>for<br>Teens',
+            days: 'days',
+            howItWorks: 'How it works',
+            startDesc: 'When you tap <strong>Start</strong>, today becomes <strong>Day 1</strong> of the plan.',
+            startInfo: 'The count advances automatically each day — you just need to check off the chapters as you read. Your progress is saved on your device.',
+            preview: 'Plan Preview',
+            andMore: 'and',
+            startBtn: 'Start Plan',
+            backupTitle: 'Progress Backup',
+            resetBtn: 'Reset Plan',
+            chapters: 'Chapters',
+            books: 'Books',
+            backToPlan: 'Day Plan',
+            conclude: 'Complete',
+            concluded: 'Completed',
+            prev: 'Previous',
+            next: 'Next',
+            daysTitle: 'Days',
+            planStarted: '✓ Plan started! Welcome!',
+            resetTitle: 'Reset Plan?',
+            resetConfirm: 'Yes, reset everything',
+            cancel: 'Cancel',
+            resetSuccess: '✓ Plan reset successfully!',
+            backupDesc: 'Export to save your progress or import a previous file.',
+            daysRead: 'Days read',
+            exportTitle: 'Export progress',
+            exportDesc: 'Download a .json file to store or transfer',
+            downloadBtn: 'Download .json file',
+            copyBtn: 'Copy JSON',
+            importTitle: 'Import progress',
+            importDesc: 'Restore from an exported file',
+            tapChoose: 'Tap to choose file',
+            dragDrop: 'or drag and drop here · .json only',
+            pasteBtn: 'Paste JSON',
+            fileExported: '✓ File exported!',
+            jsonCopied: '✓ JSON copied!',
+            restored: 'chapters restored!',
+            invalidJson: 'Invalid JSON.',
+            errorImport: 'Error importing JSON.',
+            day: 'Day',
+            of: 'of',
+            todayChapters: "Today's Chapters",
+            saved: 'saved',
+            savedPlural: 'saved',
+            tapExport: 'Tap to export or import',
+            reRead: 'Re-read day',
+            startReading: 'Start Reading',
+            completedDay: 'completed!',
+            keepItUp: "You're doing great. Keep it up!",
+            errorLoad: 'Error loading chapter',
+            back: 'Back',
+            future: 'Future',
+            complete: '✦ Complete!',
+            today: 'Today',
+            late: 'Late',
+            chapter: 'chapter',
+            chapterPlural: 'chapters',
+            read: 'read',
+            readPlural: 'read',
+            resetSub: 'All your progress will be permanently deleted. This action cannot be undone.'
         }
     }
 };
 
+/**
+ * Global translation helper.
+ */
 window.t = function(key, section = null) {
-    const lang = window.state.lang || 'pt';
-    if (section && TRANSLATIONS[lang] && TRANSLATIONS[lang][section]) {
-        return TRANSLATIONS[lang][section][key] || key;
+    const lang = window.state.lang;
+    if (section && TRANSLATIONS[section]) {
+        return TRANSLATIONS[section][lang][key] || key;
     }
-    return TRANSLATIONS[lang]?.[key] || key;
+    return TRANSLATIONS[lang][key] || key;
 };
 
 /* ══════════════════════════ STATE ══════════════════════════════ */
-function getInitialConfig() {
-    let config = JSON.parse(localStorage.getItem('bible_config') || '{}');
-    if (!config.lang && localStorage.getItem('bible_lang')) {
-        config.lang = localStorage.getItem('bible_lang');
-    }
-    if (!config.fontSize && localStorage.getItem('bible_font_size')) {
-        config.fontSize = parseFloat(localStorage.getItem('bible_font_size'));
-    }
-    return config;
-}
-const savedConfig = getInitialConfig();
-
 window.state = {
     bookId: 'JHN',
     chapter: 1,
-    fontSize: savedConfig.fontSize || 1.15,
+    fontSize: 1.1,
     verses: [],
-    lang: savedConfig.lang || 'pt',
-    userName: savedConfig.userName || '',
-    currentView: 'home'
+    lang: localStorage.getItem('bible_lang') || 'pt'
 };
 const state = window.state;
-
-function saveConfig() {
-    localStorage.setItem('bible_config', JSON.stringify({
-        fontSize: state.fontSize,
-        lang: state.lang,
-        userName: state.userName
-    }));
-}
-
-/* ═══════════════════════ LOADER HELPERS ════════════════════════ */
-function showLoader() {
-    const loader = document.getElementById('loader');
-    const content = document.getElementById('content');
-    if (loader) loader.classList.remove('d-none');
-    if (content) content.classList.add('d-none');
-}
-
-function hideLoader() {
-    const loader = document.getElementById('loader');
-    const content = document.getElementById('content');
-    if (loader) loader.classList.add('d-none');
-    if (content) content.classList.remove('d-none');
-}
 
 /* ═══════════════════════ INDEXEDDB CACHE ═══════════════════════ */
 const DB_NAME = 'BibleDB_local';
@@ -292,183 +363,37 @@ function dbGet(key) {
 function dbPut(key, verses) {
     if (!db) return;
     try {
-        db.transaction(STORE, 'readwrite').objectStore(STORE).put({ id: key, verses });
+        db.transaction(STORE, 'readwrite').objectStore(STORE)
+            .put({ id: key, verses });
     } catch { }
 }
 
 /* ═══════════════════ CHAPTER LOADING ═══════════════════════════ */
 async function fetchChapter(bookId, chapter) {
     const key = `${bookId}_${chapter}`;
+
+    // 1 — IndexedDB warm cache
     const cached = await dbGet(key);
     if (cached) return cached;
+
+    // 2 — Bundled data (always present)
     const verses = window.BIBLE_DATA?.[key];
     if (verses) {
         dbPut(key, verses);
         return verses;
     }
+
     throw new Error(`${window.t('errorChapter')}: ${key}`);
 }
 
-/* ════════════════════════ NAVIGATION ══════════════════════════ */
-function switchView(viewName, params = {}) {
-    state.currentView = viewName;
-    window.speechSynthesis?.cancel();
-    ttsSetPlaying(false);
-
-    document.querySelectorAll('.nav-item').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === viewName);
-    });
-
-    const content = document.getElementById('content');
-    content.innerHTML = '';
-
-    // Always hide loader when switching views
-    hideLoader();
-
-    renderTopBar();
-
-    switch (viewName) {
-        case 'home':
-            renderHome();
-            break;
-        case 'bible':
-            if (params.bookId) {
-                loadChapter(params.bookId, params.chapter || 1, params.verse);
-            } else {
-                renderBibleSelector();
-            }
-            break;
-        case 'plans':
-            renderPlans();
-            break;
-        case 'daily':
-            window.loadDailyReading?.();
-            break;
-        case 'teens':
-            window.openTeensDashboard?.();
-            break;
-        case 'search':
-            renderSearchInput();
-            break;
-        case 'settings':
-            renderSettings();
-            break;
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function renderTopBar() {
-    const placeholder = document.getElementById('top-bar-placeholder');
-    if (state.currentView !== 'home') {
-        placeholder.innerHTML = `
-            <div class="top-bar">
-                <div class="user-info">
-                    <div class="avatar" onclick="switchView('settings')">
-                        <i class="ph ph-user"></i>
-                    </div>
-                    <h1 class="greeting">${window.t('brand')}</h1>
-                </div>
-                <button class="icon-btn" onclick="switchView('search')">
-                    <i class="ph ph-magnifying-glass"></i>
-                </button>
-            </div>
-        `;
-        return;
-    }
-
-    placeholder.innerHTML = `
-        <div class="top-bar">
-            <div class="user-info">
-                <div class="avatar" onclick="switchView('settings')">
-                    <i class="ph ph-user"></i>
-                </div>
-                <h1 class="greeting">${window.t('hello')}, ${state.userName || '...'}! 👋</h1>
-            </div>
-            <button class="icon-btn">
-                <i class="ph ph-bell-ringing"></i>
-            </button>
-        </div>
-    `;
-}
-
-/* ════════════════════════ PROFILE ══════════════════════════ */
-function checkProfile() {
-    if (!state.userName) {
-        document.getElementById('name-modal-overlay')?.classList.remove('d-none');
-    }
-}
-
-function saveProfile() {
-    const input = document.getElementById('user-name-input');
-    const name = input.value.trim();
-    if (name) {
-        state.userName = name;
-        saveConfig();
-        document.getElementById('name-modal-overlay').classList.add('d-none');
-        renderTopBar();
-        renderHome();
-    }
-}
-
-/* ════════════════════════ MOOD / FEELING ════════════════════════ */
-const MOOD_VERSES = {
-    '😊': { label: 'Alegre', bookId: 'PHP', chapter: 4, verse: 4 },
-    '😔': { label: 'Triste', bookId: 'PSA', chapter: 34, verse: 18 },
-    '😰': { label: 'Ansioso', bookId: 'PHP', chapter: 4, verse: 6 },
-    '💪': { label: 'Corajoso', bookId: 'JOS', chapter: 1, verse: 9 },
-    '🙏': { label: 'Grato', bookId: 'PSA', chapter: 136, verse: 1 },
-    '😴': { label: 'Cansado', bookId: 'MAT', chapter: 11, verse: 28 },
-};
-
-function openMoodSelector() {
-    // Remove existing modal if any
-    document.getElementById('mood-modal-overlay')?.remove();
-
-    const overlay = document.createElement('div');
-    overlay.id = 'mood-modal-overlay';
-    overlay.className = 'modal-overlay';
-    overlay.style.cssText = 'display:flex;';
-
-    const moods = Object.entries(MOOD_VERSES);
-    overlay.innerHTML = `
-        <div class="name-modal" style="max-width:340px;width:90%">
-            <h2 style="font-family:'Cinzel',serif;margin-bottom:0.3rem">Como você está?</h2>
-            <p style="opacity:0.6;font-size:0.9rem;margin-bottom:1.5rem">Escolha seu estado de espírito e receba uma palavra</p>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1rem">
-                ${moods.map(([emoji, data]) => `
-                    <button onclick="handleMoodSelect('${data.bookId}',${data.chapter},${data.verse})"
-                        style="background:var(--surface-2,rgba(255,255,255,0.06));border:1px solid rgba(255,255,255,0.1);
-                               border-radius:12px;padding:0.75rem 0.5rem;cursor:pointer;color:inherit;
-                               display:flex;flex-direction:column;align-items:center;gap:0.3rem;
-                               font-size:0.75rem;transition:background 0.2s"
-                        onmouseover="this.style.background='rgba(180,140,60,0.2)'"
-                        onmouseout="this.style.background='var(--surface-2,rgba(255,255,255,0.06))'">
-                        <span style="font-size:1.8rem">${emoji}</span>
-                        <span>${data.label}</span>
-                    </button>
-                `).join('')}
-            </div>
-            <button onclick="document.getElementById('mood-modal-overlay').remove()"
-                style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.15);
-                       padding:0.6rem;border-radius:8px;cursor:pointer;color:inherit;font-size:0.85rem">
-                Fechar
-            </button>
-        </div>
-    `;
-
-    document.body.appendChild(overlay);
-}
-
-window.handleMoodSelect = function(bookId, chapter, verse) {
-    document.getElementById('mood-modal-overlay')?.remove();
-    switchView('bible', { bookId, chapter, verse });
-};
-
-/* ════════════════════════ SEARCH ════════════════════════════ */
+/* ══════════════════════════ SEARCH ════════════════════════════ */
 function normalise(s) {
     return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
+/**
+ * Levenshtein Distance for fuzzy matching.
+ */
 function levenshtein(a, b) {
     const tmp = [];
     for (let i = 0; i <= a.length; i++) { tmp[i] = [i]; }
@@ -485,14 +410,21 @@ function levenshtein(a, b) {
     return tmp[a.length][b.length];
 }
 
+/**
+ * Find the best book match using fuzzy search.
+ */
 function findBestBookMatch(query) {
     const q = normalise(query);
     if (q.length < 2) return null;
+
     let best = null;
-    let minDistance = 3;
+    let minDistance = 3; // Max threshold for small typos
+
     for (const book of ALL_BOOKS) {
         const bookName = normalise(book.name);
+        // Direct prefix match is high priority
         if (bookName.startsWith(q)) return book;
+
         const distance = levenshtein(q, bookName.substring(0, q.length));
         if (distance < minDistance) {
             minDistance = distance;
@@ -502,32 +434,34 @@ function findBestBookMatch(query) {
     return best;
 }
 
-function todayDayOfYear() {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 0);
-    const diff = (now - start) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
-    const oneDay = 1000 * 60 * 60 * 24;
-    return Math.floor(diff / oneDay);
-}
-
+/**
+ * Parses queries like "João 3:16", "Gn 1", "Apocalipse 22" or just "Gênesis".
+ */
 function parseReference(query) {
     const q = query.trim();
     if (q.length < 2) return null;
+
+    // Try reference with chapter: Book Chapter(:Verse)
     const refRegex = /^(\d?\s*[a-zA-Z\u00C0-\u017F\s]+)\s+(\d+)(?::(\d+))?$/i;
     const match = q.match(refRegex);
+
     if (match) {
         const bookQuery = match[1].trim();
         const chapter = parseInt(match[2]);
         const verse = match[3] ? parseInt(match[3]) : null;
         const book = findBestBookMatch(bookQuery);
+
         if (book && chapter > 0 && chapter <= book.chapters) {
             return { book, chapter, verse };
         }
     }
+
+    // Try just book name (if no numbers are present)
     if (!/\d/.test(q)) {
         const book = findBestBookMatch(q);
         if (book) return { book, chapter: null, verse: null };
     }
+
     return null;
 }
 
@@ -550,345 +484,99 @@ function searchVerses(query) {
     return results;
 }
 
-function renderSearchInput() {
+function renderSearch(query, results, directRef = null) {
     const content = document.getElementById('content');
+    content.innerHTML = '';
+    content.className = 'fade-in';
+
+    // XSS mitigation: escape user input
+    const cleanQuery = query.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(${esc})`, 'gi');
+
     content.innerHTML = `
-        <div class="search-container fade-in">
-            <h1 class="bible-heading">${window.t('search')}</h1>
-            <div class="search-box">
-                <i class="ph ph-magnifying-glass"></i>
-                <input type="text" id="searchInput" placeholder="${window.t('searchPlaceholder')}" autocomplete="off" />
-            </div>
-            <div id="searchResults"></div>
-        </div>
-    `;
-
-    const searchInput = document.getElementById('searchInput');
-    let searchTimer;
-    searchInput?.addEventListener('input', e => {
-        clearTimeout(searchTimer);
-        const q = e.target.value.trim();
-        if (!q) { document.getElementById('searchResults').innerHTML = ''; return; }
-        searchTimer = setTimeout(() => {
-            const directRef = parseReference(q);
-            const results = searchVerses(q);
-            renderSearchResults(q, results, directRef);
-        }, 400);
-    });
-    searchInput.focus();
-}
-
-function renderSearchResults(query, results, directRef = null) {
-    const wrap = document.getElementById('searchResults');
-    wrap.innerHTML = '';
+        <h1 class="bible-heading">${window.t('search')}</h1>
+        <div class="bible-subheading">"${cleanQuery}" — ${results.length} ${window.t('results')}</div>
+        <div class="ornament">✦ ✦ ✦</div>`;
 
     if (directRef) {
         const refDiv = document.createElement('div');
-        refDiv.className = 'verse-card';
-        refDiv.style.marginBottom = '1.5rem';
+        refDiv.className = 'note-card';
         refDiv.style.cursor = 'pointer';
         const chapStr = directRef.chapter ? ` ${directRef.chapter}` : '';
         const vStr = directRef.verse ? `:${directRef.verse}` : '';
         refDiv.innerHTML = `
-            <div class="verse-header">${window.t('goToRef')}</div>
-            <div class="verse-reference">${directRef.book.name}${chapStr}${vStr}</div>
+            <div class="note-label">${window.t('goToRef')}</div>
+            <div style="font-family:'Cinzel'; font-size:1.1rem; color:var(--red-bible)">
+                ${directRef.book.name}${chapStr}${vStr}
+            </div>
         `;
-        refDiv.onclick = () => switchView('bible', { bookId: directRef.book.id, chapter: directRef.chapter || 1, verse: directRef.verse });
-        wrap.appendChild(refDiv);
+        refDiv.onclick = () => loadChapter(directRef.book.id, directRef.chapter || 1, directRef.verse);
+        content.appendChild(refDiv);
     }
 
     if (!results.length && !directRef) {
-        wrap.innerHTML = `<p style="text-align:center;opacity:.6;margin-top:2rem">${window.t('noResults')}</p>`;
+        content.innerHTML += `<p style="text-align:center;opacity:.6;margin-top:2rem">${window.t('noResults')}</p>`;
         return;
     }
 
-    const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp(`(${esc})`, 'gi');
-
+    const wrap = document.createElement('div');
     for (const r of results) {
         const div = document.createElement('div');
         div.className = 'verse';
+        div.style.cursor = 'pointer';
         div.innerHTML = `
-            <span class="verse-num">${r.book.name} ${r.chapter}:${r.verse}</span>
+            <span class="verse-num" style="min-width:5rem;font-size:.75rem">
+                ${r.book.name} ${r.chapter}:${r.verse}
+            </span>
             <span class="verse-text" style="font-size:${state.fontSize}rem">
                 ${r.text.replace(re, '<mark>$1</mark>')}
             </span>`;
-        div.onclick = () => switchView('bible', { bookId: r.book.id, chapter: r.chapter, verse: r.verse });
+        div.onclick = () => loadChapter(r.book.id, r.chapter, r.verse);
         wrap.appendChild(div);
     }
+    content.appendChild(wrap);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* ═══════════════════════ DAILY TTS HELPER ══════════════════════ */
-/**
- * Get today's daily reading text from daily.js plan data (if available),
- * or fall back to the verse-of-the-day. Then speak it.
- */
-function playDailyTTS() {
-    const synth = window.speechSynthesis;
-    if (!synth) { alert('Seu dispositivo não suporta leitura em voz alta.'); return; }
-
-    // If already speaking, stop
-    if (synth.speaking) {
-        synth.cancel();
-        const banner = document.querySelector('.banner-play i');
-        if (banner) { banner.className = 'ph-fill ph-play'; }
-        return;
-    }
-
-    // Collect text: try daily plan passages first, then verse of the day
-    let textToSpeak = '';
-
-    // Try to get daily reading passages from global daily state
-    if (window.DAILY_PLAN && window.BIBLE_DATA) {
-        const dayIndex = todayDayOfYear() - 1;
-        const dayPlan = window.DAILY_PLAN[dayIndex % window.DAILY_PLAN.length];
-        if (dayPlan && Array.isArray(dayPlan.passages)) {
-            const parts = [];
-            dayPlan.passages.forEach(p => {
-                const key = `${p.bookId}_${p.chapter}`;
-                const verses = window.BIBLE_DATA[key];
-                if (verses) {
-                    parts.push(verses.map(v => v.text).join(' '));
-                }
-            });
-            textToSpeak = parts.join(' ');
-        }
-    }
-
-    // Fallback: verse of the day
-    if (!textToSpeak && window.BIBLE_DATA) {
-        const today = new Date();
-        const seed = today.getFullYear() * 1000 + (today.getMonth() + 1) * 100 + today.getDate();
-        const book = ALL_BOOKS[seed % ALL_BOOKS.length];
-        const chapNum = (seed % book.chapters) + 1;
-        const key = `${book.id}_${chapNum}`;
-        const verses = window.BIBLE_DATA[key] || [];
-        const v = verses[seed % (verses.length || 1)];
-        if (v) textToSpeak = `${book.name}, capítulo ${chapNum}, versículo ${v.verse}. ${v.text}`;
-    }
-
-    if (!textToSpeak) {
-        alert('Nenhum texto disponível para leitura.');
-        return;
-    }
-
-    const utt = new SpeechSynthesisUtterance(textToSpeak);
-    utt.lang = state.lang === 'pt' ? 'pt-BR' : 'en-US';
-    utt.rate = 0.92;
-
-    const voices = synth.getVoices();
-    const voice = voices.find(v => v.lang.replace('_', '-') === utt.lang)
-        || voices.find(v => v.lang.startsWith(state.lang));
-    if (voice) utt.voice = voice;
-
-    const bannerPlay = document.querySelector('.banner-play i');
-
-    utt.onstart = () => {
-        if (bannerPlay) bannerPlay.className = 'ph-fill ph-stop-circle';
-    };
-    utt.onend = utt.onerror = () => {
-        if (bannerPlay) bannerPlay.className = 'ph-fill ph-play';
-    };
-
-    const speak = () => synth.speak(utt);
-    if (voices.length === 0) {
-        synth.addEventListener('voiceschanged', speak, { once: true });
-    } else {
-        speak();
-    }
-}
-
-/* ════════════════════════ HOME DASHBOARD ══════════════════════════ */
-function renderHome() {
-    const content = document.getElementById('content');
-
-    const today = new Date();
-    const seed = today.getFullYear() * 1000 + (today.getMonth() + 1) * 100 + today.getDate();
-    const bookIdx = seed % ALL_BOOKS.length;
-    const book = ALL_BOOKS[bookIdx];
-    const chapNum = (seed % book.chapters) + 1;
-    const key = `${book.id}_${chapNum}`;
-    const chapterVerses = window.BIBLE_DATA?.[key] || [];
-    const verseIdx = seed % (chapterVerses.length || 1);
-    const v = chapterVerses[verseIdx] || { verse: 1, text: 'O Senhor é o meu pastor; nada me faltará.' };
-
-    content.innerHTML = `
-        <div class="fade-in">
-            <!-- Widget de Sentimento -->
-            <div class="feeling-widget" id="feelingWidget">
-                <div class="feeling-text">
-                    <span class="feeling-emoji">😀</span>
-                    ${window.t('feelingQuestion')}
-                </div>
-                <i class="ph ph-caret-right" style="color: var(--gold-dark); font-size: 1.2rem;"></i>
-            </div>
-
-            <!-- Ações Rápidas -->
-            <div class="quick-actions-wrapper">
-                <div class="quick-actions">
-                    <div class="action-item" onclick="switchView('bible')">
-                        <div class="action-circle"><i class="ph ph-book-open"></i></div>
-                        <span class="action-label">${window.t('bible').toUpperCase()}</span>
-                    </div>
-                    <div class="action-item" onclick="switchView('plans')">
-                        <div class="action-circle"><i class="ph ph-calendar-blank"></i></div>
-                        <span class="action-label">${window.t('plans').toUpperCase()}</span>
-                    </div>
-                    <div class="action-item" onclick="switchView('daily')">
-                        <div class="action-circle"><i class="ph ph-sun"></i></div>
-                        <span class="action-label">DAILY</span>
-                    </div>
-                    <div class="action-item" onclick="switchView('teens')">
-                        <div class="action-circle"><i class="ph ph-lightning"></i></div>
-                        <span class="action-label">TEENS</span>
-                    </div>
-                    <div class="action-item" onclick="switchView('search')">
-                        <div class="action-circle"><i class="ph ph-magnifying-glass"></i></div>
-                        <span class="action-label">BUSCA</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card Versículo do Dia — tipografia melhorada -->
-            <div class="verse-card-wrapper">
-                <div class="verse-card home-verse-card" onclick="switchView('bible', {bookId: '${book.id}', chapter: ${chapNum}, verse: ${v.verse}})">
-                    <div class="verse-header">${window.t('verseOfDay')}</div>
-                    <div class="verse-reference">${book.name} ${chapNum}:${v.verse}</div>
-                    <blockquote class="home-verse-text">"${v.text}"</blockquote>
-                    <div class="verse-actions">
-                        <button class="v-action-btn" onclick="event.stopPropagation();this.querySelector('i').style.color='#e53e3e'">
-                            <i class="ph ph-heart"></i><span>Amém</span>
-                        </button>
-                        <button class="v-action-btn" onclick="event.stopPropagation();shareVerse('${book.name} ${chapNum}:${v.verse}', \`${v.text.replace(/`/g, "'")}\`)">
-                            <i class="ph ph-share-network"></i><span>Enviar</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Banner — Conectados com Deus (toca TTS da leitura diária) -->
-            <div class="banner-wrapper">
-                <div class="banner" id="dailyBanner">
-                    <div class="banner-play" id="bannerPlayBtn">
-                        <i class="ph-fill ph-play"></i>
-                    </div>
-                    <div>
-                        <h2 class="banner-text">CONECTADOS<br><span style="font-size:1rem;color:var(--gold);font-family:'EB Garamond',serif;font-weight:400;font-style:italic">com a Palavra de Deus</span></h2>
-                        <p style="font-size:0.75rem;opacity:0.6;margin:0;margin-top:0.25rem">Ouvir a leitura de hoje</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Wire up feeling widget
-    document.getElementById('feelingWidget')?.addEventListener('click', openMoodSelector);
-
-    // Wire up banner play button
-    document.getElementById('bannerPlayBtn')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        playDailyTTS();
-    });
-    document.getElementById('dailyBanner')?.addEventListener('click', () => {
-        playDailyTTS();
-    });
-}
-
-/* ═══════════════════════ SHARE VERSE ════════════════════════════ */
-window.shareVerse = function(ref, text) {
-    const shareText = `"${text}" — ${ref}`;
-    if (navigator.share) {
-        navigator.share({ title: 'Versículo da Bíblia', text: shareText })
-            .catch(() => copyToClipboard(shareText));
-    } else {
-        copyToClipboard(shareText);
-    }
-};
-
-function copyToClipboard(text) {
-    navigator.clipboard?.writeText(text).then(() => {
-        showToast('Versículo copiado!');
-    }).catch(() => {
-        showToast('Copie: ' + text);
-    });
-}
-
-function showToast(msg) {
-    const t = document.createElement('div');
-    t.textContent = msg;
-    t.style.cssText = `
-        position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
-        background:rgba(0,0,0,0.85);color:#fff;padding:0.6rem 1.2rem;
-        border-radius:20px;font-size:0.85rem;z-index:9999;
-        animation:fadeIn 0.2s ease;pointer-events:none
-    `;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2500);
-}
-
-/* ════════════════════════ BIBLE SELECTOR ══════════════════════════ */
-function renderBibleSelector() {
-    const content = document.getElementById('content');
-    content.innerHTML = `
-        <div class="fade-in">
-            <h1 class="bible-heading">${window.t('bible')}</h1>
-            <div class="ornament">✦ ✦ ✦</div>
-            <div style="padding: 0 1.5rem">
-                <h3 class="sidebar-title">${window.t('ot')}</h3>
-                <div class="book-grid" id="ot-grid"></div>
-                <h3 class="sidebar-title" style="margin-top: 2rem">${window.t('nt')}</h3>
-                <div class="book-grid" id="nt-grid"></div>
-            </div>
-        </div>
-    `;
-
+/* ═══════════════════════ RENDER UI ═════════════════════════════ */
+function buildSidebar() {
     ['ot', 'nt'].forEach(section => {
-        const grid = document.getElementById(section + '-grid');
+        const container = document.getElementById(section + 'Books');
+        if (!container) return;
         BOOKS[section].forEach(book => {
-            const card = document.createElement('div');
-            card.className = 'book-card';
-            card.textContent = book.name;
-            card.onclick = () => loadChapter(book.id, 1);
-            grid.appendChild(card);
+            const btn = document.createElement('button');
+            btn.className = 'book-btn';
+            btn.textContent = book.name;
+            btn.dataset.id = book.id;
+            btn.onclick = () => loadChapter(book.id, 1);
+            container.appendChild(btn);
         });
     });
+}
+
+function updateActiveBook() {
+    document.querySelectorAll('.book-btn').forEach(btn =>
+        btn.classList.toggle('active', btn.dataset.id === state.bookId));
 }
 
 function renderVerses(verses, bookName, chapter, targetVerse = null) {
     const content = document.getElementById('content');
     content.innerHTML = '';
+    content.className = 'fade-in';
     const book = ALL_BOOKS.find(b => b.id === state.bookId);
 
-    content.innerHTML = `
-        <div class="fade-in">
-            <h1 class="bible-heading">${bookName}</h1>
-            <div class="bible-subheading">${window.t('chapter')} ${chapter}</div>
-
-            <div class="reading-controls">
-                <button class="icon-btn" id="fontDown" title="${window.t('fontDown')}"><i class="ph ph-text-aa"></i>−</button>
-                <button class="icon-btn" id="fontUp" title="${window.t('fontUp')}"><i class="ph ph-text-aa"></i>+</button>
-                <button class="icon-btn" id="ttsBtn" title="${window.t('listenTitle')}"><i class="ph ph-speaker-high" id="ttsIcon"></i></button>
-            </div>
-
-            <div class="ornament">✦ ✦ ✦</div>
-
-            <div class="chapter-row" id="chapterSelector"></div>
-
-            <div id="verseWrap"></div>
-
-            <div class="chap-nav">
-                <button class="btn-nav" ${chapter <= 1 ? 'disabled' : ''} id="prevBtn">
-                    <i class="ph ph-caret-left"></i> ${window.t('prev')} ${chapter - 1}
-                </button>
-                <button class="btn-nav" ${chapter >= book.chapters ? 'disabled' : ''} id="nextBtn">
-                    ${window.t('next')} ${chapter + 1} <i class="ph ph-caret-right"></i>
-                </button>
-            </div>
-        </div>
-    `;
+    // Header
+    const header = document.createElement('div');
+    header.innerHTML = `
+        <h1 class="bible-heading">${bookName}</h1>
+        <div class="bible-subheading">${window.t('chapter')} ${chapter}</div>
+        <div class="ornament">✦ ✦ ✦</div>
+        <div class="chapter-row"></div>`;
+    content.appendChild(header);
 
     // Chapter selector
-    const row = document.getElementById('chapterSelector');
+    const row = header.querySelector('.chapter-row');
     for (let c = 1; c <= book.chapters; c++) {
         const btn = document.createElement('button');
         btn.className = 'chap-btn' + (c === chapter ? ' active' : '');
@@ -898,10 +586,11 @@ function renderVerses(verses, bookName, chapter, targetVerse = null) {
     }
 
     // Verses
-    const verseWrap = document.getElementById('verseWrap');
+    const verseWrap = document.createElement('div');
     verses.forEach(v => {
         const div = document.createElement('div');
         div.className = 'verse';
+        div.dataset.verse = v.verse;
         if (targetVerse && v.verse === targetVerse) {
             div.classList.add('highlight-target');
             div.id = 'target-verse';
@@ -912,58 +601,70 @@ function renderVerses(verses, bookName, chapter, targetVerse = null) {
         div.onclick = () => div.classList.toggle('highlight');
         verseWrap.appendChild(div);
     });
+    content.appendChild(verseWrap);
 
+    // Auto-scroll to target verse
     if (targetVerse) {
         setTimeout(() => {
             const el = document.getElementById('target-verse');
             if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Remove highlight after 3 seconds
                 setTimeout(() => el.classList.remove('highlight-target'), 3000);
             }
         }, 500);
     }
 
+    // Prev / Next navigation
+    const nav = document.createElement('div');
+    nav.className = 'chap-nav';
+    nav.innerHTML = `
+        <button class="btn-nav" ${chapter <= 1 ? 'disabled' : ''} id="prevBtn">
+            <i class="bi bi-chevron-left"></i> ${window.t('prev')} ${chapter - 1}
+        </button>
+        <button class="btn-nav" ${chapter >= book.chapters ? 'disabled' : ''} id="nextBtn">
+            ${window.t('next')} ${chapter + 1} <i class="bi bi-chevron-right"></i>
+        </button>`;
+    content.appendChild(nav);
+
     document.getElementById('prevBtn').onclick = () => loadChapter(state.bookId, chapter - 1);
     document.getElementById('nextBtn').onclick = () => loadChapter(state.bookId, chapter + 1);
 
-    document.getElementById('fontUp')?.addEventListener('click', () => {
-        state.fontSize = Math.min(2, +(state.fontSize + 0.1).toFixed(1));
-        document.querySelectorAll('.verse-text').forEach(el => el.style.fontSize = state.fontSize + 'rem');
-        saveConfig();
-    });
-    document.getElementById('fontDown')?.addEventListener('click', () => {
-        state.fontSize = Math.max(0.8, +(state.fontSize - 0.1).toFixed(1));
-        document.querySelectorAll('.verse-text').forEach(el => el.style.fontSize = state.fontSize + 'rem');
-        saveConfig();
-    });
-
-    initTTS();
+    if (window.innerWidth < 768) closeSidebar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+/* ═══════════════════ LOAD CHAPTER ═════════════════════════════ */
 async function loadChapter(bookId, chapter, verse = null) {
+    // Stop any ongoing TTS when navigating to a new chapter
+    window.speechSynthesis?.cancel();
+    ttsSetPlaying(false);
+
     state.bookId = bookId;
     state.chapter = chapter;
-    state.currentView = 'bible';
-    renderTopBar();
+    updateActiveBook();
 
+    const loader = document.getElementById('loader');
+    const content = document.getElementById('content');
     const errMsg = document.getElementById('error-msg');
-    errMsg?.classList.add('d-none');
 
-    showLoader();
+    loader?.classList.remove('d-none');
+    content?.classList.add('d-none');
+    errMsg?.classList.add('d-none');
 
     try {
         const verses = await fetchChapter(bookId, chapter);
         state.verses = verses;
-        // Hide loader BEFORE rendering (so content shows immediately)
-        hideLoader();
         renderVerses(verses, ALL_BOOKS.find(b => b.id === bookId).name, chapter, verse);
+        loader?.classList.add('d-none');
+        content?.classList.remove('d-none');
     } catch (e) {
-        hideLoader();
+        loader?.classList.add('d-none');
         if (errMsg) {
             errMsg.classList.remove('d-none');
             errMsg.innerHTML = `
                 <div style="text-align:center;padding:2rem">
-                    <i class="ph ph-warning-circle" style="font-size:2.5rem;opacity:.5"></i>
+                    <i class="bi bi-exclamation-circle" style="font-size:2.5rem;opacity:.5"></i>
                     <p style="margin-top:1rem">${window.t('errorGeneric')}</p>
                     <button onclick="loadChapter('${bookId}',${chapter})" class="btn-nav" style="margin:auto">
                         ${window.t('tryAgain')}
@@ -973,240 +674,329 @@ async function loadChapter(bookId, chapter, verse = null) {
     }
 }
 
-/* ════════════════════════ PLANS ══════════════════════════ */
-function renderPlans() {
-    const content = document.getElementById('content');
-    content.innerHTML = `
-        <div class="fade-in">
-            <h1 class="bible-heading">${window.t('plans')}</h1>
-            <div class="ornament">✦ ✦ ✦</div>
-            <div class="settings-list">
-                <div class="settings-item" onclick="window.loadDailyReading?.()">
-                    <div class="settings-label">📅 ${window.t('planName', 'daily')}</div>
-                    <i class="ph ph-caret-right"></i>
-                </div>
-                <div class="settings-item" id="teensPlanBtn">
-                    <div class="settings-label">⚡ ${window.t('title', 'teens')}</div>
-                    <i class="ph ph-caret-right"></i>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.getElementById('teensPlanBtn')?.addEventListener('click', () => {
-        if (window.openTeensDashboard) window.openTeensDashboard();
-    });
+/* ═══════════════════ SIDEBAR ═══════════════════════════════════ */
+function closeSidebar() {
+    document.getElementById('sidebar')?.classList.remove('open');
+    document.getElementById('backdrop')?.classList.remove('visible');
 }
 
-/* ════════════════════════ SETTINGS ══════════════════════════ */
-function renderSettings() {
-    const content = document.getElementById('content');
-    content.innerHTML = `
-        <div class="fade-in">
-            <h1 class="bible-heading">${window.t('settings')}</h1>
-            <div class="ornament">✦ ✦ ✦</div>
-            <div class="settings-list">
-                <div class="settings-item" onclick="document.getElementById('name-modal-overlay').classList.remove('d-none')">
-                    <div>
-                        <div class="settings-label">${window.t('username')}</div>
-                        <div style="font-size: 0.9rem; opacity: 0.6">${state.userName}</div>
-                    </div>
-                    <i class="ph ph-user-edit"></i>
-                </div>
-                <div class="settings-item" id="langToggleBtn">
-                    <div>
-                        <div class="settings-label">${window.t('language')}</div>
-                        <div style="font-size: 0.9rem; opacity: 0.6">${state.lang === 'pt' ? 'Português' : 'English'}</div>
-                    </div>
-                    <i class="ph ph-globe"></i>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.getElementById('langToggleBtn')?.addEventListener('click', () => {
-        state.lang = state.lang === 'pt' ? 'en' : 'pt';
-        saveConfig();
-        switchView('settings');
-        renderTopBar();
-    });
-}
-
-/* ═══════════════════════ TEXT-TO-SPEECH ════════════════════════ */
+/* ═══════════════════════ TEXT-TO-SPEECH ════════════════════════
+ * Uses the Web Speech API (SpeechSynthesis).
+ * The button #tts-wrap is hidden by default in HTML; we reveal it
+ * here only if the browser supports the API.
+ *
+ * Flow:
+ *  • Click Ouvir  → reads all verse text of the current chapter
+ *  • Click Parar  → cancels immediately
+ *  • Navigate     → auto-cancelled at the top of loadChapter()
+ *  • Voices       → prefers pt-BR, falls back to any pt-* voice
+ * ════════════════════════════════════════════════════════════════ */
 let _ttsSpeaking = false;
+
 function ttsSetPlaying(on) {
     _ttsSpeaking = on;
     const btn = document.getElementById('ttsBtn');
     const icon = document.getElementById('ttsIcon');
+    const label = document.getElementById('ttsLabel');
     if (!btn) return;
     btn.classList.toggle('tts-speaking', on);
-    if (icon) icon.className = on ? 'ph-fill ph-stop-circle' : 'ph ph-speaker-high';
+    if (icon) icon.className = on ? 'bi bi-stop-fill' : 'bi bi-volume-up-fill';
+    if (label) label.textContent = on ? window.t('stop') : window.t('listen');
 }
 
 function initTTS() {
     const synth = window.speechSynthesis;
-    if (!synth) return;
+    if (!synth) return;                          // API not available — leave button hidden
+
+    const wrap = document.getElementById('tts-wrap');
     const btn = document.getElementById('ttsBtn');
-    if (!btn) return;
+    if (!wrap || !btn) return;
+
+    wrap.style.display = 'flex';                 // reveal the button now that we know it works
 
     function getChapterText() {
+        // Read verse text directly from the DOM so it always matches
+        // whatever is currently displayed (chapter OR search results).
         return Array.from(document.querySelectorAll('#content .verse-text'))
             .map(el => el.innerText.trim())
             .filter(Boolean)
             .join(' ');
     }
 
+    function pickVoice() {
+        const voices = synth.getVoices();
+        // Standardize lang tags to 'pt-BR'
+        const ptBR = voices.filter(v => v.lang.replace('_', '-') === 'pt-BR');
+
+        if (ptBR.length === 0) {
+            return voices.find(v => v.lang.startsWith('pt')) || null;
+        }
+
+        // Common male voice names/keywords in Brazilian Portuguese
+        const maleKeywords = ['daniel', 'antonio', 'ricardo', 'felipe', 'guilherme', 'thiago', 'male', 'masculino'];
+
+        const getScore = (v) => {
+            let score = 0;
+            const name = v.name.toLowerCase();
+            // Prioritize local (offline) voices
+            if (v.localService) score += 10;
+            // Prioritize masculine voices
+            if (maleKeywords.some(k => name.includes(k))) score += 5;
+            return score;
+        };
+
+        ptBR.sort((a, b) => getScore(b) - getScore(a));
+        return ptBR[0];
+    }
+
     function speak() {
         const text = getChapterText();
         if (!text) return;
-        synth.cancel();
-        const utt = new SpeechSynthesisUtterance(text);
-        utt.lang = state.lang === 'pt' ? 'pt-BR' : 'en-US';
-        utt.rate = 0.95;
 
-        const voices = synth.getVoices();
-        const voice = voices.find(v => v.lang.replace('_', '-') === utt.lang)
-            || voices.find(v => v.lang.startsWith(state.lang));
+        // Chrome sometimes keeps a stale "speaking" state — cancel first
+        synth.cancel();
+
+        const utt = new SpeechSynthesisUtterance(text);
+        utt.lang = 'pt-BR';
+        utt.rate = 0.92;   // slightly slower than default — better for formal text
+        utt.pitch = 1;
+
+        const voice = pickVoice();
         if (voice) utt.voice = voice;
 
         utt.onstart = () => ttsSetPlaying(true);
         utt.onend = () => ttsSetPlaying(false);
         utt.onerror = () => ttsSetPlaying(false);
+
         synth.speak(utt);
     }
 
-    btn.onclick = () => {
-        if (_ttsSpeaking) { synth.cancel(); ttsSetPlaying(false); return; }
+    btn.addEventListener('click', () => {
+        if (_ttsSpeaking) {
+            synth.cancel();
+            ttsSetPlaying(false);
+            return;
+        }
+
+        // Voices load asynchronously on first call in some browsers (Chrome).
+        // If the list is empty, wait for the voiceschanged event then speak.
         if (synth.getVoices().length === 0) {
             synth.addEventListener('voiceschanged', speak, { once: true });
-        } else { speak(); }
-    };
+        } else {
+            speak();
+        }
+    });
 }
 
-/* ═══════════════════════ CSS ADDITIONS ════════════════════════ */
-// Inject improved verse card typography and mood modal styles
-(function injectStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
-        /* ── Verse of the Day — improved readability ── */
-        .home-verse-card {
-            background: linear-gradient(135deg,
-                rgba(180,140,60,0.12) 0%,
-                rgba(100,70,20,0.08) 100%);
-            border: 1px solid rgba(180,140,60,0.25);
-        }
+function updateInterfaceLanguage() {
+    // 1 — Brand
+    const brand = document.querySelector('.brand');
+    if (brand) brand.textContent = window.t('brand');
 
-        .home-verse-text {
-            font-family: 'EB Garamond', 'Georgia', serif;
-            font-size: 1.25rem;
-            line-height: 1.75;
-            font-style: italic;
-            color: var(--text, #f0ead6);
-            margin: 0.75rem 0 1rem;
-            padding: 0 0.25rem;
-            border: none;
-            letter-spacing: 0.01em;
-            word-spacing: 0.05em;
-        }
+    // 2 — Search Placeholder
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.placeholder = window.t('searchPlaceholder');
 
-        .verse-reference {
-            font-family: 'Cinzel', serif;
-            font-size: 0.8rem;
-            letter-spacing: 0.12em;
-            opacity: 0.7;
-            text-transform: uppercase;
-            margin-bottom: 0.25rem;
+    // 3 — Sidebar titles
+    const sections = document.querySelectorAll('.sidebar-section');
+    sections.forEach(sec => {
+        const title = sec.querySelector('.sidebar-title');
+        if (title) {
+            const text = title.textContent.trim();
+            if (text.includes('Daily')) title.textContent = window.t('daily');
+            else if (text.includes('Antigo') || text.includes('Old')) title.textContent = window.t('ot');
+            else if (text.includes('Novo') || text.includes('New')) title.textContent = window.t('nt');
         }
+    });
 
-        /* ── Banner clickable ── */
-        .banner {
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .banner:active { opacity: 0.8; }
+    // 4 — Daily button in sidebar
+    const dailyBtn = document.getElementById('dailyBtn');
+    if (dailyBtn) dailyBtn.innerHTML = `<i class="bi bi-calendar-check"></i> ${window.t('todayReading')}`;
 
-        /* ── Mood modal animation ── */
-        #mood-modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.2s ease;
-        }
+    // 5 — Teens button in sidebar
+    const teensBtn = document.getElementById('teensBtn');
+    if (teensBtn) teensBtn.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> ${window.t('title', 'teens')}`;
 
-        /* ── Toast ── */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-50%) translateY(8px); }
-            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    // 6 — TTS button
+    const ttsBtn = document.getElementById('ttsBtn');
+    if (ttsBtn) {
+        ttsBtn.title = window.t('listenTitle');
+        const label = document.getElementById('ttsLabel');
+        if (label) label.textContent = _ttsSpeaking ? window.t('stop') : window.t('listen');
+    }
+
+    // 7 — Language toggle button
+    const langToggle = document.getElementById('langToggle');
+    if (langToggle) langToggle.innerHTML = `<i class="bi bi-globe"></i> ${window.t('langBtn')}`;
+
+    // 8 — Loader
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.innerHTML = `
+            <div class="spinner-border" role="status" style="width:2.5rem;height:2.5rem;border-width:3px;"></div>
+            ${window.t('loading')}
+        `;
+    }
+
+    // 9 — Tooltips and ARIA
+    document.getElementById('fontDown').title = window.t('fontDown');
+    document.getElementById('fontUp').title = window.t('fontUp');
+    document.getElementById('scrollTop').title = window.t('scrollTop');
+    document.getElementById('toggleSidebar').title = window.t('menuTitle');
+
+    // 10 — Content (if currently viewing a chapter or daily)
+    // For Bible chapters, just re-render
+    const content = document.getElementById('content');
+    if (!content.classList.contains('d-none')) {
+        // If it's a Bible chapter
+        if (state.verses.length && state.bookId) {
+            renderVerses(state.verses, ALL_BOOKS.find(b => b.id === state.bookId).name, state.chapter);
         }
-    `;
-    document.head.appendChild(style);
-})();
+        // If it's search results, we'd need to re-run the search or store results
+        // If it's Daily/Teens, they have their own update logic which we trigger by re-loading
+        if (document.getElementById('dailyBtn')?.classList.contains('active')) {
+            window.loadDailyReading?.();
+        }
+    }
+}
 
 /* ═══════════════════════ INIT ══════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
+
+    // Guard: bible-data.js must be loaded first
     if (!window.BIBLE_DATA) {
-        hideLoader();
+        document.getElementById('loader')?.classList.add('d-none');
         const errMsg = document.getElementById('error-msg');
         if (errMsg) {
             errMsg.classList.remove('d-none');
             errMsg.innerHTML = `
-                <div style="text-align:center;padding:2rem">
-                    <i class="ph ph-warning-circle" style="font-size:2.5rem;opacity:.5"></i>
-                    <p style="margin-top:1rem">${window.t('errorData')}</p>
-                    <p style="font-size:0.85rem;opacity:0.6">${window.t('errorDataInstruction')}</p>
+                <div style="text-align:center;padding:3rem;line-height:2">
+                    <i class="bi bi-file-earmark-x" style="font-size:3rem;opacity:.5"></i>
+                    <h3 style="margin-top:1rem">${window.t('errorData')}</h3>
+                    <p>${window.t('errorDataInstruction')}:</p>
+                    <code style="background:rgba(0,0,0,.2);padding:.5rem 1.2rem;border-radius:6px">
+                        &lt;script src="js/bible-data.js"&gt;&lt;/script&gt;
+                    </code>
                 </div>`;
         }
         return;
     }
 
+    buildSidebar();
     await initDB();
+    initTTS();
 
-    // Bottom Nav Events
-    document.querySelectorAll('.nav-item').forEach(btn => {
-        btn.addEventListener('click', () => switchView(btn.dataset.view));
+    // Font controls
+    document.getElementById('fontUp')?.addEventListener('click', () => {
+        state.fontSize = Math.min(2, +(state.fontSize + 0.1).toFixed(1));
+        document.querySelectorAll('.verse-text').forEach(el => el.style.fontSize = state.fontSize + 'rem');
+    });
+    document.getElementById('fontDown')?.addEventListener('click', () => {
+        state.fontSize = Math.max(0.8, +(state.fontSize - 0.1).toFixed(1));
+        document.querySelectorAll('.verse-text').forEach(el => el.style.fontSize = state.fontSize + 'rem');
     });
 
-    // Profile Modal save
-    document.getElementById('save-name-btn')?.addEventListener('click', saveProfile);
-    document.getElementById('user-name-input')?.addEventListener('keypress', e => {
-        if (e.key === 'Enter') saveProfile();
+    // Search (debounced — searches all 31k verses instantly from bundled data)
+    let searchTimer;
+    const searchInput = document.getElementById('searchInput');
+    searchInput?.addEventListener('input', e => {
+        clearTimeout(searchTimer);
+        const q = e.target.value.trim();
+        if (!q) { loadChapter(state.bookId, state.chapter); return; }
+        searchTimer = setTimeout(() => {
+            const directRef = parseReference(q);
+            const results = searchVerses(q);
+            renderSearch(q, results, directRef);
+        }, 400);
     });
 
-    // Scroll to Top
-    const scrollBtn = document.getElementById('scrollTop');
-    window.addEventListener('scroll', () => {
-        const show = window.scrollY > 300;
-        if (scrollBtn) {
-            scrollBtn.style.opacity = show ? '1' : '0';
-            scrollBtn.classList.toggle('visible', show);
+    // Enter key support for first result
+    searchInput?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            const firstResult = document.querySelector('.note-card, #content .verse');
+            if (firstResult) firstResult.click();
         }
     });
-    if (scrollBtn) scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    checkProfile();
-    switchView('home');
+    // Keyboard navigation ← →
+    document.addEventListener('keydown', e => {
+        if (e.target.tagName === 'INPUT') return;
+        const book = ALL_BOOKS.find(b => b.id === state.bookId);
+        if (!book) return;
+        if (e.key === 'ArrowRight' && state.chapter < book.chapters)
+            loadChapter(state.bookId, state.chapter + 1);
+        if (e.key === 'ArrowLeft' && state.chapter > 1)
+            loadChapter(state.bookId, state.chapter - 1);
+    });
+
+    // Scroll-to-top button
+    const scrollBtn = document.getElementById('scrollTop');
+    if (scrollBtn) {
+        window.addEventListener('scroll', () => {
+            const show = window.scrollY > 300;
+            scrollBtn.style.opacity = show ? '1' : '0';
+            scrollBtn.style.pointerEvents = show ? 'auto' : 'none';
+        });
+        scrollBtn.addEventListener('click', () =>
+            window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+
+    // Language toggle
+    const langToggle = document.getElementById('langToggle');
+    langToggle?.addEventListener('click', () => {
+        window.state.lang = window.state.lang === 'pt' ? 'en' : 'pt';
+        localStorage.setItem('bible_lang', window.state.lang);
+        updateInterfaceLanguage();
+        // Update sidebar as well if needed (for ARIA labels)
+        if (window.SidebarMenu?.updateAria) window.SidebarMenu.updateAria();
+    });
+
+    // Initial translation
+    if (window.state.lang !== 'pt') {
+        updateInterfaceLanguage();
+    }
+
+    // Load first chapter
+    await loadChapter('JHN', 1);
 });
 
+// ===========================================================
+// Service Worker Registration – GITHUB PAGES COMPATIBLE
+// Com trava de segurança contra loop de reload infinito
+// ===========================================================
+
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+    // Timestamp impede que o navegador sirva um SW antigo do cache CDN
+    const swUrl = 'sw.js';
+    let isRefreshing = false; // Trava para evitar múltiplos reloads
+
+    navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' })
         .then(reg => {
+            // Força verificação de nova versão
             reg.update();
+
             reg.addEventListener('updatefound', () => {
                 const newWorker = reg.installing;
+                if (!newWorker) return;
+
                 newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    if (newWorker.state === 'installed') {
+                        if (navigator.serviceWorker.controller) {
+                            console.log('[SW] Nova versão encontrada, atualizando...');
+                            newWorker.postMessage({ type: 'SKIP_WAITING' });
+                        }
                     }
                 });
             });
-        });
-    let isRefreshing = false;
+        })
+        .catch(err => console.error('[SW] Registro falhou:', err));
+
+    // Recarrega a página apenas uma vez quando o novo SW assume o controle
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (isRefreshing) return;
         isRefreshing = true;
+        console.log('[SW] Novo Service Worker ativo! Recarregando app...');
         window.location.reload();
     });
+
 }
