@@ -1,6 +1,6 @@
 /**
  * BÍBLIA SAGRADA — 100% OFFLINE
- * Modern Re-design
+ * Modern Re-design — Fixed Version
  */
 
 /* ══════════════════════════ BOOK DATA ═══════════════════════════ */
@@ -84,7 +84,6 @@ const TRANSLATIONS = {
     pt: {
         brand: '✦ Bíblia Sagrada',
         searchPlaceholder: 'Buscar na Bíblia...',
-        daily: '✦ Daily',
         todayReading: 'Leitura de Hoje',
         ot: '✦ Antigo Testamento',
         nt: '✦ Novo Testamento',
@@ -145,7 +144,6 @@ const TRANSLATIONS = {
     en: {
         brand: '✦ Holy Bible',
         searchPlaceholder: 'Search the Bible...',
-        daily: '✦ Daily',
         todayReading: "Today's Reading",
         ot: '✦ Old Testament',
         nt: '✦ New Testament',
@@ -214,10 +212,8 @@ window.t = function(key, section = null) {
 };
 
 /* ══════════════════════════ STATE ══════════════════════════════ */
-// Load config from localStorage
 function getInitialConfig() {
     let config = JSON.parse(localStorage.getItem('bible_config') || '{}');
-    // Migration from old keys
     if (!config.lang && localStorage.getItem('bible_lang')) {
         config.lang = localStorage.getItem('bible_lang');
     }
@@ -231,7 +227,7 @@ const savedConfig = getInitialConfig();
 window.state = {
     bookId: 'JHN',
     chapter: 1,
-    fontSize: savedConfig.fontSize || 1.1,
+    fontSize: savedConfig.fontSize || 1.15,
     verses: [],
     lang: savedConfig.lang || 'pt',
     userName: savedConfig.userName || '',
@@ -245,6 +241,21 @@ function saveConfig() {
         lang: state.lang,
         userName: state.userName
     }));
+}
+
+/* ═══════════════════════ LOADER HELPERS ════════════════════════ */
+function showLoader() {
+    const loader = document.getElementById('loader');
+    const content = document.getElementById('content');
+    if (loader) loader.classList.remove('d-none');
+    if (content) content.classList.add('d-none');
+}
+
+function hideLoader() {
+    const loader = document.getElementById('loader');
+    const content = document.getElementById('content');
+    if (loader) loader.classList.add('d-none');
+    if (content) content.classList.remove('d-none');
 }
 
 /* ═══════════════════════ INDEXEDDB CACHE ═══════════════════════ */
@@ -281,8 +292,7 @@ function dbGet(key) {
 function dbPut(key, verses) {
     if (!db) return;
     try {
-        db.transaction(STORE, 'readwrite').objectStore(STORE)
-            .put({ id: key, verses });
+        db.transaction(STORE, 'readwrite').objectStore(STORE).put({ id: key, verses });
     } catch { }
 }
 
@@ -305,7 +315,6 @@ function switchView(viewName, params = {}) {
     window.speechSynthesis?.cancel();
     ttsSetPlaying(false);
 
-    // Update Bottom Nav UI
     document.querySelectorAll('.nav-item').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.view === viewName);
     });
@@ -313,7 +322,9 @@ function switchView(viewName, params = {}) {
     const content = document.getElementById('content');
     content.innerHTML = '';
 
-    // Hide/Show Top Bar based on view
+    // Always hide loader when switching views
+    hideLoader();
+
     renderTopBar();
 
     switch (viewName) {
@@ -383,9 +394,7 @@ function renderTopBar() {
 /* ════════════════════════ PROFILE ══════════════════════════ */
 function checkProfile() {
     if (!state.userName) {
-        const name = prompt('Como gostaria de ser chamado?', '');
-        state.userName = name || 'Eduardo';
-        saveConfig();
+        document.getElementById('name-modal-overlay')?.classList.remove('d-none');
     }
 }
 
@@ -400,6 +409,60 @@ function saveProfile() {
         renderHome();
     }
 }
+
+/* ════════════════════════ MOOD / FEELING ════════════════════════ */
+const MOOD_VERSES = {
+    '😊': { label: 'Alegre', bookId: 'PHP', chapter: 4, verse: 4 },
+    '😔': { label: 'Triste', bookId: 'PSA', chapter: 34, verse: 18 },
+    '😰': { label: 'Ansioso', bookId: 'PHP', chapter: 4, verse: 6 },
+    '💪': { label: 'Corajoso', bookId: 'JOS', chapter: 1, verse: 9 },
+    '🙏': { label: 'Grato', bookId: 'PSA', chapter: 136, verse: 1 },
+    '😴': { label: 'Cansado', bookId: 'MAT', chapter: 11, verse: 28 },
+};
+
+function openMoodSelector() {
+    // Remove existing modal if any
+    document.getElementById('mood-modal-overlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'mood-modal-overlay';
+    overlay.className = 'modal-overlay';
+    overlay.style.cssText = 'display:flex;';
+
+    const moods = Object.entries(MOOD_VERSES);
+    overlay.innerHTML = `
+        <div class="name-modal" style="max-width:340px;width:90%">
+            <h2 style="font-family:'Cinzel',serif;margin-bottom:0.3rem">Como você está?</h2>
+            <p style="opacity:0.6;font-size:0.9rem;margin-bottom:1.5rem">Escolha seu estado de espírito e receba uma palavra</p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1rem">
+                ${moods.map(([emoji, data]) => `
+                    <button onclick="handleMoodSelect('${data.bookId}',${data.chapter},${data.verse})"
+                        style="background:var(--surface-2,rgba(255,255,255,0.06));border:1px solid rgba(255,255,255,0.1);
+                               border-radius:12px;padding:0.75rem 0.5rem;cursor:pointer;color:inherit;
+                               display:flex;flex-direction:column;align-items:center;gap:0.3rem;
+                               font-size:0.75rem;transition:background 0.2s"
+                        onmouseover="this.style.background='rgba(180,140,60,0.2)'"
+                        onmouseout="this.style.background='var(--surface-2,rgba(255,255,255,0.06))'">
+                        <span style="font-size:1.8rem">${emoji}</span>
+                        <span>${data.label}</span>
+                    </button>
+                `).join('')}
+            </div>
+            <button onclick="document.getElementById('mood-modal-overlay').remove()"
+                style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.15);
+                       padding:0.6rem;border-radius:8px;cursor:pointer;color:inherit;font-size:0.85rem">
+                Fechar
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+}
+
+window.handleMoodSelect = function(bookId, chapter, verse) {
+    document.getElementById('mood-modal-overlay')?.remove();
+    switchView('bible', { bookId, chapter, verse });
+};
 
 /* ════════════════════════ SEARCH ════════════════════════════ */
 function normalise(s) {
@@ -555,11 +618,90 @@ function renderSearchResults(query, results, directRef = null) {
     }
 }
 
+/* ═══════════════════════ DAILY TTS HELPER ══════════════════════ */
+/**
+ * Get today's daily reading text from daily.js plan data (if available),
+ * or fall back to the verse-of-the-day. Then speak it.
+ */
+function playDailyTTS() {
+    const synth = window.speechSynthesis;
+    if (!synth) { alert('Seu dispositivo não suporta leitura em voz alta.'); return; }
+
+    // If already speaking, stop
+    if (synth.speaking) {
+        synth.cancel();
+        const banner = document.querySelector('.banner-play i');
+        if (banner) { banner.className = 'ph-fill ph-play'; }
+        return;
+    }
+
+    // Collect text: try daily plan passages first, then verse of the day
+    let textToSpeak = '';
+
+    // Try to get daily reading passages from global daily state
+    if (window.DAILY_PLAN && window.BIBLE_DATA) {
+        const dayIndex = todayDayOfYear() - 1;
+        const dayPlan = window.DAILY_PLAN[dayIndex % window.DAILY_PLAN.length];
+        if (dayPlan && Array.isArray(dayPlan.passages)) {
+            const parts = [];
+            dayPlan.passages.forEach(p => {
+                const key = `${p.bookId}_${p.chapter}`;
+                const verses = window.BIBLE_DATA[key];
+                if (verses) {
+                    parts.push(verses.map(v => v.text).join(' '));
+                }
+            });
+            textToSpeak = parts.join(' ');
+        }
+    }
+
+    // Fallback: verse of the day
+    if (!textToSpeak && window.BIBLE_DATA) {
+        const today = new Date();
+        const seed = today.getFullYear() * 1000 + (today.getMonth() + 1) * 100 + today.getDate();
+        const book = ALL_BOOKS[seed % ALL_BOOKS.length];
+        const chapNum = (seed % book.chapters) + 1;
+        const key = `${book.id}_${chapNum}`;
+        const verses = window.BIBLE_DATA[key] || [];
+        const v = verses[seed % (verses.length || 1)];
+        if (v) textToSpeak = `${book.name}, capítulo ${chapNum}, versículo ${v.verse}. ${v.text}`;
+    }
+
+    if (!textToSpeak) {
+        alert('Nenhum texto disponível para leitura.');
+        return;
+    }
+
+    const utt = new SpeechSynthesisUtterance(textToSpeak);
+    utt.lang = state.lang === 'pt' ? 'pt-BR' : 'en-US';
+    utt.rate = 0.92;
+
+    const voices = synth.getVoices();
+    const voice = voices.find(v => v.lang.replace('_', '-') === utt.lang)
+        || voices.find(v => v.lang.startsWith(state.lang));
+    if (voice) utt.voice = voice;
+
+    const bannerPlay = document.querySelector('.banner-play i');
+
+    utt.onstart = () => {
+        if (bannerPlay) bannerPlay.className = 'ph-fill ph-stop-circle';
+    };
+    utt.onend = utt.onerror = () => {
+        if (bannerPlay) bannerPlay.className = 'ph-fill ph-play';
+    };
+
+    const speak = () => synth.speak(utt);
+    if (voices.length === 0) {
+        synth.addEventListener('voiceschanged', speak, { once: true });
+    } else {
+        speak();
+    }
+}
+
 /* ════════════════════════ HOME DASHBOARD ══════════════════════════ */
 function renderHome() {
     const content = document.getElementById('content');
 
-    // Get Verse of the Day (seeded by date)
     const today = new Date();
     const seed = today.getFullYear() * 1000 + (today.getMonth() + 1) * 100 + today.getDate();
     const bookIdx = seed % ALL_BOOKS.length;
@@ -573,7 +715,7 @@ function renderHome() {
     content.innerHTML = `
         <div class="fade-in">
             <!-- Widget de Sentimento -->
-            <div class="feeling-widget" onclick="switchView('search')">
+            <div class="feeling-widget" id="feelingWidget">
                 <div class="feeling-text">
                     <span class="feeling-emoji">😀</span>
                     ${window.t('feelingQuestion')}
@@ -607,28 +749,81 @@ function renderHome() {
                 </div>
             </div>
 
-            <!-- Card Versículo -->
+            <!-- Card Versículo do Dia — tipografia melhorada -->
             <div class="verse-card-wrapper">
-                <div class="verse-card" onclick="switchView('bible', {bookId: '${book.id}', chapter: ${chapNum}, verse: ${v.verse}})">
+                <div class="verse-card home-verse-card" onclick="switchView('bible', {bookId: '${book.id}', chapter: ${chapNum}, verse: ${v.verse}})">
                     <div class="verse-header">${window.t('verseOfDay')}</div>
                     <div class="verse-reference">${book.name} ${chapNum}:${v.verse}</div>
-                    <div class="verse-text">${v.text}</div>
+                    <blockquote class="home-verse-text">"${v.text}"</blockquote>
                     <div class="verse-actions">
-                        <button class="v-action-btn"><i class="ph ph-heart"></i><span>Amém</span></button>
-                        <button class="v-action-btn"><i class="ph ph-share-network"></i><span>Enviar</span></button>
+                        <button class="v-action-btn" onclick="event.stopPropagation();this.querySelector('i').style.color='#e53e3e'">
+                            <i class="ph ph-heart"></i><span>Amém</span>
+                        </button>
+                        <button class="v-action-btn" onclick="event.stopPropagation();shareVerse('${book.name} ${chapNum}:${v.verse}', \`${v.text.replace(/`/g, "'")}\`)">
+                            <i class="ph ph-share-network"></i><span>Enviar</span>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Banner Inferior (Acampamento) -->
+            <!-- Banner — Conectados com Deus (toca TTS da leitura diária) -->
             <div class="banner-wrapper">
-                <div class="banner">
-                    <div class="banner-play"><i class="ph-fill ph-play"></i></div>
-                    <h2 class="banner-text">CONECTADOS<br><span style="font-size: 1.2rem; color: var(--gold);">COM DEUS</span></h2>
+                <div class="banner" id="dailyBanner">
+                    <div class="banner-play" id="bannerPlayBtn">
+                        <i class="ph-fill ph-play"></i>
+                    </div>
+                    <div>
+                        <h2 class="banner-text">CONECTADOS<br><span style="font-size:1rem;color:var(--gold);font-family:'EB Garamond',serif;font-weight:400;font-style:italic">com a Palavra de Deus</span></h2>
+                        <p style="font-size:0.75rem;opacity:0.6;margin:0;margin-top:0.25rem">Ouvir a leitura de hoje</p>
+                    </div>
                 </div>
             </div>
         </div>
     `;
+
+    // Wire up feeling widget
+    document.getElementById('feelingWidget')?.addEventListener('click', openMoodSelector);
+
+    // Wire up banner play button
+    document.getElementById('bannerPlayBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        playDailyTTS();
+    });
+    document.getElementById('dailyBanner')?.addEventListener('click', () => {
+        playDailyTTS();
+    });
+}
+
+/* ═══════════════════════ SHARE VERSE ════════════════════════════ */
+window.shareVerse = function(ref, text) {
+    const shareText = `"${text}" — ${ref}`;
+    if (navigator.share) {
+        navigator.share({ title: 'Versículo da Bíblia', text: shareText })
+            .catch(() => copyToClipboard(shareText));
+    } else {
+        copyToClipboard(shareText);
+    }
+};
+
+function copyToClipboard(text) {
+    navigator.clipboard?.writeText(text).then(() => {
+        showToast('Versículo copiado!');
+    }).catch(() => {
+        showToast('Copie: ' + text);
+    });
+}
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = `
+        position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+        background:rgba(0,0,0,0.85);color:#fff;padding:0.6rem 1.2rem;
+        border-radius:20px;font-size:0.85rem;z-index:9999;
+        animation:fadeIn 0.2s ease;pointer-events:none
+    `;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
 }
 
 /* ════════════════════════ BIBLE SELECTOR ══════════════════════════ */
@@ -664,7 +859,6 @@ function renderVerses(verses, bookName, chapter, targetVerse = null) {
     content.innerHTML = '';
     const book = ALL_BOOKS.find(b => b.id === state.bookId);
 
-    // Reader UI
     content.innerHTML = `
         <div class="fade-in">
             <h1 class="bible-heading">${bookName}</h1>
@@ -732,7 +926,6 @@ function renderVerses(verses, bookName, chapter, targetVerse = null) {
     document.getElementById('prevBtn').onclick = () => loadChapter(state.bookId, chapter - 1);
     document.getElementById('nextBtn').onclick = () => loadChapter(state.bookId, chapter + 1);
 
-    // Re-wire font controls
     document.getElementById('fontUp')?.addEventListener('click', () => {
         state.fontSize = Math.min(2, +(state.fontSize + 0.1).toFixed(1));
         document.querySelectorAll('.verse-text').forEach(el => el.style.fontSize = state.fontSize + 'rem');
@@ -753,22 +946,19 @@ async function loadChapter(bookId, chapter, verse = null) {
     state.currentView = 'bible';
     renderTopBar();
 
-    const loader = document.getElementById('loader');
-    const content = document.getElementById('content');
     const errMsg = document.getElementById('error-msg');
-
-    loader?.classList.remove('d-none');
-    content?.classList.add('d-none');
     errMsg?.classList.add('d-none');
+
+    showLoader();
 
     try {
         const verses = await fetchChapter(bookId, chapter);
         state.verses = verses;
+        // Hide loader BEFORE rendering (so content shows immediately)
+        hideLoader();
         renderVerses(verses, ALL_BOOKS.find(b => b.id === bookId).name, chapter, verse);
-        loader?.classList.add('d-none');
-        content?.classList.remove('d-none');
     } catch (e) {
-        loader?.classList.add('d-none');
+        hideLoader();
         if (errMsg) {
             errMsg.classList.remove('d-none');
             errMsg.innerHTML = `
@@ -803,9 +993,7 @@ function renderPlans() {
         </div>
     `;
 
-    // Teens plan integration handled by its own script via event listeners or manual trigger
     document.getElementById('teensPlanBtn')?.addEventListener('click', () => {
-        // Trigger teens plan logic
         if (window.openTeensDashboard) window.openTeensDashboard();
     });
 }
@@ -877,7 +1065,8 @@ function initTTS() {
         utt.rate = 0.95;
 
         const voices = synth.getVoices();
-        const voice = voices.find(v => v.lang.replace('_', '-') === utt.lang) || voices.find(v => v.lang.startsWith(state.lang));
+        const voice = voices.find(v => v.lang.replace('_', '-') === utt.lang)
+            || voices.find(v => v.lang.startsWith(state.lang));
         if (voice) utt.voice = voice;
 
         utt.onstart = () => ttsSetPlaying(true);
@@ -894,10 +1083,82 @@ function initTTS() {
     };
 }
 
+/* ═══════════════════════ CSS ADDITIONS ════════════════════════ */
+// Inject improved verse card typography and mood modal styles
+(function injectStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        /* ── Verse of the Day — improved readability ── */
+        .home-verse-card {
+            background: linear-gradient(135deg,
+                rgba(180,140,60,0.12) 0%,
+                rgba(100,70,20,0.08) 100%);
+            border: 1px solid rgba(180,140,60,0.25);
+        }
+
+        .home-verse-text {
+            font-family: 'EB Garamond', 'Georgia', serif;
+            font-size: 1.25rem;
+            line-height: 1.75;
+            font-style: italic;
+            color: var(--text, #f0ead6);
+            margin: 0.75rem 0 1rem;
+            padding: 0 0.25rem;
+            border: none;
+            letter-spacing: 0.01em;
+            word-spacing: 0.05em;
+        }
+
+        .verse-reference {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            opacity: 0.7;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        /* ── Banner clickable ── */
+        .banner {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .banner:active { opacity: 0.8; }
+
+        /* ── Mood modal animation ── */
+        #mood-modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        /* ── Toast ── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
 /* ═══════════════════════ INIT ══════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
     if (!window.BIBLE_DATA) {
-        document.getElementById('loader')?.classList.add('d-none');
+        hideLoader();
+        const errMsg = document.getElementById('error-msg');
+        if (errMsg) {
+            errMsg.classList.remove('d-none');
+            errMsg.innerHTML = `
+                <div style="text-align:center;padding:2rem">
+                    <i class="ph ph-warning-circle" style="font-size:2.5rem;opacity:.5"></i>
+                    <p style="margin-top:1rem">${window.t('errorData')}</p>
+                    <p style="font-size:0.85rem;opacity:0.6">${window.t('errorDataInstruction')}</p>
+                </div>`;
+        }
         return;
     }
 
@@ -908,7 +1169,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         btn.addEventListener('click', () => switchView(btn.dataset.view));
     });
 
-    // Profile Modal
+    // Profile Modal save
     document.getElementById('save-name-btn')?.addEventListener('click', saveProfile);
     document.getElementById('user-name-input')?.addEventListener('keypress', e => {
         if (e.key === 'Enter') saveProfile();
@@ -918,10 +1179,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     const scrollBtn = document.getElementById('scrollTop');
     window.addEventListener('scroll', () => {
         const show = window.scrollY > 300;
-        scrollBtn.style.opacity = show ? '1' : '0';
-        scrollBtn.classList.toggle('visible', show);
+        if (scrollBtn) {
+            scrollBtn.style.opacity = show ? '1' : '0';
+            scrollBtn.classList.toggle('visible', show);
+        }
     });
-    scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (scrollBtn) scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
     checkProfile();
     switchView('home');
