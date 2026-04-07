@@ -383,14 +383,9 @@ function renderTopBar() {
 /* ════════════════════════ PROFILE ══════════════════════════ */
 function checkProfile() {
     if (!state.userName) {
-        const name = prompt('Como gostaria de ser chamado?', 'Eduardo');
-        if (name) {
-            state.userName = name;
-            saveConfig();
-        } else {
-            state.userName = 'Eduardo';
-            saveConfig();
-        }
+        const name = prompt('Como gostaria de ser chamado?', '');
+        state.userName = name || 'Eduardo';
+        saveConfig();
     }
 }
 
