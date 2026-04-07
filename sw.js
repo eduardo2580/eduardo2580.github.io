@@ -1,9 +1,9 @@
 /* ===========================================================
    Service Worker – Bíblia Sagrada PWA
-   v28 – FIXED
+   v30 – REDESIGN
    =========================================================== */
 
-const CACHE_VERSION = 'v29; // ← INCREMENTE SEMPRE QUE FIZER DEPLOY
+const CACHE_VERSION = 'v30'; // ← INCREMENTE SEMPRE QUE FIZER DEPLOY
 const PRECACHE_NAME = `bible-sagrada-${CACHE_VERSION}-precache`;
 const RUNTIME_NAME  = `bible-sagrada-${CACHE_VERSION}-runtime`;
 
@@ -24,7 +24,6 @@ const PRECACHE_URLS = [
   'js/bible-data.js',
   'js/bootstrap.min.js',
   'js/script.js',
-  'js/sidebar.js',
   'js/teens.js',
   'js/splash.js'
 ];
@@ -39,7 +38,6 @@ function log(...args) {
 // ------------------------------
 self.addEventListener('install', event => {
   log('Installing version:', CACHE_VERSION);
-  // FIX: skipWaiting inside waitUntil to avoid race conditions
   event.waitUntil(
     caches.open(PRECACHE_NAME)
       .then(cache => cache.addAll(PRECACHE_URLS))
@@ -61,7 +59,6 @@ self.addEventListener('activate', event => {
     caches.keys()
       .then(keys => Promise.all(
         keys.map(k => {
-          // FIX: delete any cache NOT in the current version's set
           if (!validCaches.has(k)) {
             log('Deleting old cache:', k);
             return caches.delete(k);
@@ -82,10 +79,8 @@ self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // FIX: strict equality, not startsWith
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  // Never cache the SW itself
   if (url.pathname.includes('sw.js')) return;
 
   if (['style', 'script', 'image', 'font'].includes(request.destination)) {
@@ -115,10 +110,7 @@ self.addEventListener('fetch', event => {
 // ------------------------------
 async function cacheFirst(request) {
   const cached = await caches.match(request);
-  if (cached) {
-    log('Cache hit:', request.url);
-    return cached;
-  }
+  if (cached) return cached;
   try {
     const response = await fetch(request);
     if (response?.status === 200) {
@@ -127,7 +119,6 @@ async function cacheFirst(request) {
     }
     return response;
   } catch (err) {
-    console.error('cacheFirst fetch failed:', request.url, err);
     throw err;
   }
 }
@@ -142,7 +133,6 @@ async function networkFirstWithOfflineFallback(request) {
     }
     throw new Error(`Bad response: ${response?.status}`);
   } catch (err) {
-    log('Network failed, falling back to cache:', err.message);
     const cached = await caches.match(request);
     if (cached) return cached;
 
@@ -164,18 +154,15 @@ async function staleWhileRevalidate(request) {
   const cache  = await caches.open(RUNTIME_NAME);
   const cached = await cache.match(request);
 
-  // FIX: always kick off revalidation, but don't let it block the response
   const revalidatePromise = fetch(request)
     .then(response => {
       if (response?.status === 200) cache.put(request, response.clone());
       return response;
     })
     .catch(err => {
-      log('Revalidation failed:', request.url, err.message);
       return null;
     });
 
-  // FIX: if we have a cached copy, return it immediately; else await the network
   return cached ?? revalidatePromise;
 }
 
@@ -189,7 +176,6 @@ async function networkFirstFallbackToCache(request) {
     }
     throw new Error(`Bad response: ${response?.status}`);
   } catch (err) {
-    log('Network failed, trying cache:', request.url, err.message);
     const cached = await caches.match(request);
     if (cached) return cached;
     return new Response('Recurso não disponível offline', { status: 404 });
@@ -201,7 +187,6 @@ async function networkFirstFallbackToCache(request) {
 // ------------------------------
 self.addEventListener('message', event => {
   if (event.data?.type === 'SKIP_WAITING') {
-    log('Received SKIP_WAITING from client');
     self.skipWaiting();
   }
 });
@@ -211,7 +196,6 @@ self.addEventListener('message', event => {
 // ------------------------------
 self.addEventListener('sync', event => {
   if (event.tag === 'sync-bible-notes') {
-    log('Background sync: sync-bible-notes');
     event.waitUntil(syncBibleNotes());
   }
 });
