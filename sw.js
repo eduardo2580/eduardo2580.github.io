@@ -3,7 +3,7 @@
    v28 – FIXED
    =========================================================== */
 
-const CACHE_VERSION = 'v48';
+const CACHE_VERSION = 'v49';
 const PRECACHE_NAME = `bible-sagrada-${CACHE_VERSION}-precache`;
 const RUNTIME_NAME = `bible-sagrada-${CACHE_VERSION}-runtime`;
 

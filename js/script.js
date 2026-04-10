@@ -84,7 +84,7 @@ const TRANSLATIONS = {
     pt: {
         brand: '✦ Bíblia Sagrada',
         searchPlaceholder: 'Buscar na Bíblia...',
-        daily: '✦ Daily',
+        daily: '✦ Diário',
         todayReading: 'Leitura de Hoje',
         ot: '✦ Antigo Testamento',
         nt: '✦ Novo Testamento',
@@ -119,6 +119,11 @@ const TRANSLATIONS = {
         home: 'Início',
         username: 'Nome do Usuário',
         language: 'Idioma',
+        theme: 'Tema',
+        light: 'Claro',
+        dark: 'Escuro',
+        dailyPlan: 'Diário',
+        teensPlan: 'Teens',
         daily: {
             title: "Leitura Diária",
             planName: "Plano Bíblico Anual",
@@ -179,6 +184,11 @@ const TRANSLATIONS = {
         home: 'Home',
         username: 'User Name',
         language: 'Language',
+        theme: 'Theme',
+        light: 'Light',
+        dark: 'Dark',
+        dailyPlan: 'Daily',
+        teensPlan: 'Teens',
         daily: {
             title: "Daily Reading",
             planName: "Annual Bible Plan",
@@ -233,6 +243,7 @@ window.state = {
     verses: [],
     lang: savedConfig.lang || 'pt',
     userName: savedConfig.userName || '',
+    theme: savedConfig.theme || 'light',
     currentView: 'home'
 };
 const state = window.state;
@@ -241,8 +252,13 @@ function saveConfig() {
     localStorage.setItem('bible_config', JSON.stringify({
         fontSize: state.fontSize,
         lang: state.lang,
-        userName: state.userName
+        userName: state.userName,
+        theme: state.theme
     }));
+}
+
+function applyTheme() {
+    document.body.classList.toggle('dark-theme', state.theme === 'dark');
 }
 
 /* ═══════════════════════ INDEXEDDB CACHE ═══════════════════════ */
@@ -354,6 +370,8 @@ function switchView(viewName, params = {}) {
 
 function renderTopBar() {
     const placeholder = document.getElementById('top-bar-placeholder');
+    const themeIcon = state.theme === 'dark' ? 'ph-sun' : 'ph-moon';
+
     if (state.currentView !== 'home') {
         placeholder.innerHTML = `
             <div class="top-bar">
@@ -363,11 +381,17 @@ function renderTopBar() {
                     </div>
                     <h1 class="greeting">${window.t('brand')}</h1>
                 </div>
-                <button class="icon-btn" onclick="switchView('search')">
-                    <i class="ph ph-magnifying-glass"></i>
-                </button>
+                <div style="display:flex; gap:0.5rem">
+                    <button class="icon-btn" id="themeToggleBtnTop">
+                        <i class="ph ${themeIcon}"></i>
+                    </button>
+                    <button class="icon-btn" onclick="switchView('search')">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </button>
+                </div>
             </div>
         `;
+        document.getElementById('themeToggleBtnTop')?.addEventListener('click', toggleTheme);
         return;
     }
 
@@ -379,8 +403,20 @@ function renderTopBar() {
                 </div>
                 <h1 class="greeting">${window.t('hello')}, ${state.userName || '...'}! 👋</h1>
             </div>
+            <button class="icon-btn" id="themeToggleBtnTop">
+                <i class="ph ${themeIcon}"></i>
+            </button>
         </div>
     `;
+    document.getElementById('themeToggleBtnTop')?.addEventListener('click', toggleTheme);
+}
+
+function toggleTheme() {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    saveConfig();
+    applyTheme();
+    renderTopBar();
+    if (state.currentView === 'settings') renderSettings();
 }
 
 /* ════════════════════════ PROFILE ══════════════════════════ */
@@ -589,15 +625,15 @@ function renderHome() {
                     </div>
                     <div class="action-item" onclick="switchView('daily')">
                         <div class="action-circle"><i class="ph ph-sun"></i></div>
-                        <span class="action-label">DAILY</span>
+                        <span class="action-label">${window.t('dailyPlan').toUpperCase()}</span>
                     </div>
                     <div class="action-item" onclick="switchView('teens')">
                         <div class="action-circle"><i class="ph ph-lightning"></i></div>
-                        <span class="action-label">TEENS</span>
+                        <span class="action-label">${window.t('teensPlan').toUpperCase()}</span>
                     </div>
                     <div class="action-item" onclick="switchView('search')">
                         <div class="action-circle"><i class="ph ph-magnifying-glass"></i></div>
-                        <span class="action-label">BUSCA</span>
+                        <span class="action-label">${window.t('search').toUpperCase()}</span>
                     </div>
                 </div>
             </div>
@@ -815,6 +851,13 @@ function renderSettings() {
                     </div>
                     <i class="ph ph-globe"></i>
                 </div>
+                <div class="settings-item" id="themeToggleBtn">
+                    <div>
+                        <div class="settings-label">${window.t('theme')}</div>
+                        <div style="font-size: 0.9rem; opacity: 0.6">${state.theme === 'dark' ? window.t('dark') : window.t('light')}</div>
+                    </div>
+                    <i class="ph ${state.theme === 'dark' ? 'ph-sun' : 'ph-moon'}"></i>
+                </div>
             </div>
         </div>
     `;
@@ -825,6 +868,8 @@ function renderSettings() {
         switchView('settings');
         renderTopBar();
     });
+
+    document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
 }
 
 /* ═══════════════════════ TEXT-TO-SPEECH ════════════════════════ */
@@ -906,6 +951,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
     scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    applyTheme();
     checkProfile();
     switchView('home');
 });

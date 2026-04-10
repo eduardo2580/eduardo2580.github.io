@@ -11,6 +11,19 @@
   --ink-soft:    #3d2e14;
   --red-bible:   #8b1a1a;
   --header-h:    66px;
+  --white-alpha: rgba(255, 255, 255, 0.4);
+}
+
+body.dark-theme {
+  --gold:        #d4af37;
+  --gold-light:  #f0e68c;
+  --gold-dark:   #a68a56;
+  --parchment:   #121212;
+  --parchment-d: #1e1e1e;
+  --ink:         #f5edd8;
+  --ink-soft:    #dcdcdc;
+  --red-bible:   #d32f2f;
+  --white-alpha: rgba(255, 255, 255, 0.05);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -26,6 +39,13 @@ body {
     radial-gradient(ellipse at bottom right, rgba(139,26,26,.08) 0%, transparent 60%);
   display: flex;
   justify-content: center;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-theme {
+  background-image:
+    radial-gradient(ellipse at top left,  rgba(201,169,110,.05) 0%, transparent 60%),
+    radial-gradient(ellipse at bottom right, rgba(211,47,47,.05) 0%, transparent 60%);
 }
 
 /* =========================================
@@ -112,7 +132,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.4);
+    background: var(--white-alpha);
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: inset 0 0 10px rgba(201,169,110,.1);
@@ -407,7 +427,7 @@ body {
   border-radius: 10px;
   transition: all .2s;
   cursor: pointer;
-  background: rgba(255,255,255,0.2);
+  background: var(--white-alpha);
   border: 1px solid rgba(201,169,110,0.1);
 }
 .verse:hover { background: rgba(201,169,110,0.15); border-color: var(--gold-dark); }
@@ -558,7 +578,8 @@ body {
     padding: 1rem 1rem 1rem 3rem;
     border-radius: 12px;
     border: 2px solid var(--gold-dark);
-    background: rgba(255,255,255,0.5);
+    background: var(--white-alpha);
+    color: var(--ink);
     font-family: 'EB Garamond', serif;
     font-size: 1.1rem;
     outline: none;
@@ -636,7 +657,7 @@ body {
     gap: 1rem;
 }
 .settings-item {
-    background: rgba(255,255,255,0.4);
+    background: var(--white-alpha);
     border: 1.5px solid var(--gold-dark);
     border-radius: 12px;
     padding: 1.2rem;
