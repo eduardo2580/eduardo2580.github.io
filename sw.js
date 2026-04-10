@@ -1,11 +1,11 @@
 /* ===========================================================
-   Service Worker – Bíblia Sagrada PWA
+   Service Worker – Bíblia Sagrada PW
    v28 – FIXED
    =========================================================== */
 
-const CACHE_VERSION = 'v34';
+const CACHE_VERSION = 'v49';
 const PRECACHE_NAME = `bible-sagrada-${CACHE_VERSION}-precache`;
-const RUNTIME_NAME  = `bible-sagrada-${CACHE_VERSION}-runtime`;
+const RUNTIME_NAME = `bible-sagrada-${CACHE_VERSION}-runtime`;
 
 const PRECACHE_URLS = [
   './',
@@ -24,8 +24,8 @@ const PRECACHE_URLS = [
   'js/bible-data.js',
   'js/bootstrap.min.js',
   'js/script.js',
-  'js/sidebar.js',
   'js/teens.js',
+  'js/highlighter.js',
   'js/splash.js'
 ];
 
@@ -161,7 +161,7 @@ async function networkFirstWithOfflineFallback(request) {
 }
 
 async function staleWhileRevalidate(request) {
-  const cache  = await caches.open(RUNTIME_NAME);
+  const cache = await caches.open(RUNTIME_NAME);
   const cached = await cache.match(request);
 
   // FIX: always kick off revalidation, but don't let it block the response
@@ -215,6 +215,10 @@ self.addEventListener('sync', event => {
     event.waitUntil(syncBibleNotes());
   }
 });
+
+async function syncBibleNotes() {
+  log('Syncing bible notes...');
+}
 
 async function syncBibleNotes() {
   log('Syncing bible notes...');

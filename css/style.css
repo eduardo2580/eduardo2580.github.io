@@ -1,3 +1,6 @@
+/* =========================================
+   VARIÁVEIS ORIGINAIS E NOVAS
+   ========================================= */
 :root {
   --gold:        #c9a96e;
   --gold-light:  #e8d5a8;
@@ -7,40 +10,21 @@
   --ink:         #1a1209;
   --ink-soft:    #3d2e14;
   --red-bible:   #8b1a1a;
-  --sidebar-w:   280px;
   --header-h:    66px;
+  --white-alpha: rgba(255, 255, 255, 0.4);
 }
 
-/* ========== CORRECTED FONT-FACE ==========
-   Assumes you have these three TTF files in the 'ttf/' folder:
-   - Cinzel-Regular.ttf      (weight 400)
-   - Cinzel-Bold.ttf         (weight 700)
-   - Cinzel-ExtraBold.ttf    (weight 800 or 900)
-*/
-@font-face {
-  font-family: 'Cinzel';
-  src: url('../ttf/Cinzel-Regular.ttf') format('truetype');
-  font-weight: 400;          /* Normal */
-  font-style: normal;
-  font-display: swap;
+body.dark-theme {
+  --gold:        #d4af37;
+  --gold-light:  #f0e68c;
+  --gold-dark:   #a68a56;
+  --parchment:   #121212;
+  --parchment-d: #1e1e1e;
+  --ink:         #f5edd8;
+  --ink-soft:    #dcdcdc;
+  --red-bible:   #d32f2f;
+  --white-alpha: rgba(255, 255, 255, 0.05);
 }
-@font-face {
-  font-family: 'Cinzel';
-  src: url('../ttf/Cinzel-Bold.ttf') format('truetype');
-  font-weight: 700;          /* Bold */
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Cinzel';
-  src: url('../ttf/Cinzel-ExtraBold.ttf') format('truetype');
-  font-weight: 800;          /* ExtraBold */
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Fallback: if you don't have Bold/ExtraBold files,
-   the browser will synthesize them – but the above is clean. */
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -53,187 +37,367 @@ body {
   background-image:
     radial-gradient(ellipse at top left,  rgba(201,169,110,.15) 0%, transparent 60%),
     radial-gradient(ellipse at bottom right, rgba(139,26,26,.08) 0%, transparent 60%);
-}
-
-/* ── HEADER ───────────────────────────────────────── */
-header {
-  background: linear-gradient(135deg, #1a0d02 0%, #2e1a06 40%, #1a0d02 100%);
-  border-bottom: 3px solid var(--gold);
-  padding: 1.1rem 1.5rem;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  box-shadow: 0 4px 24px rgba(0,0,0,.55);
-}
-
-header .brand {
-  font-family: 'Cinzel', serif;
-  font-weight: 700;   /* uses Cinzel-Bold.ttf */
-  font-size: 1.35rem;
-  color: var(--gold);
-  letter-spacing: .08em;
-  text-shadow: 0 0 18px rgba(201,169,110,.4);
-  white-space: nowrap;
-}
-
-header .brand small {
-  font-size: .65rem;
-  color: var(--gold-light);
-  display: block;
-  letter-spacing: .25em;
-  font-weight: 400;   /* uses Cinzel-Regular.ttf */
-  margin-top: -.2rem;
-}
-
-.btn-menu {
-  background: transparent;
-  border: 1.5px solid var(--gold-dark);
-  color: var(--gold);
-  border-radius: 6px;
-  padding: .35rem .65rem;
-  font-size: 1.2rem;
-  transition: all .2s;
-  flex-shrink: 0;
-}
-.btn-menu:hover { background: var(--gold-dark); color: #fff; }
-
-/* search bar in sidebar */
-.search-wrap {
-  position: relative;
-  padding: 0.8rem 1.1rem;
-  z-index: 10;
-}
-.search-wrap input {
-  background: rgba(255,255,255,.07);
-  border: 1.5px solid var(--gold-dark);
-  color: var(--gold-light);
-  border-radius: 8px;
-  padding: .42rem .9rem .42rem 2.4rem;
-  font-family: 'EB Garamond', serif;
-  font-size: .95rem;
-  width: 100%;
-  transition: border-color .25s, background .25s, box-shadow .25s;
-}
-.search-wrap input::placeholder { color: rgba(201,169,110,.4); }
-.search-wrap input:focus {
-  outline: none;
-  background: rgba(255,255,255,.12);
-  border-color: var(--gold);
-}
-.search-wrap .bi-search {
-  position: absolute;
-  left: 1.85rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--gold-dark);
-  font-size: 1rem;
-  pointer-events: none;
-}
-
-/* ── LAYOUT ───────────────────────────────────────── */
-.layout {
   display: flex;
-  min-height: calc(100vh - var(--header-h));
-  position: relative;
+  justify-content: center;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-/* ── SIDEBAR ──────────────────────────────────────── */
-#sidebar {
-  width: var(--sidebar-w);
-  background: linear-gradient(180deg, #1f1005 0%, #261408 100%);
-  border-right: 2px solid var(--gold-dark);
-  overflow-y: auto;
-  flex-shrink: 0;
-  transition: transform .3s ease;
-  position: relative;
-  z-index: 900;
+body.dark-theme {
+  background-image:
+    radial-gradient(ellipse at top left,  rgba(201,169,110,.05) 0%, transparent 60%),
+    radial-gradient(ellipse at bottom right, rgba(211,47,47,.05) 0%, transparent 60%);
 }
 
-.sidebar-section {
-  padding: .5rem 0;
-  border-bottom: 1px solid rgba(201,169,110,.15);
-}
-.sidebar-section.border-0 { border-bottom: 0 !important; }
+/* =========================================
+   ESTRUTURA DO APP (Baseado na imagem)
+   ========================================= */
 
-.sidebar-title {
-  font-family: 'Cinzel', serif;
-  font-size: .65rem;
-  letter-spacing: .25em;
-  color: var(--gold-dark);
-  padding: .7rem 1.1rem .3rem;
-  text-transform: uppercase;
-  font-weight: 700;   /* uses Cinzel-Bold.ttf */
-}
-
-.book-btn {
-  display: block;
-  width: 100%;
-  background: transparent;
-  border: none;
-  text-align: left;
-  padding: .4rem 1.1rem;
-  font-family: 'EB Garamond', serif;
-  font-size: .95rem;
-  color: var(--gold-light);
-  cursor: pointer;
-  transition: background .15s, color .15s;
-  border-left: 3px solid transparent;
-}
-.book-btn:hover  { background: rgba(201,169,110,.1); color: var(--gold); border-left-color: var(--gold-dark); }
-.book-btn.active { background: rgba(201,169,110,.18); color: var(--gold); border-left-color: var(--gold); font-weight: 500; }
-
-/* ── BACKDROP ─────────────────────────────────────── */
-#backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  z-index: 1050;
-}
-#backdrop.visible {
-  display: block;
+.app-container {
+    width: 100%;
+    max-width: 480px;
+    background-color: transparent;
+    min-height: 100vh;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.1);
+    overflow-x: hidden;
+    padding-bottom: 90px;
+    display: flex;
+    flex-direction: column;
 }
 
-/* ── MAIN CONTENT ─────────────────────────────────── */
-#main {
-  flex: 1;
-  padding: 2.5rem 2rem 4rem;
-  max-width: 820px;
-  margin: 0 auto;
-  min-width: 0;
+/* --- Cabeçalho (Greeting) --- */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
 }
 
-/* chapter selector row */
-.chapter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .45rem;
-  margin-bottom: 2rem;
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
-.chap-btn {
-  width: 42px;
-  height: 42px;
-  border-radius: 6px;
-  border: 1.5px solid var(--gold-dark);
-  background: transparent;
-  color: var(--ink-soft);
-  font-family: 'Cinzel', serif;
-  font-size: .8rem;
-  cursor: pointer;
-  transition: all .18s;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 600;   /* medium bold, uses Cinzel-Bold.ttf or fallback */
-}
-.chap-btn:hover  { background: var(--gold-dark); color: #fff; border-color: var(--gold-dark); }
-.chap-btn.active { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 700; box-shadow: 0 2px 10px rgba(201,169,110,.35); }
 
-/* book / chapter heading */
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    border: 2px solid var(--gold-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    font-size: 1.8rem;
+    box-shadow: 0 4px 10px rgba(201,169,110,.4);
+    cursor: pointer;
+}
+
+.greeting {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: 0.05em;
+}
+
+.icon-btn {
+    background: transparent;
+    border: 1.5px solid var(--gold-dark);
+    border-radius: 8px;
+    color: var(--gold-dark);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.icon-btn:hover {
+    background: var(--gold-dark);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139,111,58,0.3);
+}
+
+/* --- Widget de Sentimento --- */
+.feeling-widget {
+    margin: 0 1.5rem 2rem 1.5rem;
+    border: 1.5px solid var(--gold-dark);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--white-alpha);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 10px rgba(201,169,110,.1);
+}
+.feeling-widget:hover {
+    background: rgba(201,169,110,.2);
+    box-shadow: inset 0 0 15px rgba(201,169,110,.3), 0 4px 15px rgba(0,0,0,0.05);
+    transform: scale(1.02);
+}
+.feeling-text {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--ink-soft);
+}
+.feeling-emoji { font-size: 1.4rem; }
+
+/* --- Botões de Ação Rápida (Carrossel Horizontal) --- */
+.quick-actions-wrapper {
+    padding: 0 1.5rem;
+    margin-bottom: 2.5rem;
+}
+.quick-actions {
+    display: flex;
+    gap: 1.2rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+}
+.quick-actions::-webkit-scrollbar { display: none; }
+
+.action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 75px;
+    cursor: pointer;
+}
+.action-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--gold-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--ink-soft);
+    background: var(--parchment-d);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.action-item:hover .action-circle {
+    background: var(--gold-dark);
+    color: #fff;
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(139,111,58,0.4);
+    border-color: var(--gold);
+}
+.action-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    transition: color 0.2s;
+    letter-spacing: 0.05em;
+}
+.action-item:hover .action-label {
+    color: var(--red-bible);
+}
+
+/* --- Cartão: Versículo do Dia --- */
+.verse-card-wrapper {
+    padding: 0 1.5rem;
+    margin-bottom: 2rem;
+}
+.verse-card {
+    background: linear-gradient(135deg, #1a0d02 0%, #2e1a06 40%, #1a0d02 100%);
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    padding: 1.8rem;
+    color: var(--parchment);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    position: relative;
+}
+.verse-header {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    color: var(--gold-light);
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+}
+.verse-reference {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--gold);
+    margin-bottom: 1.2rem;
+    text-shadow: 0 0 10px rgba(201,169,110,.3);
+}
+.verse-text {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    color: #fff;
+}
+.verse-actions {
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid rgba(201,169,110,0.3);
+    padding-top: 1.2rem;
+}
+.v-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    background: transparent;
+    border: none;
+    color: var(--gold-light);
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.8;
+}
+.v-action-btn i { font-size: 1.4rem; }
+.v-action-btn:hover {
+    color: var(--gold);
+    opacity: 1;
+    transform: scale(1.1);
+    text-shadow: 0 0 8px rgba(201,169,110,.5);
+}
+
+/* --- Banner Inferior (Acampamento) --- */
+.banner-wrapper {
+    padding: 0 1.5rem;
+    margin-bottom: 2rem;
+}
+.banner {
+    height: 130px;
+    background: linear-gradient(45deg, var(--red-bible), #d35400);
+    border-radius: 16px;
+    border: 2px solid var(--gold-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(139,26,26,.3);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.banner:hover { transform: translateY(-3px); }
+.banner::after {
+    content: ''; position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px);
+    background-size: 20px 20px;
+}
+.banner-play {
+    position: absolute;
+    top: 15px; left: 15px;
+    width: 40px; height: 40px;
+    background: var(--parchment);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--red-bible);
+    font-size: 1.2rem;
+    z-index: 2;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+.banner-text {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-light);
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    z-index: 2;
+    text-align: center;
+}
+
+/* --- Menu de Navegação Inferior --- */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 480px;
+    background: var(--parchment);
+    border-top: 2px solid var(--gold-dark);
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 1.2rem 1.5rem 1.2rem;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+    z-index: 1000;
+    border-radius: 20px 20px 0 0;
+}
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    transition: all 0.3s;
+    position: relative;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+.nav-item i {
+    font-size: 1.6rem;
+    transition: transform 0.3s, color 0.3s;
+}
+
+.nav-item:hover, .nav-item.active {
+    color: var(--red-bible);
+}
+.nav-item:hover i, .nav-item.active i {
+    transform: translateY(-4px);
+    color: var(--red-bible);
+}
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--red-bible);
+}
+
+.nav-item .ph-fill { display: none; }
+.nav-item.active .ph-fill { display: inline-block; }
+.nav-item.active i:not(.ph-fill) { display: none; }
+
+/* =========================================
+   ESTILOS EXISTENTES ADAPTADOS
+   ========================================= */
+
+#content-area {
+    padding: 0 0 2rem 0;
+    flex: 1;
+}
+
 .bible-heading {
   font-family: 'Cinzel', serif;
   font-size: 1.7rem;
-  font-weight: 800;   /* uses Cinzel-ExtraBold.ttf */
+  font-weight: 800;
   color: var(--red-bible);
   text-align: center;
+  margin-top: 1rem;
   margin-bottom: .2rem;
   letter-spacing: .04em;
 }
@@ -244,10 +408,7 @@ header .brand small {
   color: var(--gold-dark);
   letter-spacing: .2em;
   margin-bottom: 2rem;
-  font-weight: 400;   /* regular */
 }
-
-/* ornament divider */
 .ornament {
   text-align: center;
   color: var(--gold-dark);
@@ -256,319 +417,254 @@ header .brand small {
   opacity: .6;
 }
 
-/* verses */
 .verse {
   display: flex;
-  gap: .6rem;
-  margin-bottom: .7rem;
-  line-height: 1.85;
-  font-size: 1.1rem;
-  padding: .5rem .6rem;
-  border-radius: 6px;
-  transition: background .2s;
+  gap: .8rem;
+  margin: 0 1rem .5rem 1rem;
+  line-height: 1.8;
+  font-size: 1.15rem;
+  padding: .6rem .8rem;
+  border-radius: 10px;
+  transition: all .2s;
   cursor: pointer;
+  background: var(--white-alpha);
+  border: 1px solid rgba(201,169,110,0.1);
 }
-.verse:hover     { background: rgba(201,169,110,.1); }
-.verse.highlight { background: rgba(201,169,110,.22); }
-.highlight-target { background: rgba(201,169,110,.4) !important; border-radius: 4px; }
+.verse:hover { background: rgba(201,169,110,0.15); border-color: var(--gold-dark); }
+.verse.highlight { background: rgba(201,169,110,0.25); border-color: var(--gold); }
+.highlight-target { background: rgba(201,169,110,0.4) !important; border-color: var(--gold-dark) !important; }
 
 .verse-num {
   font-family: 'Cinzel', serif;
-  font-size: .72rem;
+  font-size: .75rem;
   font-weight: 700;
   color: var(--gold-dark);
-  min-width: 1.8rem;
-  margin-top: .35rem;
+  min-width: 1.5rem;
+  margin-top: .3rem;
   flex-shrink: 0;
 }
+.verse-text { flex: 1; color: var(--ink-soft); }
 
-.verse-text { flex: 1; }
-.verse-text em { color: var(--red-bible); font-style: normal; }
-
-/* note cards */
-.note-card {
-  background: rgba(201,169,110,.12);
-  border-left: 4px solid var(--gold);
-  border-radius: 0 8px 8px 0;
-  padding: .85rem 1rem;
-  margin: 1.5rem 0;
-  font-size: .95rem;
+.chapter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 0 1.5rem 2rem 1.5rem;
+  justify-content: center;
+}
+.chap-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1.5px solid var(--gold-dark);
+  background: var(--parchment-d);
   color: var(--ink-soft);
-}
-.note-card .note-label {
   font-family: 'Cinzel', serif;
-  font-size: .65rem;
-  letter-spacing: .2em;
-  color: var(--gold-dark);
-  margin-bottom: .35rem;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
 }
+.chap-btn:hover { background: var(--gold-dark); color: #fff; }
+.chap-btn.active { background: var(--gold); color: var(--ink); border-color: var(--gold-dark); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
-/* nav prev/next */
 .chap-nav {
   display: flex;
   justify-content: space-between;
-  margin-top: 3rem;
-  border-top: 1px solid var(--gold-dark);
+  margin: 2.5rem 1.5rem 1rem 1.5rem;
   padding-top: 1.5rem;
+  border-top: 1px solid var(--gold-dark);
 }
-.chap-nav .btn-nav {
+.btn-nav {
   font-family: 'Cinzel', serif;
   font-size: .8rem;
-  letter-spacing: .1em;
+  font-weight: 700;
   color: var(--gold-dark);
-  background: transparent;
+  background: var(--parchment-d);
   border: 1.5px solid var(--gold-dark);
-  border-radius: 6px;
-  padding: .5rem 1.1rem;
+  border-radius: 8px;
+  padding: .6rem 1rem;
   cursor: pointer;
-  transition: all .2s;
-}
-.chap-nav .btn-nav:hover:not([disabled]) { background: var(--gold-dark); color: #fff; }
-.chap-nav .btn-nav[disabled] { opacity: .35; cursor: not-allowed; }
-
-/* ── TTS LISTEN BUTTON ────────────────────────────── */
-.btn-tts {
+  transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: .4rem;
-  background: transparent;
-  border: 1.5px solid var(--gold-dark);
-  color: var(--gold);
-  border-radius: 6px;
-  padding: .35rem .75rem;
-  font-family: 'Cinzel', serif;
-  font-size: .72rem;
-  letter-spacing: .08em;
-  cursor: pointer;
-  transition: background .2s, color .2s, border-color .2s, box-shadow .2s;
-  white-space: nowrap;
+  gap: 0.5rem;
 }
-.btn-tts:hover {
-  background: var(--gold-dark);
-  color: #fff;
-}
-.btn-tts.tts-speaking {
-  background: var(--red-bible);
-  border-color: var(--red-bible);
-  color: #fff;
-  box-shadow: 0 0 10px rgba(139,26,26,.45);
-  animation: tts-pulse 1.8s ease-in-out infinite;
-}
-@keyframes tts-pulse {
-  0%, 100% { box-shadow: 0 0 6px rgba(139,26,26,.4); }
-  50%       { box-shadow: 0 0 16px rgba(139,26,26,.75); }
-}
+.btn-nav:hover:not([disabled]) { background: var(--gold-dark); color: #fff; }
+.btn-nav[disabled] { opacity: .4; cursor: not-allowed; }
 
-/* hide label text on very small screens, keep icon only */
-@media (max-width: 400px) {
-  .btn-tts #ttsLabel { display: none; }
-  .btn-tts { padding: .3rem .55rem; }
-}
-
-/* ── FONT SIZE CONTROLS ───────────────────────────── */
-.font-controls {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  flex-shrink: 0;
-}
-.font-controls button {
-  background: var(--gold);
-  border: 1.5px solid var(--gold-dark);
-  color: var(--ink);
-  border-radius: 5px;
-  width: 38px; height: 38px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .15s, box-shadow .15s;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15);
-}
-.font-controls button:hover { background: var(--gold-dark); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
-
-/* loading spinner */
 #loader {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 0;
-  gap: 1rem;
+  padding: 5rem 0;
+  gap: 1.5rem;
   color: var(--gold-dark);
   font-family: 'Cinzel', serif;
-  letter-spacing: .1em;
-  font-size: .85rem;
+  font-size: 1rem;
 }
 .spinner-border { border-color: var(--gold) !important; border-right-color: transparent !important; }
 
-/* error */
-#error-msg {
-  text-align: center;
-  padding: 3rem;
-  color: var(--red-bible);
-  font-family: 'Cinzel', serif;
+/* --- MODAL DE NOME --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 1.5rem;
+}
+.name-modal {
+    background: var(--parchment);
+    border: 3px solid var(--gold);
+    border-radius: 20px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    animation: modalIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes modalIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.name-modal h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--red-bible);
+    margin-bottom: 1rem;
+}
+.name-modal input {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 2px solid var(--gold-dark);
+    background: white;
+    font-family: 'EB Garamond', serif;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+.name-modal button {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 10px;
+    background: var(--gold-dark);
+    color: white;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background 0.2s;
+}
+.name-modal button:hover { background: var(--gold); }
+
+/* --- PESQUISA --- */
+.search-container {
+    padding: 1.5rem;
+}
+.search-box {
+    position: relative;
+    margin-bottom: 2rem;
+}
+.search-box input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border-radius: 12px;
+    border: 2px solid var(--gold-dark);
+    background: var(--white-alpha);
+    color: var(--ink);
+    font-family: 'EB Garamond', serif;
+    font-size: 1.1rem;
+    outline: none;
+}
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold-dark);
+    font-size: 1.2rem;
 }
 
-/* scroll to top */
+/* --- BÍBLIA VIEW --- */
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    padding: 1.5rem;
+}
+.book-card {
+    background: var(--parchment-d);
+    border: 1px solid var(--gold-dark);
+    border-radius: 12px;
+    padding: 1rem 0.5rem;
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.book-card:hover { background: var(--gold); color: white; transform: translateY(-3px); }
+
+/* --- SCROLL TO TOP --- */
 #scrollTop {
   position: fixed;
-  bottom: 2rem;
+  bottom: 100px;
   right: 1.5rem;
   background: var(--gold);
   color: var(--ink);
   border: none;
   border-radius: 50%;
   width: 44px; height: 44px;
-  font-size: 1.2rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
   cursor: pointer;
   opacity: 0;
-  transition: opacity .3s;
+  transition: opacity 0.3s;
   display: flex; align-items: center; justify-content: center;
   z-index: 999;
 }
 #scrollTop.visible { opacity: 1; }
 
-/* custom scrollbar */
-#sidebar::-webkit-scrollbar { width: 5px; }
-#sidebar::-webkit-scrollbar-track { background: transparent; }
-#sidebar::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 3px; }
+.d-none { display: none !important; }
+.fade-in { animation: fadeIn 0.4s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* fade-in animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: none; }
+/* --- CONTROLES DE FONTE E TTS NO HEADER DA LEITURA --- */
+.reading-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
-.fade-in { animation: fadeIn .45s ease both; }
-
-/* ── RESPONSIVE: tablets ─────────────────────────── */
-@media (max-width: 900px) {
-  #main {
-    padding: 2rem 1.5rem 3rem;
-  }
+.reading-controls .icon-btn {
+    font-size: 1.2rem;
+    padding: 0.4rem;
 }
 
-/* ── RESPONSIVE: mobile (≤768px) ─────────────────── */
-@media (max-width: 768px) {
-
-  /* Header — keep everything on one row */
-  header {
-    padding: .85rem 1rem;
-  }
-  header .d-flex {
-    flex-wrap: nowrap;
-    gap: .5rem;
+/* --- CONFIGURAÇÕES --- */
+.settings-list {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.settings-item {
+    background: var(--white-alpha);
+    border: 1.5px solid var(--gold-dark);
+    border-radius: 12px;
+    padding: 1.2rem;
+    display: flex;
     align-items: center;
-  }
-  header .brand {
-    font-size: 1rem;
-    flex-shrink: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  header .brand small {
-    display: none;
-  }
-  .font-controls {
-    gap: .25rem;
-  }
-  .font-controls button {
-    width: 34px;
-    height: 34px;
-    font-size: .85rem;
-  }
-
-  /* Sidebar — hidden off-screen by default, slides in as overlay */
-  #sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: var(--sidebar-w);
-    max-width: 85vw;
-    height: 100vh;
-    max-height: 100vh;
-    z-index: 1100;
-    overflow-y: auto;
-    overflow-x: hidden;
-    transform: translateX(calc(-1 * var(--sidebar-w)));
-    border-right: 2px solid var(--gold);
-  }
-  #sidebar.open {
-    transform: translateX(0);
-  }
-
-  /* Main — full width, no side offset */
-  #main {
-    padding: 1.5rem 1rem 3rem;
-    width: 100%;
-    margin-left: 0;
-  }
-
-  /* Typography tweaks */
-  .bible-heading { font-size: 1.3rem; }
-  .bible-subheading { font-size: .75rem; }
-
-  /* Chapter buttons — slightly smaller */
-  .chap-btn {
-    width: 36px;
-    height: 36px;
-    font-size: .72rem;
-  }
-
-  /* Verse text — comfortable reading size */
-  .verse {
-    font-size: 1rem;
-    line-height: 1.75;
-  }
-
-  /* Nav buttons — stacked if needed */
-  .chap-nav {
-    gap: .5rem;
-  }
-  .chap-nav .btn-nav {
-    font-size: .72rem;
-    padding: .45rem .75rem;
-  }
-
-  /* Scroll-to-top — keep above VLibras widget */
-  #scrollTop {
-    bottom: 5rem;
-    right: 1rem;
-  }
+    justify-content: space-between;
+    cursor: pointer;
 }
-
-/* ── RESPONSIVE: very small (≤400px, Galaxy S8 = 360px) */
-@media (max-width: 400px) {
-  header {
-    padding: .75rem .75rem;
-  }
-  header .brand {
-    font-size: .88rem;
-  }
-  .btn-menu {
-    padding: .3rem .55rem;
-    font-size: 1.1rem;
-  }
-  .font-controls button {
-    width: 30px;
-    height: 30px;
-    font-size: .8rem;
-  }
-  #sidebar {
-    max-width: 90vw;
-  }
-  #main {
-    padding: 1.25rem .75rem 3rem;
-  }
-  .chap-btn {
-    width: 32px;
-    height: 32px;
-    font-size: .68rem;
-  }
-  .chapter-row {
-    gap: .35rem;
-  }
-}
-
+.settings-item i { font-size: 1.4rem; color: var(--gold-dark); }
+.settings-label { font-weight: 700; font-family: 'Cinzel', serif; }
