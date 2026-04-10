@@ -422,9 +422,7 @@ function toggleTheme() {
 /* ════════════════════════ PROFILE ══════════════════════════ */
 function checkProfile() {
     if (!state.userName) {
-        const name = prompt('Como gostaria de ser chamado?', '');
-        state.userName = name || 'Eduardo';
-        saveConfig();
+        document.getElementById('name-modal-overlay')?.classList.remove('d-none');
     }
 }
 
@@ -436,7 +434,11 @@ function saveProfile() {
         saveConfig();
         document.getElementById('name-modal-overlay').classList.add('d-none');
         renderTopBar();
-        renderHome();
+        if (state.currentView === 'home') renderHome();
+        if (state.currentView === 'settings') renderSettings();
+    } else {
+        input.focus();
+        input.style.borderColor = 'var(--red-bible)';
     }
 }
 
