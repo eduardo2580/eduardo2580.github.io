@@ -445,6 +445,26 @@ body.dark-theme {
 }
 .verse-text { flex: 1; color: var(--ink-soft); }
 
+.version-badge {
+  display: inline-block;
+  font-family: 'Cinzel', serif;
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  color: var(--gold-dark);
+  background: rgba(201,169,110,0.15);
+  border: 1px solid rgba(201,169,110,0.35);
+  border-radius: 5px;
+  padding: .1rem .35rem;
+  margin-left: .3rem;
+  vertical-align: middle;
+}
+.version-badge.active {
+  color: #fff;
+  background: var(--red-bible);
+  border-color: var(--red-bible);
+}
+
 .chapter-row {
   display: flex;
   flex-wrap: wrap;
@@ -668,3 +688,37 @@ body.dark-theme {
 }
 .settings-item i { font-size: 1.4rem; color: var(--gold-dark); }
 .settings-label { font-weight: 700; font-family: 'Cinzel', serif; }
+
+/* --- SELETOR DE VERSÃO DA BÍBLIA --- */
+.version-modal { max-width: 420px; text-align: left; }
+.version-modal h2 { text-align: center; font-size: 1.2rem; }
+.version-option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.version-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    background: var(--white-alpha);
+    border: 1.5px solid var(--gold-dark);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s, border-color 0.2s;
+    font-family: 'EB Garamond', serif;
+}
+.version-option:hover { background: var(--gold); }
+.version-option.active { border-color: var(--red-bible); border-width: 2px; }
+.version-abbr {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    color: var(--gold-dark);
+    min-width: 3.2rem;
+}
+.version-name { flex: 1; font-size: 1rem; }
+.version-option i { font-size: 1.3rem; color: var(--gold-dark); }
+.version-option.active i { color: var(--red-bible); }

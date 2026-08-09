@@ -3,7 +3,7 @@
    v28 – FIXED
    =========================================================== */
 
-const CACHE_VERSION = 'v61';
+const CACHE_VERSION = 'v62';
 const PRECACHE_NAME = `bible-sagrada-${CACHE_VERSION}-precache`;
 const RUNTIME_NAME = `bible-sagrada-${CACHE_VERSION}-runtime`;
 
@@ -22,6 +22,8 @@ const PRECACHE_URLS = [
   'css/bootstrap.min.css',
   'js/daily.js',
   'js/bible-data.js',
+  'js/bible-data-acf.js',
+  'js/bible-data-nvi.js',
   'js/bootstrap.min.js',
   'js/script.js',
   'js/teens.js',

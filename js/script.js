@@ -79,6 +79,22 @@ const BOOKS = {
 
 const ALL_BOOKS = [...BOOKS.ot, ...BOOKS.nt];
 
+/* ══════════════════════════ BIBLE VERSIONS ══════════════════════ */
+const BIBLE_VERSIONS = [
+    { id: 'ara', abbr: 'ARA', name: 'Almeida Revisada Atualizada' },
+    { id: 'acf', abbr: 'ACF', name: 'Almeida Corrigida e Fiel' },
+    { id: 'nvi', abbr: 'NVI', name: 'Nova Versão Internacional' },
+];
+
+function getBibleData(versionId) {
+    switch (versionId) {
+        case 'acf': return window.BIBLE_DATA_ACF;
+        case 'nvi': return window.BIBLE_DATA_NVI;
+        case 'ara':
+        default: return window.BIBLE_DATA;
+    }
+}
+
 /* ════════════════════════ TRANSLATIONS ═════════════════════════ */
 const TRANSLATIONS = {
     pt: {
@@ -122,6 +138,8 @@ const TRANSLATIONS = {
         theme: 'Tema',
         light: 'Claro',
         dark: 'Escuro',
+        version: 'Versão da Bíblia',
+        chooseVersion: 'Escolher versão da Bíblia',
         dailyPlan: 'Diário',
         teensPlan: 'Teens',
         daily: {
@@ -187,6 +205,8 @@ const TRANSLATIONS = {
         theme: 'Theme',
         light: 'Light',
         dark: 'Dark',
+        version: 'Bible Version',
+        chooseVersion: 'Choose Bible version',
         dailyPlan: 'Daily',
         teensPlan: 'Teens',
         daily: {
@@ -244,6 +264,7 @@ window.state = {
     lang: savedConfig.lang || 'pt',
     userName: savedConfig.userName || '',
     theme: savedConfig.theme || 'light',
+    version: savedConfig.version || 'ara',
     currentView: 'home'
 };
 const state = window.state;
@@ -253,7 +274,8 @@ function saveConfig() {
         fontSize: state.fontSize,
         lang: state.lang,
         userName: state.userName,
-        theme: state.theme
+        theme: state.theme,
+        version: state.version
     }));
 }
 
@@ -302,15 +324,17 @@ function dbPut(key, verses) {
 
 /* ═══════════════════ CHAPTER LOADING ═══════════════════════════ */
 async function fetchChapter(bookId, chapter) {
-    const key = `${bookId}_${chapter}`;
-    const cached = await dbGet(key);
+    const version = state.version || 'ara';
+    const dataKey = `${bookId}_${chapter}`;
+    const cacheKey = `${version}_${dataKey}`;
+    const cached = await dbGet(cacheKey);
     if (cached) return cached;
-    const verses = window.BIBLE_DATA?.[key];
+    const verses = getBibleData(version)?.[dataKey];
     if (verses) {
-        dbPut(key, verses);
+        dbPut(cacheKey, verses);
         return verses;
     }
-    throw new Error(`${window.t('errorChapter')}: ${key}`);
+    throw new Error(`${window.t('errorChapter')}: ${dataKey}`);
 }
 
 /* ════════════════════════ NAVIGATION ══════════════════════════ */
@@ -509,22 +533,56 @@ function parseReference(query) {
     return null;
 }
 
+/**
+ * Searches the query across ALL loaded Bible versions (not just the one
+ * currently selected). A verse is returned once even if it matches in
+ * several versions — each result keeps track of which version(s) it was
+ * found in, so we can jump straight to the matching text later on.
+ */
 function searchVerses(query) {
-    if (!query.trim() || !window.BIBLE_DATA) return [];
     const q = normalise(query.trim());
+    if (q.length < 2) return [];
+
+    const MAX_RESULTS = 60;
+    const byRef = new Map(); // "BOOK_c_v" -> result entry
     const results = [];
-    for (const book of ALL_BOOKS) {
-        for (let c = 1; c <= book.chapters; c++) {
-            const verses = window.BIBLE_DATA[`${book.id}_${c}`];
-            if (!verses) continue;
-            for (const v of verses) {
-                if (normalise(v.text).includes(q)) {
-                    results.push({ book, chapter: c, verse: v.verse, text: v.text });
-                    if (results.length >= 60) return results;
+
+    outer:
+    for (const version of BIBLE_VERSIONS) {
+        const data = getBibleData(version.id);
+        if (!data) continue;
+        for (const book of ALL_BOOKS) {
+            for (let c = 1; c <= book.chapters; c++) {
+                const verses = data[`${book.id}_${c}`];
+                if (!verses) continue;
+                for (const v of verses) {
+                    if (!normalise(v.text).includes(q)) continue;
+                    const refKey = `${book.id}_${c}_${v.verse}`;
+                    let entry = byRef.get(refKey);
+                    if (!entry) {
+                        entry = { book, chapter: c, verse: v.verse, versions: {} };
+                        byRef.set(refKey, entry);
+                        results.push(entry);
+                        if (results.length >= MAX_RESULTS) {
+                            entry.versions[version.id] = v.text;
+                            break outer;
+                        }
+                    }
+                    entry.versions[version.id] = v.text;
                 }
             }
         }
     }
+
+    // Pick the text to preview for each result: prefer the version the
+    // user currently reads in, then fall back to whichever matched.
+    for (const entry of results) {
+        entry.text = entry.versions[state.version]
+            || entry.versions['ara']
+            || Object.values(entry.versions)[0];
+        entry.matchedVersions = Object.keys(entry.versions);
+    }
+
     return results;
 }
 
@@ -586,12 +644,33 @@ function renderSearchResults(query, results, directRef = null) {
     for (const r of results) {
         const div = document.createElement('div');
         div.className = 'verse';
+
+        // Show which version(s) this result matched in, so it's clear the
+        // preview text may belong to a version other than the one active.
+        const versionBadges = r.matchedVersions.map(id => {
+            const v = BIBLE_VERSIONS.find(bv => bv.id === id);
+            const active = id === state.version;
+            return `<span class="version-badge${active ? ' active' : ''}">${v ? v.abbr : id}</span>`;
+        }).join('');
+
         div.innerHTML = `
-            <span class="verse-num">${r.book.name} ${r.chapter}:${r.verse}</span>
+            <span class="verse-num">${r.book.name} ${r.chapter}:${r.verse} ${versionBadges}</span>
             <span class="verse-text" style="font-size:${state.fontSize}rem">
                 ${r.text.replace(re, '<mark>$1</mark>')}
             </span>`;
-        div.onclick = () => switchView('bible', { bookId: r.book.id, chapter: r.chapter, verse: r.verse });
+        div.onclick = () => {
+            // If the currently selected version doesn't contain this match,
+            // switch to a version that does, so the verse the user tapped on
+            // is exactly what shows up inside the chapter content.
+            if (!r.versions[state.version]) {
+                const matchedVersion = r.matchedVersions[0];
+                if (matchedVersion && matchedVersion !== state.version) {
+                    state.version = matchedVersion;
+                    saveConfig();
+                }
+            }
+            switchView('bible', { bookId: r.book.id, chapter: r.chapter, verse: r.verse });
+        };
         wrap.appendChild(div);
     }
 }
@@ -860,6 +939,13 @@ function renderSettings() {
                     </div>
                     <i class="ph ${state.theme === 'dark' ? 'ph-sun' : 'ph-moon'}"></i>
                 </div>
+                <div class="settings-item" id="versionToggleBtn">
+                    <div>
+                        <div class="settings-label">${window.t('version')}</div>
+                        <div style="font-size: 0.9rem; opacity: 0.6">${currentVersionLabel()}</div>
+                    </div>
+                    <i class="ph ph-books"></i>
+                </div>
             </div>
         </div>
     `;
@@ -872,6 +958,78 @@ function renderSettings() {
     });
 
     document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
+    document.getElementById('versionToggleBtn')?.addEventListener('click', openVersionModal);
+}
+
+function currentVersionLabel() {
+    const v = BIBLE_VERSIONS.find(v => v.id === state.version) || BIBLE_VERSIONS[0];
+    return `${v.abbr} — ${v.name}`;
+}
+
+function openVersionModal() {
+    let overlay = document.getElementById('version-modal-overlay');
+    if (overlay) overlay.remove();
+
+    overlay = document.createElement('div');
+    overlay.id = 'version-modal-overlay';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="name-modal version-modal">
+            <h2>${window.t('chooseVersion')}</h2>
+            <div class="version-option-list">
+                ${BIBLE_VERSIONS.map(v => `
+                    <button class="version-option${v.id === state.version ? ' active' : ''}" data-version="${v.id}">
+                        <span class="version-abbr">${v.abbr}</span>
+                        <span class="version-name">${v.name}</span>
+                        <i class="ph ${v.id === state.version ? 'ph-fill ph-check-circle' : 'ph-circle'}"></i>
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+
+    overlay.querySelectorAll('.version-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const versionId = btn.dataset.version;
+            if (versionId !== state.version) {
+                state.version = versionId;
+                saveConfig();
+                // Keep whatever chapter is loaded (even if we're currently on
+                // another screen, e.g. Settings) in sync with the new version,
+                // so the book content always matches the selected version.
+                refreshOpenChapter();
+            }
+            overlay.remove();
+            if (state.currentView === 'settings') switchView('settings');
+        });
+    });
+}
+
+/**
+ * Re-fetches the chapter currently associated with state.bookId/state.chapter
+ * using whichever Bible version is now selected, and — if the reader is
+ * actually on screen — re-renders it immediately. This is what makes the
+ * book content "follow" the selected version even when the version was
+ * changed from a different screen (e.g. Settings).
+ */
+async function refreshOpenChapter() {
+    if (!state.bookId || !state.chapter) return;
+    try {
+        const verses = await fetchChapter(state.bookId, state.chapter);
+        state.verses = verses;
+        if (state.currentView === 'bible') {
+            const book = ALL_BOOKS.find(b => b.id === state.bookId);
+            if (book) renderVerses(verses, book.name, state.chapter);
+        }
+    } catch (e) {
+        // Silently ignore — the chapter will simply reload fresh next time
+        // the user navigates to it.
+    }
 }
 
 /* ═══════════════════════ TEXT-TO-SPEECH ════════════════════════ */
