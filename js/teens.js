@@ -80,7 +80,7 @@
         if (!teensStart) return '';
         const d = new Date(teensStart);
         d.setDate(d.getDate() + dayNum - 1);
-        const locale = (window.state?.lang === 'pt') ? 'pt-BR' : 'en-US';
+        const locale = window.langLocale ? window.langLocale(window.state?.lang) : 'pt-BR';
         return d.toLocaleDateString(locale, { day: '2-digit', month: 'short' }).replace('.', '');
     }
 

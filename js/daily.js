@@ -34,7 +34,7 @@
 
     function formatDate(doy) {
         const d = new Date(new Date().getFullYear(), 0, doy);
-        const locale = window.state?.lang === 'pt' ? 'pt-BR' : 'en-US';
+        const locale = window.langLocale ? window.langLocale(window.state?.lang) : 'pt-BR';
         return d.toLocaleDateString(locale, { day: 'numeric', month: 'long' });
     }
 
@@ -329,13 +329,21 @@
         const alreadyDone = completed.has(todayKey);
         const pct         = Math.round((doy / DAYS_IN_YEAR) * 100);
         const chapLabels  = portions.map(p => `${p.bookName} ${p.chapter}`).join(' · ');
-        const QUOTES      = window.state?.lang === 'pt' ? [
-            '"A tua palavra é lâmpada que ilumina os meus passos." — Sl 119:105',
-            '"Bem-aventurado o que lê, e os que ouvem as palavras desta profecia." — Ap 1:3',
-        ] : [
-            '"Your word is a lamp to my feet and a light to my path." — Ps 119:105',
-            '"Blessed is the one who reads aloud the words of this prophecy." — Rev 1:3',
-        ];
+        const QUOTES_BY_LANG = {
+            pt: [
+                '"A tua palavra é lâmpada que ilumina os meus passos." — Sl 119:105',
+                '"Bem-aventurado o que lê, e os que ouvem as palavras desta profecia." — Ap 1:3',
+            ],
+            en: [
+                '"Your word is a lamp to my feet and a light to my path." — Ps 119:105',
+                '"Blessed is the one who reads aloud the words of this prophecy." — Rev 1:3',
+            ],
+            es: [
+                '"Lámpara es a mis pies tu palabra, y lumbrera a mi camino." — Sal 119:105',
+                '"Bienaventurado el que lee, y los que oyen las palabras de esta profecía." — Ap 1:3',
+            ],
+        };
+        const QUOTES = QUOTES_BY_LANG[window.state?.lang] || QUOTES_BY_LANG.pt;
 
         const wrap = document.createElement('div');
         wrap.className = 'daily-wrap';
@@ -356,7 +364,7 @@
             </div>
 
             <div class="daily-chips">
-                <span class="daily-chip"><i class="ph ph-book-open"></i> ${portions.length} ${portions.length === 1 ? 'capítulo' : 'capítulos'}</span>
+                <span class="daily-chip"><i class="ph ph-book-open"></i> ${portions.length} ${portions.length === 1 ? (window.t('chapterWord') || 'capítulo') : (window.t('chaptersWord') || 'capítulos')}</span>
                 <span class="daily-chip"><i class="ph ph-calendar-blank"></i> ${window.t('today','daily') || 'Hoje'}</span>
                 ${alreadyDone ? `<span class="daily-chip" style="background:rgba(5,150,105,.1);border-color:rgba(5,150,105,.25);color:#059669"><i class="ph ph-check-circle" style="color:#059669"></i> ${window.t('concluded','daily') || 'Concluído'}</span>` : ''}
             </div>
@@ -375,7 +383,7 @@
                 </div>
             </div>
 
-            <p class="daily-section-label">Capítulos</p>
+            <p class="daily-section-label">${window.t('chaptersLabel') || 'Capítulos'}</p>
         `;
 
         /* — book blocks (collapsible) — */

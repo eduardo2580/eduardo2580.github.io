@@ -95,6 +95,20 @@ function getBibleData(versionId) {
     }
 }
 
+/* ══════════════════════════ APP LANGUAGES ════════════════════════ */
+const LANGUAGES = [
+    { id: 'pt', abbr: 'PT', name: 'Português' },
+    { id: 'en', abbr: 'EN', name: 'English' },
+    { id: 'es', abbr: 'ES', name: 'Español' },
+];
+
+// Locale codes used for date formatting and speech synthesis.
+const LOCALE_MAP = { pt: 'pt-BR', en: 'en-US', es: 'es-ES' };
+window.LOCALE_MAP = LOCALE_MAP;
+window.langLocale = function (lang) {
+    return LOCALE_MAP[lang] || LOCALE_MAP.pt;
+};
+
 /* ════════════════════════ TRANSLATIONS ═════════════════════════ */
 const TRANSLATIONS = {
     pt: {
@@ -140,8 +154,12 @@ const TRANSLATIONS = {
         dark: 'Escuro',
         version: 'Versão da Bíblia',
         chooseVersion: 'Escolher versão da Bíblia',
+        chooseLanguage: 'Escolher idioma do app',
         dailyPlan: 'Diário',
         teensPlan: 'Teens',
+        chapterWord: 'capítulo',
+        chaptersWord: 'capítulos',
+        chaptersLabel: 'Capítulos',
         daily: {
             title: "Leitura Diária",
             planName: "Plano Bíblico Anual",
@@ -161,7 +179,30 @@ const TRANSLATIONS = {
             startBtn: "Iniciar Plano",
             concluded: "Concluído",
             conclude: "Concluir Dia",
-            backToPlan: "Voltar ao Plano"
+            backToPlan: "Voltar ao Plano",
+            days: 'dias', daysTitle: 'Dias', chapters: 'Capítulos', books: 'Livros',
+            howItWorks: 'Como funciona', startInfo: 'O progresso é salvo automaticamente.',
+            preview: 'Prévia do plano', andMore: 'e mais',
+            planStarted: '🚀 Plano iniciado!', day: 'Dia', of: 'de',
+            today: 'Hoje', future: 'Futuro', complete: 'Completo', late: 'Atrasado',
+            todayChapters: 'Leitura do dia', startReading: 'Começar a ler',
+            reRead: 'Reler', completedDay: 'concluído!', keepItUp: 'Continue assim!',
+            chapter: 'capítulo', chapterPlural: 'capítulos',
+            read: 'lido', readPlural: 'lidos', saved: 'salvo', savedPlural: 'salvos',
+            backupTitle: 'Backup', backupDesc: 'Exporte ou importe seu progresso.',
+            exportTitle: 'Exportar', exportDesc: 'Salve seu progresso em arquivo.',
+            importTitle: 'Importar', importDesc: 'Restaure de um backup.',
+            downloadBtn: 'Baixar JSON', copyBtn: 'Copiar JSON', pasteBtn: 'Colar JSON',
+            tapChoose: 'Toque para escolher', dragDrop: 'ou arraste aqui',
+            daysRead: 'Dias lidos', tapExport: 'Toque para exportar',
+            fileExported: '✓ Arquivo exportado', jsonCopied: '✓ JSON copiado',
+            invalidJson: 'JSON inválido', errorImport: 'Erro ao importar',
+            restored: 'capítulos restaurados', errorLoad: 'Erro ao carregar',
+            back: 'Voltar', prev: 'Ant', next: 'Próx',
+            resetBtn: 'Resetar plano', resetTitle: 'Resetar plano?',
+            resetSub: 'Todo o progresso será apagado permanentemente.',
+            resetConfirm: 'Sim, resetar', cancel: 'Cancelar',
+            resetSuccess: '✓ Plano resetado', brand: 'BibleXtra',
         }
     },
     en: {
@@ -207,8 +248,12 @@ const TRANSLATIONS = {
         dark: 'Dark',
         version: 'Bible Version',
         chooseVersion: 'Choose Bible version',
+        chooseLanguage: 'Choose app language',
         dailyPlan: 'Daily',
         teensPlan: 'Teens',
+        chapterWord: 'chapter',
+        chaptersWord: 'chapters',
+        chaptersLabel: 'Chapters',
         daily: {
             title: "Daily Reading",
             planName: "Annual Bible Plan",
@@ -228,7 +273,124 @@ const TRANSLATIONS = {
             startBtn: "Start Plan",
             concluded: "Concluded",
             conclude: "Conclude Day",
-            backToPlan: "Back to Plan"
+            backToPlan: "Back to Plan",
+            days: 'days', daysTitle: 'Days', chapters: 'Chapters', books: 'Books',
+            howItWorks: 'How it works', startInfo: 'Your progress is saved automatically.',
+            preview: 'Plan preview', andMore: 'and more',
+            planStarted: '🚀 Plan started!', day: 'Day', of: 'of',
+            today: 'Today', future: 'Future', complete: 'Complete', late: 'Late',
+            todayChapters: "Today's reading", startReading: 'Start reading',
+            reRead: 'Re-read', completedDay: 'completed!', keepItUp: 'Keep it up!',
+            chapter: 'chapter', chapterPlural: 'chapters',
+            read: 'read', readPlural: 'read', saved: 'saved', savedPlural: 'saved',
+            backupTitle: 'Backup', backupDesc: 'Export or import your progress.',
+            exportTitle: 'Export', exportDesc: 'Save your progress to a file.',
+            importTitle: 'Import', importDesc: 'Restore from a backup.',
+            downloadBtn: 'Download JSON', copyBtn: 'Copy JSON', pasteBtn: 'Paste JSON',
+            tapChoose: 'Tap to choose', dragDrop: 'or drag here',
+            daysRead: 'Days read', tapExport: 'Tap to export',
+            fileExported: '✓ File exported', jsonCopied: '✓ JSON copied',
+            invalidJson: 'Invalid JSON', errorImport: 'Error importing',
+            restored: 'chapters restored', errorLoad: 'Error loading',
+            back: 'Back', prev: 'Prev', next: 'Next',
+            resetBtn: 'Reset plan', resetTitle: 'Reset plan?',
+            resetSub: 'All progress will be permanently erased.',
+            resetConfirm: 'Yes, reset', cancel: 'Cancel',
+            resetSuccess: '✓ Plan reset', brand: 'BibleXtra',
+        }
+    },
+    es: {
+        brand: '✦ Santa Biblia',
+        searchPlaceholder: 'Buscar en la Biblia...',
+        daily: '✦ Diario',
+        todayReading: 'Lectura de Hoy',
+        ot: '✦ Antiguo Testamento',
+        nt: '✦ Nuevo Testamento',
+        listen: 'Escuchar',
+        stop: 'Detener',
+        search: 'Buscar',
+        results: 'resultado(s)',
+        goToRef: 'IR A REFERENCIA',
+        noResults: 'No se encontraron versículos.',
+        chapter: 'Capítulo',
+        loading: 'Cargando la Palabra…',
+        tryAgain: 'Intentar de Nuevo',
+        errorData: 'Archivo de datos no encontrado',
+        errorChapter: 'Capítulo no encontrado',
+        errorGeneric: 'Error al cargar los datos',
+        errorDataInstruction: 'Agregar a index.html antes de script.js',
+        fontDown: 'Reducir fuente',
+        fontUp: 'Aumentar fuente',
+        listenTitle: 'Escuchar la Palabra',
+        scrollTop: 'Volver arriba',
+        menuTitle: 'Menú de libros',
+        closeMenu: 'Cerrar menú',
+        openMenu: 'Abrir menú',
+        prev: 'Cap',
+        next: 'Cap',
+        langBtn: 'Español',
+        hello: 'Hola',
+        verseOfDay: 'Versículo del Día',
+        bible: 'Biblia',
+        plans: 'Planes',
+        settings: 'Más',
+        home: 'Inicio',
+        username: 'Nombre de Usuario',
+        language: 'Idioma',
+        theme: 'Tema',
+        light: 'Claro',
+        dark: 'Oscuro',
+        version: 'Versión de la Biblia',
+        chooseVersion: 'Elegir versión de la Biblia',
+        chooseLanguage: 'Elegir idioma del app',
+        dailyPlan: 'Diario',
+        teensPlan: 'Teens',
+        chapterWord: 'capítulo',
+        chaptersWord: 'capítulos',
+        chaptersLabel: 'Capítulos',
+        daily: {
+            title: "Lectura Diaria",
+            planName: "Plan Bíblico Anual",
+            today: "Hoy",
+            day: "Día",
+            of: "de",
+            annualProgress: "Progreso Anual",
+            concluded: "Completado",
+            concludeBtn: "Concluir Lectura",
+            done: "¡Lectura Completada!"
+        },
+        teens: {
+            title: "Plan Teens",
+            tag: "Viaje Bíblico",
+            bannerTitle: "Explorando<br>la Palabra",
+            startDesc: "¡Comienza tu viaje de lectura bíblica hoy mismo!",
+            startBtn: "Iniciar Plan",
+            concluded: "Completado",
+            conclude: "Concluir Día",
+            backToPlan: "Volver al Plan",
+            days: 'días', daysTitle: 'Días', chapters: 'Capítulos', books: 'Libros',
+            howItWorks: 'Cómo funciona', startInfo: 'Tu progreso se guarda automáticamente.',
+            preview: 'Vista previa del plan', andMore: 'y más',
+            planStarted: '🚀 ¡Plan iniciado!', day: 'Día', of: 'de',
+            today: 'Hoy', future: 'Futuro', complete: 'Completo', late: 'Atrasado',
+            todayChapters: 'Lectura de hoy', startReading: 'Comenzar a leer',
+            reRead: 'Releer', completedDay: '¡completado!', keepItUp: '¡Sigue así!',
+            chapter: 'capítulo', chapterPlural: 'capítulos',
+            read: 'leído', readPlural: 'leídos', saved: 'guardado', savedPlural: 'guardados',
+            backupTitle: 'Copia de seguridad', backupDesc: 'Exporta o importa tu progreso.',
+            exportTitle: 'Exportar', exportDesc: 'Guarda tu progreso en un archivo.',
+            importTitle: 'Importar', importDesc: 'Restaura desde una copia de seguridad.',
+            downloadBtn: 'Descargar JSON', copyBtn: 'Copiar JSON', pasteBtn: 'Pegar JSON',
+            tapChoose: 'Toca para elegir', dragDrop: 'o arrastra aquí',
+            daysRead: 'Días leídos', tapExport: 'Toca para exportar',
+            fileExported: '✓ Archivo exportado', jsonCopied: '✓ JSON copiado',
+            invalidJson: 'JSON inválido', errorImport: 'Error al importar',
+            restored: 'capítulos restaurados', errorLoad: 'Error al cargar',
+            back: 'Volver', prev: 'Ant', next: 'Sig',
+            resetBtn: 'Restablecer plan', resetTitle: '¿Restablecer plan?',
+            resetSub: 'Todo el progreso se borrará permanentemente.',
+            resetConfirm: 'Sí, restablecer', cancel: 'Cancelar',
+            resetSuccess: '✓ Plan restablecido', brand: 'BibleXtra',
         }
     }
 };
@@ -928,7 +1090,7 @@ function renderSettings() {
                 <div class="settings-item" id="langToggleBtn">
                     <div>
                         <div class="settings-label">${window.t('language')}</div>
-                        <div style="font-size: 0.9rem; opacity: 0.6">${state.lang === 'pt' ? 'Português' : 'English'}</div>
+                        <div style="font-size: 0.9rem; opacity: 0.6">${currentLanguageLabel()}</div>
                     </div>
                     <i class="ph ph-globe"></i>
                 </div>
@@ -950,12 +1112,7 @@ function renderSettings() {
         </div>
     `;
 
-    document.getElementById('langToggleBtn')?.addEventListener('click', () => {
-        state.lang = state.lang === 'pt' ? 'en' : 'pt';
-        saveConfig();
-        switchView('settings');
-        renderTopBar();
-    });
+    document.getElementById('langToggleBtn')?.addEventListener('click', openLanguageModal);
 
     document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
     document.getElementById('versionToggleBtn')?.addEventListener('click', openVersionModal);
@@ -964,6 +1121,52 @@ function renderSettings() {
 function currentVersionLabel() {
     const v = BIBLE_VERSIONS.find(v => v.id === state.version) || BIBLE_VERSIONS[0];
     return `${v.abbr} — ${v.name}`;
+}
+
+function currentLanguageLabel() {
+    const l = LANGUAGES.find(l => l.id === state.lang) || LANGUAGES[0];
+    return l.name;
+}
+
+function openLanguageModal() {
+    let overlay = document.getElementById('language-modal-overlay');
+    if (overlay) overlay.remove();
+
+    overlay = document.createElement('div');
+    overlay.id = 'language-modal-overlay';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="name-modal version-modal">
+            <h2>${window.t('chooseLanguage')}</h2>
+            <div class="version-option-list">
+                ${LANGUAGES.map(l => `
+                    <button class="version-option${l.id === state.lang ? ' active' : ''}" data-lang="${l.id}">
+                        <span class="version-abbr">${l.abbr}</span>
+                        <span class="version-name">${l.name}</span>
+                        <i class="ph ${l.id === state.lang ? 'ph-fill ph-check-circle' : 'ph-circle'}"></i>
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+
+    overlay.querySelectorAll('.version-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const langId = btn.dataset.lang;
+            if (langId !== state.lang) {
+                state.lang = langId;
+                saveConfig();
+                renderTopBar();
+            }
+            overlay.remove();
+            if (state.currentView === 'settings') switchView('settings');
+        });
+    });
 }
 
 function openVersionModal() {
@@ -1061,7 +1264,7 @@ function initTTS() {
         if (!text) return;
         synth.cancel();
         const utt = new SpeechSynthesisUtterance(text);
-        utt.lang = state.lang === 'pt' ? 'pt-BR' : 'en-US';
+        utt.lang = window.langLocale(state.lang);
         utt.rate = 0.95;
 
         const voices = synth.getVoices();
