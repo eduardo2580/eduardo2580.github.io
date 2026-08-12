@@ -203,6 +203,39 @@ const TRANSLATIONS = {
             resetSub: 'Todo o progresso será apagado permanentemente.',
             resetConfirm: 'Sim, resetar', cancel: 'Cancelar',
             resetSuccess: '✓ Plano resetado', brand: 'BibleXtra',
+        },
+        bible6: {
+            title: "Bíblia em 6 Meses", planName: "Bíblia em 6 Meses", tag: "PLANO XTRA",
+            desc: "Leia a Bíblia inteira em apenas 6 meses, em porções diárias equilibradas.",
+            startBtn: "Iniciar Plano", startInfo: "Seu progresso é salvo automaticamente.",
+            planStarted: "🚀 Plano iniciado!", daysWord: "dias",
+            day: "Dia", of: "de", today: "Hoje", progressLabel: "Progresso do Plano",
+            concluded: "Concluído", concludeBtn: "Concluir Leitura", done: "Leitura Concluída!",
+            resetBtn: "Resetar plano", resetTitle: "Resetar plano?",
+            resetSub: "Todo o progresso será apagado permanentemente.",
+            resetConfirm: "Sim, resetar", cancel: "Cancelar", resetSuccess: "✓ Plano resetado",
+        },
+        nt90: {
+            title: "Novo Testamento em 90 Dias", planName: "Novo Testamento em 90 Dias", tag: "PLANO XTRA",
+            desc: "Percorra todo o Novo Testamento em 90 dias, do Evangelho de Mateus ao Apocalipse.",
+            startBtn: "Iniciar Plano", startInfo: "Seu progresso é salvo automaticamente.",
+            planStarted: "🚀 Plano iniciado!", daysWord: "dias",
+            day: "Dia", of: "de", today: "Hoje", progressLabel: "Progresso do Plano",
+            concluded: "Concluído", concludeBtn: "Concluir Leitura", done: "Leitura Concluída!",
+            resetBtn: "Resetar plano", resetTitle: "Resetar plano?",
+            resetSub: "Todo o progresso será apagado permanentemente.",
+            resetConfirm: "Sim, resetar", cancel: "Cancelar", resetSuccess: "✓ Plano resetado",
+        },
+        prov31: {
+            title: "Provérbios em 31 Dias", planName: "Provérbios em 31 Dias", tag: "PLANO XTRA",
+            desc: "Um capítulo de Provérbios por dia — sabedoria para cada dia do mês.",
+            startBtn: "Iniciar Plano", startInfo: "Seu progresso é salvo automaticamente.",
+            planStarted: "🚀 Plano iniciado!", daysWord: "dias",
+            day: "Dia", of: "de", today: "Hoje", progressLabel: "Progresso do Plano",
+            concluded: "Concluído", concludeBtn: "Concluir Leitura", done: "Leitura Concluída!",
+            resetBtn: "Resetar plano", resetTitle: "Resetar plano?",
+            resetSub: "Todo o progresso será apagado permanentemente.",
+            resetConfirm: "Sim, resetar", cancel: "Cancelar", resetSuccess: "✓ Plano resetado",
         }
     },
     en: {
@@ -297,6 +330,39 @@ const TRANSLATIONS = {
             resetSub: 'All progress will be permanently erased.',
             resetConfirm: 'Yes, reset', cancel: 'Cancel',
             resetSuccess: '✓ Plan reset', brand: 'BibleXtra',
+        },
+        bible6: {
+            title: "Bible in 6 Months", planName: "Bible in 6 Months", tag: "XTRA PLAN",
+            desc: "Read the entire Bible in just 6 months, in balanced daily portions.",
+            startBtn: "Start Plan", startInfo: "Your progress is saved automatically.",
+            planStarted: "🚀 Plan started!", daysWord: "days",
+            day: "Day", of: "of", today: "Today", progressLabel: "Plan Progress",
+            concluded: "Concluded", concludeBtn: "Conclude Reading", done: "Reading Done!",
+            resetBtn: "Reset plan", resetTitle: "Reset plan?",
+            resetSub: "All progress will be permanently erased.",
+            resetConfirm: "Yes, reset", cancel: "Cancel", resetSuccess: "✓ Plan reset",
+        },
+        nt90: {
+            title: "New Testament in 90 Days", planName: "New Testament in 90 Days", tag: "XTRA PLAN",
+            desc: "Walk through the entire New Testament in 90 days, from Matthew to Revelation.",
+            startBtn: "Start Plan", startInfo: "Your progress is saved automatically.",
+            planStarted: "🚀 Plan started!", daysWord: "days",
+            day: "Day", of: "of", today: "Today", progressLabel: "Plan Progress",
+            concluded: "Concluded", concludeBtn: "Conclude Reading", done: "Reading Done!",
+            resetBtn: "Reset plan", resetTitle: "Reset plan?",
+            resetSub: "All progress will be permanently erased.",
+            resetConfirm: "Yes, reset", cancel: "Cancel", resetSuccess: "✓ Plan reset",
+        },
+        prov31: {
+            title: "Proverbs in 31 Days", planName: "Proverbs in 31 Days", tag: "XTRA PLAN",
+            desc: "One chapter of Proverbs a day — wisdom for every day of the month.",
+            startBtn: "Start Plan", startInfo: "Your progress is saved automatically.",
+            planStarted: "🚀 Plan started!", daysWord: "days",
+            day: "Day", of: "of", today: "Today", progressLabel: "Plan Progress",
+            concluded: "Concluded", concludeBtn: "Conclude Reading", done: "Reading Done!",
+            resetBtn: "Reset plan", resetTitle: "Reset plan?",
+            resetSub: "All progress will be permanently erased.",
+            resetConfirm: "Yes, reset", cancel: "Cancel", resetSuccess: "✓ Plan reset",
         }
     },
     es: {
@@ -391,6 +457,39 @@ const TRANSLATIONS = {
             resetSub: 'Todo el progreso se borrará permanentemente.',
             resetConfirm: 'Sí, restablecer', cancel: 'Cancelar',
             resetSuccess: '✓ Plan restablecido', brand: 'BibleXtra',
+        },
+        bible6: {
+            title: "Biblia en 6 Meses", planName: "Biblia en 6 Meses", tag: "PLAN XTRA",
+            desc: "Lee toda la Biblia en solo 6 meses, en porciones diarias equilibradas.",
+            startBtn: "Iniciar Plan", startInfo: "Tu progreso se guarda automáticamente.",
+            planStarted: "🚀 ¡Plan iniciado!", daysWord: "días",
+            day: "Día", of: "de", today: "Hoy", progressLabel: "Progreso del Plan",
+            concluded: "Completado", concludeBtn: "Concluir Lectura", done: "¡Lectura Completada!",
+            resetBtn: "Restablecer plan", resetTitle: "¿Restablecer plan?",
+            resetSub: "Todo el progreso se borrará permanentemente.",
+            resetConfirm: "Sí, restablecer", cancel: "Cancelar", resetSuccess: "✓ Plan restablecido",
+        },
+        nt90: {
+            title: "Nuevo Testamento en 90 Días", planName: "Nuevo Testamento en 90 Días", tag: "PLAN XTRA",
+            desc: "Recorre todo el Nuevo Testamento en 90 días, desde Mateo hasta Apocalipsis.",
+            startBtn: "Iniciar Plan", startInfo: "Tu progreso se guarda automáticamente.",
+            planStarted: "🚀 ¡Plan iniciado!", daysWord: "días",
+            day: "Día", of: "de", today: "Hoy", progressLabel: "Progreso del Plan",
+            concluded: "Completado", concludeBtn: "Concluir Lectura", done: "¡Lectura Completada!",
+            resetBtn: "Restablecer plan", resetTitle: "¿Restablecer plan?",
+            resetSub: "Todo el progreso se borrará permanentemente.",
+            resetConfirm: "Sí, restablecer", cancel: "Cancelar", resetSuccess: "✓ Plan restablecido",
+        },
+        prov31: {
+            title: "Proverbios en 31 Días", planName: "Proverbios en 31 Días", tag: "PLAN XTRA",
+            desc: "Un capítulo de Proverbios al día: sabiduría para cada día del mes.",
+            startBtn: "Iniciar Plan", startInfo: "Tu progreso se guarda automáticamente.",
+            planStarted: "🚀 ¡Plan iniciado!", daysWord: "días",
+            day: "Día", of: "de", today: "Hoy", progressLabel: "Progreso del Plan",
+            concluded: "Completado", concludeBtn: "Concluir Lectura", done: "¡Lectura Completada!",
+            resetBtn: "Restablecer plan", resetTitle: "¿Restablecer plan?",
+            resetSub: "Todo el progreso se borrará permanentemente.",
+            resetConfirm: "Sí, restablecer", cancel: "Cancelar", resetSuccess: "✓ Plan restablecido",
         }
     }
 };
@@ -543,6 +642,11 @@ function switchView(viewName, params = {}) {
             break;
         case 'teens':
             window.openTeensDashboard?.();
+            break;
+        case 'bible6':
+        case 'nt90':
+        case 'prov31':
+            window.openReadingPlan?.(viewName);
             break;
         case 'search':
             renderSearchInput();
@@ -1059,6 +1163,18 @@ function renderPlans() {
                 </div>
                 <div class="settings-item" id="teensPlanBtn">
                     <div class="settings-label">⚡ ${window.t('title', 'teens')}</div>
+                    <i class="ph ph-caret-right"></i>
+                </div>
+                <div class="settings-item" onclick="switchView('bible6')">
+                    <div class="settings-label">🗓️ ${window.t('title', 'bible6')}</div>
+                    <i class="ph ph-caret-right"></i>
+                </div>
+                <div class="settings-item" onclick="switchView('nt90')">
+                    <div class="settings-label">✝️ ${window.t('title', 'nt90')}</div>
+                    <i class="ph ph-caret-right"></i>
+                </div>
+                <div class="settings-item" onclick="switchView('prov31')">
+                    <div class="settings-label">💡 ${window.t('title', 'prov31')}</div>
                     <i class="ph ph-caret-right"></i>
                 </div>
             </div>
