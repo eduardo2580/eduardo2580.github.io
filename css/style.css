@@ -640,6 +640,75 @@ body.dark-theme {
     font-size: 1.2rem;
 }
 
+/* --- ABAS: BUSCA / ASSISTENTE --- */
+.search-tabs {
+    display: flex;
+    gap: .6rem;
+    margin-bottom: 1.5rem;
+    background: var(--white-alpha);
+    border: 1.5px solid var(--gold-dark);
+    border-radius: 14px;
+    padding: .35rem;
+}
+.search-tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: .7rem .5rem;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: 'Cinzel', serif;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+    cursor: pointer;
+    transition: all .2s;
+}
+.search-tab-btn i { font-size: 1rem; }
+.search-tab-btn.active {
+    background: var(--red-bible);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(139,26,26,.3);
+}
+
+/* --- ASSISTENTE (BUSCA POR TEMA — 100% LOCAL) --- */
+.assistant-intro {
+    font-size: .9rem;
+    opacity: .75;
+    text-align: center;
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+.assistant-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin: 1rem 0;
+}
+.assistant-chip {
+    background: var(--white-alpha);
+    border: 1.5px solid var(--gold-dark);
+    border-radius: 20px;
+    padding: .5rem .9rem;
+    font-size: .82rem;
+    font-family: 'EB Garamond', serif;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all .2s;
+}
+.assistant-chip:hover { background: var(--gold); color: var(--ink); border-color: var(--gold); }
+.topic-heading {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--red-bible);
+    margin: .5rem 1rem 1rem 1rem;
+    letter-spacing: .04em;
+}
+
 /* --- BÍBLIA VIEW --- */
 .book-grid {
     display: grid;

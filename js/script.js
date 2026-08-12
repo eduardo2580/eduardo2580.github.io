@@ -125,6 +125,10 @@ const TRANSLATIONS = {
         goToRef: 'IR PARA REFERÊNCIA',
         noResults: 'Nenhum versículo encontrado.',
         chapter: 'Capítulo',
+        tabSearch: 'Busca',
+        tabAssistant: 'Assistente IA',
+        assistantIntro: 'Encontre versículos por tema, instantaneamente e sem internet — tudo roda no seu dispositivo.',
+        assistantTopicPlaceholder: 'Digite um tema (ex: perdão, medo, fé)...',
         loading: 'Carregando a Palavra…',
         tryAgain: 'Tentar Novamente',
         errorData: 'Arquivo de dados não encontrado',
@@ -252,6 +256,10 @@ const TRANSLATIONS = {
         goToRef: 'GO TO REFERENCE',
         noResults: 'No verses found.',
         chapter: 'Chapter',
+        tabSearch: 'Search',
+        tabAssistant: 'AI Assistant',
+        assistantIntro: 'Find verses by topic instantly, fully offline — everything runs on your device.',
+        assistantTopicPlaceholder: 'Type a topic (e.g. forgiveness, fear, faith)...',
         loading: 'Loading the Word...',
         tryAgain: 'Try Again',
         errorData: 'Data file not found',
@@ -379,6 +387,10 @@ const TRANSLATIONS = {
         goToRef: 'IR A REFERENCIA',
         noResults: 'No se encontraron versículos.',
         chapter: 'Capítulo',
+        tabSearch: 'Buscar',
+        tabAssistant: 'Asistente IA',
+        assistantIntro: 'Encuentra versículos por tema al instante y sin internet — todo funciona en tu dispositivo.',
+        assistantTopicPlaceholder: 'Escribe un tema (ej: perdón, miedo, fe)...',
         loading: 'Cargando la Palabra…',
         tryAgain: 'Intentar de Nuevo',
         errorData: 'Archivo de datos no encontrado',
@@ -852,17 +864,51 @@ function searchVerses(query) {
     return results;
 }
 
+// Which sub-tab of the Search view is active: 'search' (classic verse
+// search) or 'assistant' (Bible Assistant chat). Not persisted — resets
+// to classic search whenever the app is reloaded.
+let searchTab = 'search';
+
 function renderSearchInput() {
     const content = document.getElementById('content');
     content.innerHTML = `
         <div class="search-container fade-in">
             <h1 class="bible-heading">${window.t('search')}</h1>
-            <div class="search-box">
-                <i class="ph ph-magnifying-glass"></i>
-                <input type="text" id="searchInput" placeholder="${window.t('searchPlaceholder')}" autocomplete="off" />
+            <div class="search-tabs">
+                <button class="search-tab-btn${searchTab === 'search' ? ' active' : ''}" data-tab="search">
+                    <i class="ph ph-magnifying-glass"></i> ${window.t('tabSearch')}
+                </button>
+                <button class="search-tab-btn${searchTab === 'assistant' ? ' active' : ''}" data-tab="assistant">
+                    <i class="ph ph-sparkle"></i> ${window.t('tabAssistant')}
+                </button>
             </div>
-            <div id="searchResults"></div>
+            <div id="searchTabBody"></div>
         </div>
+    `;
+
+    document.querySelectorAll('.search-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (searchTab === btn.dataset.tab) return;
+            searchTab = btn.dataset.tab;
+            renderSearchInput();
+        });
+    });
+
+    if (searchTab === 'assistant') {
+        renderAssistantTab();
+    } else {
+        renderClassicSearch();
+    }
+}
+
+function renderClassicSearch() {
+    const body = document.getElementById('searchTabBody');
+    body.innerHTML = `
+        <div class="search-box">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="${window.t('searchPlaceholder')}" autocomplete="off" />
+        </div>
+        <div id="searchResults"></div>
     `;
 
     const searchInput = document.getElementById('searchInput');
@@ -939,6 +985,126 @@ function renderSearchResults(query, results, directRef = null) {
         };
         wrap.appendChild(div);
     }
+}
+
+
+/* ════════════════════════ TOPICAL VERSE FINDER (100% LOCAL) ══════════════════════════
+   No network calls, no API key, no waiting — everything below runs against
+   the Bible data already bundled with the app. It's a curated cross-reference
+   index (topic -> verse references) plus the existing local full-text search,
+   so results are instant. */
+const BIBLE_TOPICS = [
+    { id: 'love', pt: 'Amor', en: 'Love', es: 'Amor', refs: [['JHN', 3, 16], ['1CO', 13, 4], ['1CO', 13, 13], ['1JN', 4, 8], ['ROM', 8, 38]] },
+    { id: 'forgiveness', pt: 'Perdão', en: 'Forgiveness', es: 'Perdón', refs: [['MAT', 6, 14], ['EPH', 4, 32], ['COL', 3, 13], ['1JN', 1, 9], ['LUK', 6, 37]] },
+    { id: 'faith', pt: 'Fé', en: 'Faith', es: 'Fe', refs: [['HEB', 11, 1], ['ROM', 10, 17], ['MRK', 11, 24], ['JAS', 2, 17], ['2CO', 5, 7]] },
+    { id: 'hope', pt: 'Esperança', en: 'Hope', es: 'Esperanza', refs: [['ROM', 15, 13], ['JER', 29, 11], ['ROM', 8, 24], ['PSA', 42, 11], ['1PE', 1, 3]] },
+    { id: 'fear', pt: 'Medo', en: 'Fear', es: 'Miedo', refs: [['ISA', 41, 10], ['PSA', 23, 4], ['2TI', 1, 7], ['JOS', 1, 9], ['PSA', 56, 3]] },
+    { id: 'peace', pt: 'Paz', en: 'Peace', es: 'Paz', refs: [['JHN', 14, 27], ['PHP', 4, 6], ['PHP', 4, 7], ['ISA', 26, 3], ['COL', 3, 15]] },
+    { id: 'wisdom', pt: 'Sabedoria', en: 'Wisdom', es: 'Sabiduría', refs: [['PRO', 3, 5], ['PRO', 9, 10], ['JAS', 1, 5], ['PRO', 1, 7], ['ECC', 7, 12]] },
+    { id: 'prayer', pt: 'Oração', en: 'Prayer', es: 'Oración', refs: [['PHP', 4, 6], ['1TH', 5, 17], ['MAT', 6, 6], ['JAS', 5, 16], ['JHN', 15, 7]] },
+    { id: 'salvation', pt: 'Salvação', en: 'Salvation', es: 'Salvación', refs: [['ROM', 10, 9], ['EPH', 2, 8], ['JHN', 3, 16], ['ACT', 4, 12], ['ROM', 6, 23]] },
+    { id: 'family', pt: 'Família', en: 'Family', es: 'Familia', refs: [['JOS', 24, 15], ['EPH', 6, 1], ['PRO', 22, 6], ['PSA', 127, 3], ['DEU', 6, 6]] },
+    { id: 'strength', pt: 'Força', en: 'Strength', es: 'Fuerza', refs: [['PHP', 4, 13], ['ISA', 40, 31], ['PSA', 46, 1], ['2CO', 12, 9], ['NEH', 8, 10]] },
+    { id: 'patience', pt: 'Paciência', en: 'Patience', es: 'Paciencia', refs: [['ROM', 12, 12], ['JAS', 1, 4], ['GAL', 6, 9], ['ECC', 7, 8], ['PSA', 27, 14]] },
+    { id: 'gratitude', pt: 'Gratidão', en: 'Gratitude', es: 'Gratitud', refs: [['1TH', 5, 18], ['PSA', 100, 4], ['COL', 3, 17], ['PHP', 4, 6], ['PSA', 107, 1]] },
+    { id: 'humility', pt: 'Humildade', en: 'Humility', es: 'Humildad', refs: [['JAS', 4, 10], ['PRO', 22, 4], ['1PE', 5, 6], ['PHP', 2, 3], ['MIC', 6, 8]] },
+    { id: 'anger', pt: 'Ira', en: 'Anger', es: 'Ira', refs: [['EPH', 4, 26], ['JAS', 1, 19], ['PRO', 15, 1], ['PRO', 29, 11], ['COL', 3, 8]] },
+    { id: 'anxiety', pt: 'Ansiedade', en: 'Anxiety', es: 'Ansiedad', refs: [['PHP', 4, 6], ['1PE', 5, 7], ['MAT', 6, 34], ['PSA', 94, 19], ['JHN', 14, 27]] },
+    { id: 'friendship', pt: 'Amizade', en: 'Friendship', es: 'Amistad', refs: [['PRO', 17, 17], ['ECC', 4, 9], ['JHN', 15, 13], ['PRO', 27, 17], ['1SA', 18, 1]] },
+    { id: 'work', pt: 'Trabalho', en: 'Work', es: 'Trabajo', refs: [['COL', 3, 23], ['PRO', 14, 23], ['ECC', 3, 13], ['2TH', 3, 10], ['PRO', 22, 29]] },
+    { id: 'guidance', pt: 'Direção/Guia', en: 'Guidance', es: 'Guía', refs: [['PRO', 3, 5], ['PRO', 3, 6], ['PSA', 32, 8], ['ISA', 30, 21], ['PSA', 119, 105]] },
+    { id: 'grace', pt: 'Graça', en: 'Grace', es: 'Gracia', refs: [['EPH', 2, 8], ['2CO', 12, 9], ['ROM', 3, 24], ['TIT', 2, 11], ['JHN', 1, 16]] },
+];
+
+function topicLabel(topic) {
+    const lang = state.lang || 'pt';
+    return topic[lang] || topic.pt;
+}
+
+function resolveTopicRefs(topic) {
+    const version = state.version || 'ara';
+    const data = getBibleData(version) || getBibleData('ara');
+    return topic.refs.map(([bookId, chapter, verse]) => {
+        const book = ALL_BOOKS.find(b => b.id === bookId);
+        const verses = data?.[`${bookId}_${chapter}`];
+        const v = verses?.find(vv => vv.verse === verse);
+        return { book, chapter, verse, text: v ? v.text : null };
+    }).filter(r => r.book);
+}
+
+function matchTopics(query) {
+    const q = normalise(query.trim());
+    if (!q) return [];
+    return BIBLE_TOPICS.filter(t =>
+        normalise(t.pt).includes(q) || normalise(t.en).includes(q) || normalise(t.es).includes(q) ||
+        q.includes(normalise(t.pt)) || q.includes(normalise(t.en)) || q.includes(normalise(t.es))
+    );
+}
+
+function renderAssistantTab() {
+    const body = document.getElementById('searchTabBody');
+    body.innerHTML = `
+        <p class="assistant-intro">${window.t('assistantIntro')}</p>
+        <div class="search-box">
+            <i class="ph ph-tag"></i>
+            <input type="text" id="topicInput" placeholder="${window.t('assistantTopicPlaceholder')}" autocomplete="off" />
+        </div>
+        <div class="assistant-chips" id="topicChips"></div>
+        <div id="topicResults"></div>
+    `;
+
+    const chipsWrap = document.getElementById('topicChips');
+    chipsWrap.innerHTML = BIBLE_TOPICS.map(t => `<button class="assistant-chip" data-topic="${t.id}">${topicLabel(t)}</button>`).join('');
+    chipsWrap.querySelectorAll('.assistant-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const topic = BIBLE_TOPICS.find(t => t.id === btn.dataset.topic);
+            document.getElementById('topicInput').value = topicLabel(topic);
+            showTopicResults(topic);
+        });
+    });
+
+    const input = document.getElementById('topicInput');
+    let timer;
+    input.addEventListener('input', e => {
+        clearTimeout(timer);
+        const q = e.target.value.trim();
+        if (!q) { document.getElementById('topicResults').innerHTML = ''; return; }
+        timer = setTimeout(() => {
+            const topics = matchTopics(q);
+            if (topics.length) {
+                showTopicResults(topics[0]);
+            } else {
+                // Fall back to the fast local full-text search when the
+                // typed word isn't in the curated topic list.
+                showFullTextFallback(q);
+            }
+        }, 150);
+    });
+    input.focus();
+}
+
+function showFullTextFallback(q) {
+    const wrap = document.getElementById('topicResults');
+    const results = searchVerses(q);
+    const directRef = parseReference(q);
+    wrap.innerHTML = '<div id="searchResults"></div>';
+    renderSearchResults(q, results, directRef);
+}
+
+function showTopicResults(topic) {
+    const wrap = document.getElementById('topicResults');
+    const refs = resolveTopicRefs(topic);
+    wrap.innerHTML = `<h3 class="topic-heading">${topicLabel(topic)}</h3>` + refs.map(r => `
+        <div class="verse topic-verse" data-book="${r.book.id}" data-chapter="${r.chapter}" data-verse="${r.verse}">
+            <span class="verse-num">${r.book.name} ${r.chapter}:${r.verse}</span>
+            <span class="verse-text" style="font-size:${state.fontSize}rem">${r.text || ''}</span>
+        </div>
+    `).join('');
+    wrap.querySelectorAll('.topic-verse').forEach(el => {
+        el.addEventListener('click', () => {
+            switchView('bible', { bookId: el.dataset.book, chapter: parseInt(el.dataset.chapter), verse: parseInt(el.dataset.verse) });
+        });
+    });
 }
 
 /* ════════════════════════ HOME DASHBOARD ══════════════════════════ */
