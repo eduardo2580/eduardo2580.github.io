@@ -730,6 +730,9 @@ function switchView(viewName, params = {}) {
         case 'teens':
             window.openTeensDashboard?.();
             break;
+        case 'quiz':
+            window.openQuizDashboard?.();
+            break;
         case 'bible6':
         case 'nt90':
         case 'prov31':
@@ -1222,6 +1225,10 @@ function renderHome() {
                     <div class="action-item" onclick="switchView('search')">
                         <div class="action-circle"><i class="ph ph-magnifying-glass"></i></div>
                         <span class="action-label">${window.t('search').toUpperCase()}</span>
+                    </div>
+                    <div class="action-item" onclick="switchView('quiz')">
+                        <div class="action-circle"><i class="ph ph-trophy"></i></div>
+                        <span class="action-label">QUIZ</span>
                     </div>
                 </div>
             </div>
