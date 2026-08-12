@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Privacidade — Bíblia Sagrada</title>
+  <meta name="description" content="Política de Privacidade do app Bíblia Sagrada: dados 100% locais, sem rastreamento, sem venda de dados." />
+
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="manifest" href="site.webmanifest">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* ---- Page-specific layout (shares brand tokens from style.css) ---- */
+    body.privacy-page {
+      display: block;
+      background-color: var(--parchment);
+    }
+    .privacy-page-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: calc(1.6rem + var(--safe-top)) 1.4rem calc(4rem + var(--safe-bottom)) 1.4rem;
+    }
+    .pp-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .pp-back {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-family: 'Cinzel', serif;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      text-decoration: none;
+      border: 1.5px solid var(--gold-dark);
+      border-radius: 8px;
+      padding: .5rem .9rem;
+      transition: all .2s;
+    }
+    .pp-back:hover { background: var(--gold-dark); color: #fff; }
+
+    .pp-lang-switch {
+      display: flex;
+      gap: .4rem;
+      background: var(--white-alpha);
+      border: 1.5px solid var(--gold-dark);
+      border-radius: 10px;
+      padding: .25rem;
+    }
+    .pp-lang-switch button {
+      font-family: 'Cinzel', serif;
+      font-size: .75rem;
+      font-weight: 700;
+      background: transparent;
+      border: none;
+      color: var(--ink-soft);
+      padding: .35rem .6rem;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    .pp-lang-switch button.active { background: var(--gold-dark); color: #fff; }
+
+    .pp-hero { text-align: center; margin-bottom: 1.6rem; }
+    .pp-hero i { font-size: 2.4rem; color: var(--gold-dark); }
+    .pp-hero h1 {
+      font-family: 'Cinzel', serif;
+      color: var(--red-bible);
+      font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem);
+      margin: .6rem 0 .5rem 0;
+      letter-spacing: .02em;
+    }
+    .pp-hero p.lead {
+      color: var(--ink-soft);
+      font-size: 1.05rem;
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .pp-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      justify-content: center;
+      margin: 1.4rem 0 2rem 0;
+    }
+    .pp-badge {
+      font-family: 'Cinzel', serif;
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      background: rgba(201,169,110,0.15);
+      border: 1px solid rgba(201,169,110,0.4);
+      border-radius: 20px;
+      padding: .4rem .8rem;
+    }
+
+    .pp-updated {
+      text-align: center;
+      font-size: .8rem;
+      opacity: .55;
+      margin-bottom: 2rem;
+    }
+
+    .pp-article {
+      background: var(--white-alpha);
+      border: 1.5px solid rgba(201,169,110,0.35);
+      border-radius: 16px;
+      padding: clamp(1.4rem, 1rem + 1.5vw, 2.4rem);
+    }
+    .pp-article section { margin-bottom: 2rem; }
+    .pp-article section:last-child { margin-bottom: 0; }
+    .pp-article h2 {
+      font-family: 'Cinzel', serif;
+      color: var(--red-bible);
+      font-size: 1.15rem;
+      margin-bottom: .7rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .pp-article h2 i { color: var(--gold-dark); font-size: 1.1rem; }
+    .pp-article p, .pp-article li {
+      color: var(--ink-soft);
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+    .pp-article ul { padding-left: 1.3rem; margin: .5rem 0; }
+    .pp-article li { margin-bottom: .4rem; }
+    .pp-article strong { color: var(--ink); }
+    .pp-tldr {
+      background: rgba(201,169,110,0.12);
+      border-left: 3px solid var(--gold);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 2rem;
+    }
+    .pp-tldr strong { font-family: 'Cinzel', serif; color: var(--red-bible); font-size: .8rem; letter-spacing: .05em; }
+
+    .pp-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .8rem;
+      margin-top: 1.2rem;
+    }
+    .pp-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: 'Cinzel', serif;
+      font-size: .8rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--gold-dark);
+      border-radius: 10px;
+      padding: .7rem 1rem;
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .pp-cta:hover { background: var(--gold); }
+
+    .pp-footer {
+      text-align: center;
+      margin-top: 2.5rem;
+      font-size: .85rem;
+      opacity: .6;
+    }
+    .pp-footer a { color: var(--gold-dark); }
+
+    @media (max-width: 480px) {
+      .pp-header { justify-content: center; }
+    }
+  </style>
+</head>
+
+<body class="privacy-page">
+  <div class="privacy-page-wrap">
+
+    <div class="pp-header">
+      <a class="pp-back" href="index.html"><i class="ph ph-arrow-left"></i> <span data-t="back"></span></a>
+      <div class="pp-lang-switch" id="pp-lang-switch">
+        <button type="button" data-lang="pt">PT</button>
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="es">ES</button>
+      </div>
+    </div>
+
+    <div class="pp-hero">
+      <i class="ph ph-shield-check"></i>
+      <h1 data-t="heroTitle"></h1>
+      <p class="lead" data-t="heroLead"></p>
+    </div>
+
+    <div class="pp-badges">
+      <span class="pp-badge" data-t="badgeLocal"></span>
+      <span class="pp-badge" data-t="badgeNoTrack"></span>
+      <span class="pp-badge" data-t="badgeNoAds"></span>
+      <span class="pp-badge" data-t="badgeNoSell"></span>
+      <span class="pp-badge" data-t="badgeOpen"></span>
+    </div>
+
+    <div class="pp-updated" data-t="lastUpdated"></div>
+
+    <article class="pp-article">
+
+      <div class="pp-tldr">
+        <strong data-t="tldrLabel"></strong>
+        <p data-t="tldrText" style="margin:.4rem 0 0 0;"></p>
+      </div>
+
+      <section>
+        <h2><i class="ph ph-database"></i> <span data-t="s1Title"></span></h2>
+        <p data-t="s1p1"></p>
+        <ul>
+          <li data-t="s1li1"></li>
+          <li data-t="s1li2"></li>
+          <li data-t="s1li3"></li>
+        </ul>
+        <p data-t="s1p2"></p>
+      </section>
+
+      <section>
+        <h2><i class="ph ph-prohibit"></i> <span data-t="s2Title"></span></h2>
+        <ul>
+          <li data-t="s2li1"></li>
+          <li data-t="s2li2"></li>
+          <li data-t="s2li3"></li>
+          <li data-t="s2li4"></li>
+          <li data-t="s2li5"></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><i class="ph ph-globe"></i> <span data-t="s3Title"></span></h2>
+        <p data-t="s3p1"></p>
+        <ul>
+          <li data-t="s3li1"></li>
+          <li data-t="s3li2"></li>
+          <li data-t="s3li3"></li>
+        </ul>
+        <p data-t="s3p2"></p>
+      </section>
+
+      <section>
+        <h2><i class="ph ph-sliders"></i> <span data-t="s4Title"></span></h2>
+        <p data-t="s4p1"></p>
+        <ul>
+          <li data-t="s4li1"></li>
+          <li data-t="s4li2"></li>
+          <li data-t="s4li3"></li>
+        </ul>
+        <div class="pp-cta-row">
+          <a class="pp-cta" href="index.html#settings"><i class="ph ph-gear"></i> <span data-t="ctaSettings"></span></a>
+        </div>
+      </section>
+
+      <section>
+        <h2><i class="ph ph-wifi-slash"></i> <span data-t="s5Title"></span></h2>
+        <p data-t="s5p1"></p>
+      </section>
+
+      <section>
+        <h2><i class="ph ph-baby"></i> <span data-t="s6Title"></span></h2>
+        <p data-t="s6p1"></p>
+      </section>
+
+      <section>
+        <h2><i class="ph ph-clock-counter-clockwise"></i> <span data-t="s7Title"></span></h2>
+        <p data-t="s7p1"></p>
+      </section>
+
+      <section>
+        <h2><i class="ph ph-envelope"></i> <span data-t="s8Title"></span></h2>
+        <p data-t="s8p1"></p>
+        <div class="pp-cta-row">
+          <a class="pp-cta" href="https://github.com/eduardo2580/eduardo2580.github.io" target="_blank" rel="noopener"><i class="ph ph-github-logo"></i> GitHub</a>
+        </div>
+      </section>
+
+    </article>
+
+    <div class="pp-footer">
+      <span data-t="footerNote"></span> · <a href="index.html" data-t="backToApp"></a>
+    </div>
+
+  </div>
+
+  <script>
+    const PP_TRANSLATIONS = {
+      pt: {
+        back: 'Voltar ao app',
+        heroTitle: 'Sua Bíblia. Seus dados. Sua privacidade.',
+        heroLead: 'Este app foi construído para que seu estudo bíblico pertença só a você — não a nós, não a nenhuma empresa de publicidade.',
+        badgeLocal: '🔒 100% local', badgeNoTrack: '🚫 Sem rastreamento', badgeNoAds: '🚫 Sem anúncios',
+        badgeNoSell: '🚫 Nunca vendemos dados', badgeOpen: '📖 Código aberto',
+        lastUpdated: 'Última atualização: 12 de agosto de 2026',
+        tldrLabel: 'RESUMO', tldrText: 'Tudo o que você faz neste app — leitura, progresso em planos, preferências — fica salvo apenas no seu próprio dispositivo. Não existe conta, não existe servidor guardando seus dados, e nunca vendemos ou compartilhamos nada. Você pode exportar ou apagar tudo a qualquer momento, na tela Mais → Privacidade e Dados.',
+        s1Title: 'O que este app guarda, e onde',
+        s1p1: 'O app roda inteiramente no seu navegador. Os dados que ele salva ficam armazenados localmente no seu dispositivo, usando duas tecnologias padrão da web:',
+        s1li1: '<strong>localStorage</strong> — suas preferências (idioma, tema, tamanho da fonte, versão da Bíblia, o nome que você digitou) e o progresso salvo em cada plano de leitura.',
+        s1li2: '<strong>IndexedDB</strong> — um cache local do texto bíblico, para abrir capítulos mais rápido. O texto em si já vem embutido no app (nos arquivos JavaScript); esse cache é só uma cópia de conveniência, não algo baixado com seus dados pessoais.',
+        s1li3: '<strong>Cache do Service Worker</strong> — os arquivos do próprio app (HTML, CSS, JS, ícones), para funcionar offline. Isso também não contém nenhum dado pessoal seu.',
+        s1p2: 'Nada disso é enviado para nenhum servidor, nosso ou de terceiros. Se você desinstalar o app ou limpar os dados do site no navegador, essas informações são apagadas junto — como já seria de se esperar de algo guardado só no seu aparelho.',
+        s2Title: 'O que nós nunca fazemos',
+        s2li1: 'Não criamos conta de usuário nem exigimos login.',
+        s2li2: 'Não usamos ferramentas de analytics, rastreadores ou pixels de publicidade.',
+        s2li3: 'Não mostramos anúncios.',
+        s2li4: 'Não vendemos, alugamos ou compartilhamos seus dados com ninguém — porque, tecnicamente, eles nunca chegam até nós.',
+        s2li5: 'Não fazemos perfil de comportamento de leitura para nenhum fim comercial.',
+        s3Title: 'Recursos de terceiros ao abrir esta página',
+        s3p1: 'Para ser transparente até no detalhe: como qualquer site, ao carregar esta página o navegador busca alguns recursos externos — isso é diferente do seu conteúdo bíblico, que nunca sai do aparelho. Os recursos carregados são:',
+        s3li1: '<strong>Google Fonts</strong> — as fontes Cinzel e EB Garamond, servidas pelo Google.',
+        s3li2: '<strong>Phosphor Icons (unpkg.com)</strong> — os ícones da interface.',
+        s3li3: '<strong>VLibras (vlibras.gov.br)</strong> — o widget oficial do governo brasileiro para tradução em Libras, usado por acessibilidade.',
+        s3p2: 'Esses provedores podem registrar informações técnicas padrão de qualquer requisição web (como o endereço IP), de acordo com as próprias políticas deles — mas nenhum dado do seu estudo bíblico (progresso, notas, nome) é incluído nessas requisições.',
+        s4Title: 'Seu controle sobre os dados',
+        s4p1: 'Como tudo fica no seu dispositivo, o controle também é todo seu. Na tela <strong>Mais → Privacidade e Dados</strong> você pode:',
+        s4li1: '<strong>Exportar tudo</strong> — baixar um arquivo com todos os seus dados, opcionalmente protegido por senha (criptografia AES-256, feita no próprio dispositivo antes de o arquivo ser criado).',
+        s4li2: '<strong>Importar um backup</strong> — restaurar seus dados a partir de um arquivo exportado anteriormente, em qualquer dispositivo.',
+        s4li3: '<strong>Apagar tudo</strong> — remover permanentemente todas as preferências e todo o progresso salvo, de forma irreversível.',
+        ctaSettings: 'Ir para Privacidade e Dados',
+        s5Title: 'Funcionamento offline',
+        s5p1: 'O app funciona sem internet depois do primeiro carregamento, graças a um Service Worker que guarda em cache os arquivos do próprio aplicativo. Esse cache técnico é separado dos seus dados pessoais e pode ser limpo pelo navegador sem apagar seu progresso salvo, e vice-versa.',
+        s6Title: 'Privacidade de crianças',
+        s6p1: 'O app não coleta nenhum dado de identificação pessoal de ninguém, incluindo crianças, já que não existe coleta de dados em servidor alguma. O nome exibido na tela inicial é opcional, definido pelo próprio usuário e guardado apenas localmente.',
+        s7Title: 'Alterações a esta política',
+        s7p1: 'Se esta política mudar, a data de "última atualização" no topo desta página será atualizada. Como o app é de código aberto, qualquer alteração também fica visível no histórico do repositório no GitHub.',
+        s8Title: 'Dúvidas ou contato',
+        s8p1: 'Este é um projeto pessoal e de código aberto. Se tiver dúvidas sobre privacidade ou quiser revisar o código-fonte, o repositório está disponível publicamente.',
+        footerNote: 'Bíblia Sagrada — feita para ser sua, e só sua.',
+        backToApp: 'Voltar ao app',
+      },
+      en: {
+        back: 'Back to app',
+        heroTitle: 'Your Bible. Your data. Your privacy.',
+        heroLead: 'This app was built so your Bible study belongs only to you — not to us, not to any advertising company.',
+        badgeLocal: '🔒 100% local', badgeNoTrack: '🚫 No tracking', badgeNoAds: '🚫 No ads',
+        badgeNoSell: '🚫 We never sell data', badgeOpen: '📖 Open source',
+        lastUpdated: 'Last updated: August 12, 2026',
+        tldrLabel: 'TL;DR', tldrText: 'Everything you do in this app — reading, plan progress, preferences — is saved only on your own device. There\'s no account, no server holding your data, and we never sell or share anything. You can export or delete everything at any time from More → Privacy & Data.',
+        s1Title: 'What this app stores, and where',
+        s1p1: 'The app runs entirely in your browser. Data it saves stays stored locally on your device, using two standard web technologies:',
+        s1li1: '<strong>localStorage</strong> — your preferences (language, theme, font size, Bible version, the name you typed) and your saved progress in each reading plan.',
+        s1li2: '<strong>IndexedDB</strong> — a local cache of Bible text, so chapters open faster. The text itself already ships inside the app (in its JavaScript files); this cache is just a convenience copy, not something downloaded together with your personal data.',
+        s1li3: '<strong>Service Worker cache</strong> — the app\'s own files (HTML, CSS, JS, icons), so it works offline. This also contains none of your personal data.',
+        s1p2: 'None of this is ever sent to any server, ours or a third party\'s. If you uninstall the app or clear the site\'s data in your browser, this information is deleted along with it — exactly as you\'d expect from something kept only on your own device.',
+        s2Title: 'What we never do',
+        s2li1: 'We don\'t create a user account or require a login.',
+        s2li2: 'We don\'t use analytics tools, trackers, or advertising pixels.',
+        s2li3: 'We don\'t show ads.',
+        s2li4: 'We don\'t sell, rent, or share your data with anyone — because, technically, it never reaches us.',
+        s2li5: 'We don\'t profile reading behavior for any commercial purpose.',
+        s3Title: 'Third-party resources when this page loads',
+        s3p1: 'To be transparent down to the detail: like any website, loading this page makes your browser fetch a few external resources — this is separate from your Bible content, which never leaves the device. The resources loaded are:',
+        s3li1: '<strong>Google Fonts</strong> — the Cinzel and EB Garamond typefaces, served by Google.',
+        s3li2: '<strong>Phosphor Icons (unpkg.com)</strong> — the interface icons.',
+        s3li3: '<strong>VLibras (vlibras.gov.br)</strong> — the official Brazilian government widget for Brazilian Sign Language translation, used for accessibility.',
+        s3p2: 'These providers may log standard technical information from any web request (such as IP address) under their own policies — but none of your Bible-study data (progress, notes, name) is included in those requests.',
+        s4Title: 'Your control over the data',
+        s4p1: 'Since everything stays on your device, the control is entirely yours too. From <strong>More → Privacy & Data</strong> you can:',
+        s4li1: '<strong>Export everything</strong> — download a file with all your data, optionally password-protected (AES-256 encryption, performed on-device before the file is created).',
+        s4li2: '<strong>Import a backup</strong> — restore your data from a previously exported file, on any device.',
+        s4li3: '<strong>Delete everything</strong> — permanently and irreversibly remove all preferences and saved progress.',
+        ctaSettings: 'Go to Privacy & Data',
+        s5Title: 'Offline behavior',
+        s5p1: 'The app works without internet after the first load, thanks to a Service Worker that caches the app\'s own files. That technical cache is separate from your personal data and can be cleared by the browser without erasing your saved progress, and vice versa.',
+        s6Title: 'Children\'s privacy',
+        s6p1: 'The app doesn\'t collect any personally identifying data from anyone, including children, since there is no server-side data collection at all. The name shown on the home screen is optional, set by the user themselves, and stored only locally.',
+        s7Title: 'Changes to this policy',
+        s7p1: 'If this policy changes, the "last updated" date at the top of this page will be updated. Since the app is open source, any change also stays visible in the repository\'s history on GitHub.',
+        s8Title: 'Questions or contact',
+        s8p1: 'This is a personal, open-source project. If you have questions about privacy or want to review the source code, the repository is publicly available.',
+        footerNote: 'Bíblia Sagrada — made to be yours, and only yours.',
+        backToApp: 'Back to app',
+      },
+      es: {
+        back: 'Volver a la app',
+        heroTitle: 'Tu Biblia. Tus datos. Tu privacidad.',
+        heroLead: 'Esta app fue construida para que tu estudio bíblico te pertenezca solo a ti — no a nosotros, ni a ninguna empresa de publicidad.',
+        badgeLocal: '🔒 100% local', badgeNoTrack: '🚫 Sin rastreo', badgeNoAds: '🚫 Sin anuncios',
+        badgeNoSell: '🚫 Nunca vendemos datos', badgeOpen: '📖 Código abierto',
+        lastUpdated: 'Última actualización: 12 de agosto de 2026',
+        tldrLabel: 'RESUMEN', tldrText: 'Todo lo que haces en esta app —lectura, progreso en planes, preferencias— se guarda solo en tu propio dispositivo. No existe cuenta, no hay servidor guardando tus datos, y nunca vendemos ni compartimos nada. Puedes exportar o borrar todo en cualquier momento desde Más → Privacidad y Datos.',
+        s1Title: 'Qué guarda esta app, y dónde',
+        s1p1: 'La app funciona por completo en tu navegador. Los datos que guarda se almacenan localmente en tu dispositivo, usando dos tecnologías estándar de la web:',
+        s1li1: '<strong>localStorage</strong> — tus preferencias (idioma, tema, tamaño de fuente, versión de la Biblia, el nombre que escribiste) y el progreso guardado en cada plan de lectura.',
+        s1li2: '<strong>IndexedDB</strong> — una caché local del texto bíblico, para abrir capítulos más rápido. El texto en sí ya viene incluido en la app (en sus archivos JavaScript); esta caché es solo una copia de conveniencia, no algo descargado junto con tus datos personales.',
+        s1li3: '<strong>Caché del Service Worker</strong> — los archivos propios de la app (HTML, CSS, JS, íconos), para que funcione sin conexión. Esto tampoco contiene ningún dato personal tuyo.',
+        s1p2: 'Nada de esto se envía jamás a ningún servidor, ni nuestro ni de terceros. Si desinstalas la app o borras los datos del sitio en tu navegador, esta información se elimina junto con ellos, tal como cabría esperar de algo guardado solo en tu propio dispositivo.',
+        s2Title: 'Lo que nunca hacemos',
+        s2li1: 'No creamos una cuenta de usuario ni exigimos inicio de sesión.',
+        s2li2: 'No usamos herramientas de analítica, rastreadores ni píxeles publicitarios.',
+        s2li3: 'No mostramos anuncios.',
+        s2li4: 'No vendemos, alquilamos ni compartimos tus datos con nadie — porque, técnicamente, nunca llegan hasta nosotros.',
+        s2li5: 'No elaboramos perfiles de comportamiento de lectura con fines comerciales.',
+        s3Title: 'Recursos de terceros al abrir esta página',
+        s3p1: 'Para ser transparentes hasta en el detalle: como cualquier sitio web, al cargar esta página tu navegador solicita algunos recursos externos — esto es distinto de tu contenido bíblico, que nunca sale del dispositivo. Los recursos cargados son:',
+        s3li1: '<strong>Google Fonts</strong> — las tipografías Cinzel y EB Garamond, servidas por Google.',
+        s3li2: '<strong>Phosphor Icons (unpkg.com)</strong> — los íconos de la interfaz.',
+        s3li3: '<strong>VLibras (vlibras.gov.br)</strong> — el widget oficial del gobierno brasileño para traducción a Libras, usado por accesibilidad.',
+        s3p2: 'Estos proveedores pueden registrar información técnica estándar de cualquier solicitud web (como la dirección IP), según sus propias políticas — pero ningún dato de tu estudio bíblico (progreso, notas, nombre) se incluye en esas solicitudes.',
+        s4Title: 'Tu control sobre los datos',
+        s4p1: 'Como todo permanece en tu dispositivo, el control también es completamente tuyo. Desde <strong>Más → Privacidad y Datos</strong> puedes:',
+        s4li1: '<strong>Exportar todo</strong> — descargar un archivo con todos tus datos, opcionalmente protegido con contraseña (cifrado AES-256, realizado en el propio dispositivo antes de crear el archivo).',
+        s4li2: '<strong>Importar un respaldo</strong> — restaurar tus datos desde un archivo exportado anteriormente, en cualquier dispositivo.',
+        s4li3: '<strong>Borrar todo</strong> — eliminar permanente e irreversiblemente todas las preferencias y el progreso guardado.',
+        ctaSettings: 'Ir a Privacidad y Datos',
+        s5Title: 'Funcionamiento sin conexión',
+        s5p1: 'La app funciona sin internet después de la primera carga, gracias a un Service Worker que guarda en caché los archivos propios de la aplicación. Esa caché técnica está separada de tus datos personales y puede ser borrada por el navegador sin eliminar tu progreso guardado, y viceversa.',
+        s6Title: 'Privacidad de los niños',
+        s6p1: 'La app no recopila ningún dato de identificación personal de nadie, incluidos los niños, ya que no existe ninguna recopilación de datos en servidor. El nombre mostrado en la pantalla de inicio es opcional, lo define el propio usuario y se guarda solo localmente.',
+        s7Title: 'Cambios a esta política',
+        s7p1: 'Si esta política cambia, la fecha de "última actualización" en la parte superior de esta página se actualizará. Como la app es de código abierto, cualquier cambio también queda visible en el historial del repositorio en GitHub.',
+        s8Title: 'Preguntas o contacto',
+        s8p1: 'Este es un proyecto personal y de código abierto. Si tienes preguntas sobre privacidad o quieres revisar el código fuente, el repositorio está disponible públicamente.',
+        footerNote: 'Bíblia Sagrada — hecha para ser tuya, y solo tuya.',
+        backToApp: 'Volver a la app',
+      }
+    };
+
+    function applyPPLang(lang) {
+      const dict = PP_TRANSLATIONS[lang] || PP_TRANSLATIONS.pt;
+      document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        if (dict[key] !== undefined) el.innerHTML = dict[key];
+      });
+      document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
+      document.title = ({
+        pt: 'Privacidade — Bíblia Sagrada',
+        en: 'Privacy — Holy Bible',
+        es: 'Privacidad — Biblia Sagrada'
+      })[lang] || document.title;
+      document.querySelectorAll('#pp-lang-switch button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+      try { localStorage.setItem('pp_lang', lang); } catch (_) {}
+    }
+
+    function detectInitialLang() {
+      try {
+        const saved = localStorage.getItem('pp_lang');
+        if (saved && PP_TRANSLATIONS[saved]) return saved;
+        const cfg = JSON.parse(localStorage.getItem('bible_config') || '{}');
+        if (cfg.lang && PP_TRANSLATIONS[cfg.lang]) return cfg.lang;
+      } catch (_) {}
+      const nav = (navigator.language || 'pt').slice(0, 2).toLowerCase();
+      return PP_TRANSLATIONS[nav] ? nav : 'pt';
+    }
+
+    document.querySelectorAll('#pp-lang-switch button').forEach(btn => {
+      btn.addEventListener('click', () => applyPPLang(btn.dataset.lang));
+    });
+
+    applyPPLang(detectInitialLang());
+  </script>
+</body>
+
+</html>

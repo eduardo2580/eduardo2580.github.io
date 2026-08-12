@@ -164,6 +164,31 @@ const TRANSLATIONS = {
         chapterWord: 'capítulo',
         chaptersWord: 'capítulos',
         chaptersLabel: 'Capítulos',
+        privacy: {
+            navLabel: 'Privacidade e Dados',
+            heroTitle: 'Seu estudo bíblico pertence a você.',
+            heroDesc: 'Tudo o que você grava aqui — progresso, preferências, notas — fica somente neste dispositivo. Nada é enviado para nenhum servidor.',
+            badgeLocal: '🔒 100% local', badgeNoTrack: '🚫 Sem rastreamento', badgeNoAds: '🚫 Sem anúncios', badgeNoSell: '🚫 Nunca vendemos dados',
+            exportTitle: 'Exportar meus dados', exportDesc: 'Baixe uma cópia de tudo em um arquivo',
+            importTitle: 'Importar backup', importDesc: 'Restaure a partir de um arquivo salvo',
+            deleteTitle: 'Apagar tudo', deleteDesc: 'Remove permanentemente todos os dados deste aparelho',
+            policyLink: 'Ler política de privacidade completa',
+            exportModalTitle: 'Exportar seus dados', exportModalSub: 'Um arquivo com suas preferências e progresso de leitura.',
+            choicePlainTitle: 'Arquivo simples (.json)', choicePlainDesc: 'Legível, fácil de conferir. Guarde em local de confiança.',
+            choiceEncTitle: 'Arquivo protegido por senha', choiceEncDesc: 'Criptografado no seu dispositivo — recomendado se for guardar na nuvem.',
+            passphraseLabel: 'Crie uma senha para este backup', passphraseHint: 'Você vai precisar dela para importar este arquivo depois. Não a perca — não há como recuperá-la.',
+            downloadBtn: 'Baixar arquivo', exportedOk: '✓ Arquivo baixado com sucesso',
+            importModalTitle: 'Importar backup', importModalSub: 'Selecione o arquivo exportado anteriormente.',
+            fileDropLabel: 'Toque para escolher o arquivo', fileChosen: 'Arquivo selecionado',
+            importPassphraseLabel: 'Senha do backup', importBtn: 'Restaurar dados',
+            importedOk: '✓ Dados restaurados. Recarregando…', importInvalid: 'Arquivo inválido ou corrompido.',
+            importWrongPass: 'Senha incorreta. Tente novamente.', importNeedsPass: 'Este arquivo é protegido por senha.',
+            deleteModalTitle: 'Apagar todos os dados?', deleteModalSub: 'Esta ação não pode ser desfeita.',
+            deleteWarning: 'Isso remove permanentemente suas preferências, nome, tema, versão escolhida e todo o progresso salvo em planos de leitura neste dispositivo. Considere exportar antes.',
+            deleteConfirmLabel: 'Digite', deleteConfirmWord: 'APAGAR', deleteConfirmLabelEnd: 'para confirmar',
+            deleteBtn: 'Apagar tudo permanentemente', deletedOk: '✓ Dados apagados. Recarregando…',
+            cancel: 'Cancelar', close: 'Fechar',
+        },
         daily: {
             title: "Leitura Diária",
             planName: "Plano Bíblico Anual",
@@ -295,6 +320,31 @@ const TRANSLATIONS = {
         chapterWord: 'chapter',
         chaptersWord: 'chapters',
         chaptersLabel: 'Chapters',
+        privacy: {
+            navLabel: 'Privacy & Data',
+            heroTitle: 'Your Bible study belongs to you.',
+            heroDesc: 'Everything you save here — progress, preferences, notes — stays on this device only. Nothing is ever sent to a server.',
+            badgeLocal: '🔒 100% local', badgeNoTrack: '🚫 No tracking', badgeNoAds: '🚫 No ads', badgeNoSell: '🚫 We never sell data',
+            exportTitle: 'Export my data', exportDesc: 'Download a copy of everything as a file',
+            importTitle: 'Import backup', importDesc: 'Restore from a previously saved file',
+            deleteTitle: 'Delete everything', deleteDesc: 'Permanently removes all data from this device',
+            policyLink: 'Read the full privacy policy',
+            exportModalTitle: 'Export your data', exportModalSub: 'A file with your preferences and reading progress.',
+            choicePlainTitle: 'Plain file (.json)', choicePlainDesc: 'Readable, easy to inspect. Keep it somewhere you trust.',
+            choiceEncTitle: 'Password-protected file', choiceEncDesc: 'Encrypted on your device — recommended if you\'ll store it in the cloud.',
+            passphraseLabel: 'Create a password for this backup', passphraseHint: 'You\'ll need it to import this file later. Don\'t lose it — it can\'t be recovered.',
+            downloadBtn: 'Download file', exportedOk: '✓ File downloaded successfully',
+            importModalTitle: 'Import backup', importModalSub: 'Choose the file you exported earlier.',
+            fileDropLabel: 'Tap to choose a file', fileChosen: 'File selected',
+            importPassphraseLabel: 'Backup password', importBtn: 'Restore data',
+            importedOk: '✓ Data restored. Reloading…', importInvalid: 'Invalid or corrupted file.',
+            importWrongPass: 'Wrong password. Try again.', importNeedsPass: 'This file is password-protected.',
+            deleteModalTitle: 'Delete all data?', deleteModalSub: 'This action cannot be undone.',
+            deleteWarning: 'This permanently removes your preferences, name, theme, chosen version, and all saved reading-plan progress on this device. Consider exporting first.',
+            deleteConfirmLabel: 'Type', deleteConfirmWord: 'DELETE', deleteConfirmLabelEnd: 'to confirm',
+            deleteBtn: 'Permanently delete everything', deletedOk: '✓ Data deleted. Reloading…',
+            cancel: 'Cancel', close: 'Close',
+        },
         daily: {
             title: "Daily Reading",
             planName: "Annual Bible Plan",
@@ -426,6 +476,31 @@ const TRANSLATIONS = {
         chapterWord: 'capítulo',
         chaptersWord: 'capítulos',
         chaptersLabel: 'Capítulos',
+        privacy: {
+            navLabel: 'Privacidad y Datos',
+            heroTitle: 'Tu estudio bíblico te pertenece.',
+            heroDesc: 'Todo lo que guardas aquí — progreso, preferencias, notas — permanece solo en este dispositivo. Nada se envía jamás a un servidor.',
+            badgeLocal: '🔒 100% local', badgeNoTrack: '🚫 Sin rastreo', badgeNoAds: '🚫 Sin anuncios', badgeNoSell: '🚫 Nunca vendemos datos',
+            exportTitle: 'Exportar mis datos', exportDesc: 'Descarga una copia de todo en un archivo',
+            importTitle: 'Importar respaldo', importDesc: 'Restaura desde un archivo guardado',
+            deleteTitle: 'Borrar todo', deleteDesc: 'Elimina permanentemente todos los datos de este dispositivo',
+            policyLink: 'Leer la política de privacidad completa',
+            exportModalTitle: 'Exportar tus datos', exportModalSub: 'Un archivo con tus preferencias y progreso de lectura.',
+            choicePlainTitle: 'Archivo simple (.json)', choicePlainDesc: 'Legible, fácil de revisar. Guárdalo en un lugar de confianza.',
+            choiceEncTitle: 'Archivo protegido con contraseña', choiceEncDesc: 'Cifrado en tu dispositivo — recomendado si lo guardarás en la nube.',
+            passphraseLabel: 'Crea una contraseña para este respaldo', passphraseHint: 'La necesitarás para importar este archivo después. No la pierdas — no se puede recuperar.',
+            downloadBtn: 'Descargar archivo', exportedOk: '✓ Archivo descargado con éxito',
+            importModalTitle: 'Importar respaldo', importModalSub: 'Selecciona el archivo exportado anteriormente.',
+            fileDropLabel: 'Toca para elegir el archivo', fileChosen: 'Archivo seleccionado',
+            importPassphraseLabel: 'Contraseña del respaldo', importBtn: 'Restaurar datos',
+            importedOk: '✓ Datos restaurados. Recargando…', importInvalid: 'Archivo inválido o corrupto.',
+            importWrongPass: 'Contraseña incorrecta. Intenta de nuevo.', importNeedsPass: 'Este archivo está protegido con contraseña.',
+            deleteModalTitle: '¿Borrar todos los datos?', deleteModalSub: 'Esta acción no se puede deshacer.',
+            deleteWarning: 'Esto elimina permanentemente tus preferencias, nombre, tema, versión elegida y todo el progreso guardado en planes de lectura en este dispositivo. Considera exportar antes.',
+            deleteConfirmLabel: 'Escribe', deleteConfirmWord: 'BORRAR', deleteConfirmLabelEnd: 'para confirmar',
+            deleteBtn: 'Borrar todo permanentemente', deletedOk: '✓ Datos borrados. Recargando…',
+            cancel: 'Cancelar', close: 'Cerrar',
+        },
         daily: {
             title: "Lectura Diaria",
             planName: "Plan Bíblico Anual",
@@ -1391,6 +1466,50 @@ function renderSettings() {
                     <i class="ph ph-books"></i>
                 </div>
             </div>
+
+            <div class="ornament">✦ ✦ ✦</div>
+            <div class="privacy-section">
+                <div class="privacy-hero">
+                    <i class="ph ph-shield-check"></i>
+                    <h3>${window.t('heroTitle', 'privacy')}</h3>
+                    <p>${window.t('heroDesc', 'privacy')}</p>
+                    <div class="privacy-badges">
+                        <span class="privacy-badge">${window.t('badgeLocal', 'privacy')}</span>
+                        <span class="privacy-badge">${window.t('badgeNoTrack', 'privacy')}</span>
+                        <span class="privacy-badge">${window.t('badgeNoAds', 'privacy')}</span>
+                        <span class="privacy-badge">${window.t('badgeNoSell', 'privacy')}</span>
+                    </div>
+                </div>
+                <div class="settings-list" style="padding: 0;">
+                    <div class="settings-item" id="exportDataBtn">
+                        <div>
+                            <div class="settings-label">${window.t('exportTitle', 'privacy')}</div>
+                            <div class="settings-desc">${window.t('exportDesc', 'privacy')}</div>
+                        </div>
+                        <i class="ph ph-download-simple"></i>
+                    </div>
+                    <div class="settings-item" id="importDataBtn">
+                        <div>
+                            <div class="settings-label">${window.t('importTitle', 'privacy')}</div>
+                            <div class="settings-desc">${window.t('importDesc', 'privacy')}</div>
+                        </div>
+                        <i class="ph ph-upload-simple"></i>
+                    </div>
+                    <div class="settings-item danger" id="deleteDataBtn">
+                        <div>
+                            <div class="settings-label">${window.t('deleteTitle', 'privacy')}</div>
+                            <div class="settings-desc">${window.t('deleteDesc', 'privacy')}</div>
+                        </div>
+                        <i class="ph ph-trash"></i>
+                    </div>
+                    <div class="settings-item" id="privacyPolicyBtn">
+                        <div>
+                            <div class="settings-label">${window.t('policyLink', 'privacy')}</div>
+                        </div>
+                        <i class="ph ph-file-text"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 
@@ -1398,6 +1517,13 @@ function renderSettings() {
 
     document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
     document.getElementById('versionToggleBtn')?.addEventListener('click', openVersionModal);
+
+    document.getElementById('exportDataBtn')?.addEventListener('click', openExportModal);
+    document.getElementById('importDataBtn')?.addEventListener('click', openImportModal);
+    document.getElementById('deleteDataBtn')?.addEventListener('click', openDeleteModal);
+    document.getElementById('privacyPolicyBtn')?.addEventListener('click', () => {
+        window.open('privacy.html', '_blank', 'noopener');
+    });
 }
 
 function currentVersionLabel() {
@@ -1492,6 +1618,219 @@ function openVersionModal() {
             overlay.remove();
             if (state.currentView === 'settings') switchView('settings');
         });
+    });
+}
+
+/* ═══════════════════ PRIVACY & DATA MODALS ═══════════════════════ */
+
+function closePrivacyModal(overlay) {
+    overlay?.remove();
+}
+
+function openExportModal() {
+    let overlay = document.getElementById('privacy-export-overlay');
+    if (overlay) overlay.remove();
+
+    let mode = 'plain'; // 'plain' | 'encrypted'
+
+    overlay = document.createElement('div');
+    overlay.id = 'privacy-export-overlay';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="name-modal privacy-modal">
+            <h2>${window.t('exportModalTitle', 'privacy')}</h2>
+            <div class="privacy-modal-sub">${window.t('exportModalSub', 'privacy')}</div>
+            <div class="choice-row">
+                <button type="button" class="privacy-choice active" data-mode="plain">
+                    <i class="ph ph-file-text"></i>
+                    <div><strong>${window.t('choicePlainTitle', 'privacy')}</strong>
+                    <span class="desc">${window.t('choicePlainDesc', 'privacy')}</span></div>
+                </button>
+                <button type="button" class="privacy-choice" data-mode="encrypted">
+                    <i class="ph ph-lock-key"></i>
+                    <div><strong>${window.t('choiceEncTitle', 'privacy')}</strong>
+                    <span class="desc">${window.t('choiceEncDesc', 'privacy')}</span></div>
+                </button>
+            </div>
+            <div id="export-pass-wrap" class="d-none">
+                <label class="settings-label" style="font-size:.85rem;">${window.t('passphraseLabel', 'privacy')}</label>
+                <input type="password" id="export-pass-input" autocomplete="new-password" />
+                <div class="field-hint">${window.t('passphraseHint', 'privacy')}</div>
+            </div>
+            <button type="button" class="primary-btn" id="export-confirm-btn">
+                <i class="ph ph-download-simple"></i> ${window.t('downloadBtn', 'privacy')}
+            </button>
+            <div class="status-msg" id="export-status"></div>
+            <button type="button" class="ghost-btn" id="export-close-btn">${window.t('close', 'privacy')}</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closePrivacyModal(overlay); });
+    overlay.querySelector('#export-close-btn').addEventListener('click', () => closePrivacyModal(overlay));
+
+    const passWrap = overlay.querySelector('#export-pass-wrap');
+    overlay.querySelectorAll('.privacy-choice').forEach(btn => {
+        btn.addEventListener('click', () => {
+            mode = btn.dataset.mode;
+            overlay.querySelectorAll('.privacy-choice').forEach(b => b.classList.toggle('active', b === btn));
+            passWrap.classList.toggle('d-none', mode !== 'encrypted');
+        });
+    });
+
+    overlay.querySelector('#export-confirm-btn').addEventListener('click', async () => {
+        const statusEl = overlay.querySelector('#export-status');
+        const btn = overlay.querySelector('#export-confirm-btn');
+        const passphrase = overlay.querySelector('#export-pass-input')?.value || '';
+
+        if (mode === 'encrypted' && !passphrase.trim()) {
+            statusEl.textContent = window.t('passphraseLabel', 'privacy');
+            statusEl.className = 'status-msg err';
+            return;
+        }
+
+        btn.disabled = true;
+        try {
+            await window.PrivacyManager.exportData(mode === 'encrypted' ? { passphrase } : {});
+            statusEl.textContent = window.t('exportedOk', 'privacy');
+            statusEl.className = 'status-msg ok';
+        } catch (err) {
+            statusEl.textContent = String(err?.message || err);
+            statusEl.className = 'status-msg err';
+        } finally {
+            btn.disabled = false;
+        }
+    });
+}
+
+function openImportModal() {
+    let overlay = document.getElementById('privacy-import-overlay');
+    if (overlay) overlay.remove();
+
+    let chosenFile = null;
+
+    overlay = document.createElement('div');
+    overlay.id = 'privacy-import-overlay';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="name-modal privacy-modal">
+            <h2>${window.t('importModalTitle', 'privacy')}</h2>
+            <div class="privacy-modal-sub">${window.t('importModalSub', 'privacy')}</div>
+            <div class="file-drop" id="import-file-drop">
+                <i class="ph ph-file-arrow-up"></i>
+                <span id="import-file-label">${window.t('fileDropLabel', 'privacy')}</span>
+            </div>
+            <input type="file" id="import-file-input" accept=".json,application/json" class="d-none" />
+            <div id="import-pass-wrap" class="d-none">
+                <label class="settings-label" style="font-size:.85rem;">${window.t('importPassphraseLabel', 'privacy')}</label>
+                <input type="password" id="import-pass-input" autocomplete="current-password" />
+            </div>
+            <button type="button" class="primary-btn" id="import-confirm-btn" disabled>
+                <i class="ph ph-upload-simple"></i> ${window.t('importBtn', 'privacy')}
+            </button>
+            <div class="status-msg" id="import-status"></div>
+            <button type="button" class="ghost-btn" id="import-close-btn">${window.t('close', 'privacy')}</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closePrivacyModal(overlay); });
+    overlay.querySelector('#import-close-btn').addEventListener('click', () => closePrivacyModal(overlay));
+
+    const fileInput = overlay.querySelector('#import-file-input');
+    const fileDrop = overlay.querySelector('#import-file-drop');
+    const fileLabel = overlay.querySelector('#import-file-label');
+    const confirmBtn = overlay.querySelector('#import-confirm-btn');
+    const passWrap = overlay.querySelector('#import-pass-wrap');
+    const statusEl = overlay.querySelector('#import-status');
+
+    fileDrop.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files?.[0];
+        if (!file) return;
+        chosenFile = file;
+        fileLabel.textContent = `${window.t('fileChosen', 'privacy')}: ${file.name}`;
+        fileDrop.classList.add('has-file');
+        confirmBtn.disabled = false;
+        statusEl.textContent = '';
+        // Guess if it needs a passphrase, but let the actual import attempt decide.
+        passWrap.classList.remove('d-none');
+    });
+
+    confirmBtn.addEventListener('click', async () => {
+        if (!chosenFile) return;
+        confirmBtn.disabled = true;
+        statusEl.className = 'status-msg';
+        statusEl.textContent = '';
+        try {
+            const text = await chosenFile.text();
+            const passphrase = overlay.querySelector('#import-pass-input')?.value || '';
+            const result = await window.PrivacyManager.importData(text, passphrase);
+            statusEl.textContent = window.t('importedOk', 'privacy');
+            statusEl.className = 'status-msg ok';
+            setTimeout(() => window.location.reload(), 900);
+        } catch (err) {
+            let msg = window.t('importInvalid', 'privacy');
+            if (err?.code === 'NEEDS_PASSPHRASE') msg = window.t('importNeedsPass', 'privacy');
+            else if (err?.code === 'WRONG_PASSPHRASE') msg = window.t('importWrongPass', 'privacy');
+            statusEl.textContent = msg;
+            statusEl.className = 'status-msg err';
+            confirmBtn.disabled = false;
+        }
+    });
+}
+
+function openDeleteModal() {
+    let overlay = document.getElementById('privacy-delete-overlay');
+    if (overlay) overlay.remove();
+
+    overlay = document.createElement('div');
+    overlay.id = 'privacy-delete-overlay';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="name-modal privacy-modal">
+            <h2>${window.t('deleteModalTitle', 'privacy')}</h2>
+            <div class="privacy-modal-sub">${window.t('deleteModalSub', 'privacy')}</div>
+            <div class="danger-warning">${window.t('deleteWarning', 'privacy')}</div>
+            <label class="settings-label" style="font-size:.85rem;">
+                ${window.t('deleteConfirmLabel', 'privacy')}
+                <span class="confirm-type">${window.t('deleteConfirmWord', 'privacy')}</span>
+                ${window.t('deleteConfirmLabelEnd', 'privacy')}
+            </label>
+            <input type="text" id="delete-confirm-input" autocomplete="off" />
+            <button type="button" class="primary-btn danger-btn" id="delete-confirm-btn" disabled>
+                <i class="ph ph-trash"></i> ${window.t('deleteBtn', 'privacy')}
+            </button>
+            <div class="status-msg" id="delete-status"></div>
+            <button type="button" class="ghost-btn" id="delete-close-btn">${window.t('cancel', 'privacy')}</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closePrivacyModal(overlay); });
+    overlay.querySelector('#delete-close-btn').addEventListener('click', () => closePrivacyModal(overlay));
+
+    const input = overlay.querySelector('#delete-confirm-input');
+    const confirmBtn = overlay.querySelector('#delete-confirm-btn');
+    const expectedWord = window.t('deleteConfirmWord', 'privacy');
+
+    input.addEventListener('input', () => {
+        confirmBtn.disabled = input.value.trim().toUpperCase() !== expectedWord.toUpperCase();
+    });
+
+    confirmBtn.addEventListener('click', async () => {
+        confirmBtn.disabled = true;
+        const statusEl = overlay.querySelector('#delete-status');
+        try {
+            await window.PrivacyManager.deleteEverything();
+            statusEl.textContent = window.t('deletedOk', 'privacy');
+            statusEl.className = 'status-msg ok';
+            setTimeout(() => window.location.reload(), 900);
+        } catch (err) {
+            statusEl.textContent = String(err?.message || err);
+            statusEl.className = 'status-msg err';
+            confirmBtn.disabled = false;
+        }
     });
 }
 

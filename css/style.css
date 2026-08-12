@@ -980,3 +980,204 @@ body.dark-theme {
     scroll-behavior: auto !important;
   }
 }
+
+/* =========================================
+   PRIVACIDADE E DADOS
+   ========================================= */
+.privacy-section {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+}
+.privacy-hero {
+    background: var(--white-alpha);
+    border: 1.5px solid var(--gold-dark);
+    border-radius: 14px;
+    padding: 1.4rem 1.3rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+.privacy-hero i {
+    font-size: 1.8rem;
+    color: var(--gold-dark);
+}
+.privacy-hero h3 {
+    font-family: 'Cinzel', serif;
+    color: var(--red-bible);
+    font-size: 1.05rem;
+    margin: .5rem 0 .4rem 0;
+}
+.privacy-hero p {
+    color: var(--ink-soft);
+    font-size: .92rem;
+    line-height: 1.55;
+    margin: 0;
+}
+.privacy-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+.privacy-badge {
+    font-family: 'Cinzel', serif;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    color: var(--gold-dark);
+    background: rgba(201,169,110,0.15);
+    border: 1px solid rgba(201,169,110,0.4);
+    border-radius: 20px;
+    padding: .35rem .7rem;
+    white-space: nowrap;
+}
+.settings-item.danger {
+    border-color: var(--red-bible);
+}
+.settings-item.danger i,
+.settings-item.danger .settings-label {
+    color: var(--red-bible);
+}
+.settings-item .settings-desc {
+    font-size: .85rem;
+    opacity: .65;
+    margin-top: .15rem;
+    font-family: 'EB Garamond', serif;
+}
+
+/* --- Modal shared bits for privacy actions --- */
+.privacy-modal {
+    max-width: 440px;
+    text-align: left;
+}
+.privacy-modal h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--red-bible);
+    text-align: center;
+    font-size: 1.15rem;
+    margin-bottom: .3rem;
+}
+.privacy-modal .privacy-modal-sub {
+    text-align: center;
+    font-size: .88rem;
+    opacity: .7;
+    margin-bottom: 1.2rem;
+}
+.privacy-modal .choice-row {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+.privacy-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    width: 100%;
+    text-align: left;
+    padding: .9rem 1rem;
+    border-radius: 12px;
+    border: 1.5px solid var(--gold-dark);
+    background: var(--white-alpha);
+    cursor: pointer;
+    color: var(--ink);
+    font-family: 'EB Garamond', serif;
+    transition: all .2s;
+}
+.privacy-choice i:first-child { font-size: 1.3rem; color: var(--gold-dark); margin-top: .1rem; }
+.privacy-choice strong { font-family: 'Cinzel', serif; font-size: .85rem; display: block; margin-bottom: .15rem; color: var(--ink); }
+.privacy-choice span.desc { font-size: .82rem; opacity: .7; }
+.privacy-choice.active { background: rgba(201,169,110,0.22); border-color: var(--gold); }
+.privacy-modal input[type="password"],
+.privacy-modal input[type="text"] {
+    width: 100%;
+    padding: .8rem 1rem;
+    border-radius: 10px;
+    border: 2px solid var(--gold-dark);
+    background: white;
+    font-family: 'EB Garamond', serif;
+    font-size: 1rem;
+    margin: .6rem 0;
+}
+body.dark-theme .privacy-modal input[type="password"],
+body.dark-theme .privacy-modal input[type="text"] {
+    background: var(--parchment-d);
+    color: var(--ink);
+}
+.privacy-modal .field-hint {
+    font-size: .78rem;
+    opacity: .6;
+    margin: -.3rem 0 .8rem 0;
+}
+.privacy-modal .field-error {
+    font-size: .82rem;
+    color: var(--red-bible);
+    margin: -.3rem 0 .8rem 0;
+    display: none;
+}
+.privacy-modal .field-error.show { display: block; }
+.privacy-modal .primary-btn {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 10px;
+    background: var(--gold-dark);
+    color: white;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+}
+.privacy-modal .primary-btn:hover { background: var(--gold); }
+.privacy-modal .primary-btn:disabled { opacity: .5; cursor: not-allowed; }
+.privacy-modal .primary-btn.danger-btn { background: var(--red-bible); }
+.privacy-modal .primary-btn.danger-btn:hover { background: #a83232; }
+.privacy-modal .ghost-btn {
+    width: 100%;
+    padding: .8rem;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: 'EB Garamond', serif;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    font-size: .95rem;
+    margin-top: .5rem;
+}
+.privacy-modal .ghost-btn:hover { text-decoration: underline; }
+.privacy-modal .file-drop {
+    border: 2px dashed var(--gold-dark);
+    border-radius: 12px;
+    padding: 1.6rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    color: var(--ink-soft);
+    font-size: .9rem;
+}
+.privacy-modal .file-drop i { font-size: 1.6rem; color: var(--gold-dark); display: block; margin-bottom: .4rem; }
+.privacy-modal .file-drop.has-file { border-style: solid; }
+.privacy-modal .status-msg {
+    text-align: center;
+    font-size: .88rem;
+    margin-top: .8rem;
+    min-height: 1.2em;
+}
+.privacy-modal .status-msg.ok { color: #2f7a3d; }
+body.dark-theme .privacy-modal .status-msg.ok { color: #6fd07f; }
+.privacy-modal .status-msg.err { color: var(--red-bible); }
+.privacy-modal .danger-warning {
+    background: rgba(139,26,26,0.08);
+    border: 1px solid rgba(139,26,26,0.3);
+    border-radius: 10px;
+    padding: .9rem 1rem;
+    font-size: .88rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+}
+.privacy-modal .confirm-type {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    color: var(--red-bible);
+}
