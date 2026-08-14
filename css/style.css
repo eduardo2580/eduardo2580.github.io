@@ -1399,3 +1399,105 @@ body.dark-theme .quiz-mastery-bar { background: rgba(255,255,255,.08); }
     .quiz-results-actions { flex-direction: row; gap: .7rem; }
     .quiz-results-actions button { margin-bottom: 0; }
 }
+
+/* =========================================
+   MEMORIZAÇÃO DE VERSÍCULOS
+   ========================================= */
+.mem-app { padding: 0 1.2rem 1rem; max-width: 640px; margin: 0 auto; }
+.mem-header { text-align: center; margin-bottom: 1.2rem; }
+.mem-header .ornament { color: var(--gold-dark); font-size: 1.2rem; margin-bottom: .2rem; }
+.mem-tagline { color: var(--ink-soft); font-style: italic; margin-top: .2rem; font-size: .95rem; text-align: center; }
+
+.mem-stats-row { display: flex; gap: .7rem; margin-bottom: 1.2rem; }
+.mem-stat-chip {
+    flex: 1; text-align: center; background: var(--white-alpha);
+    border-radius: 14px; padding: .7rem .4rem; display: flex; flex-direction: column; align-items: center; gap: .15rem;
+}
+.mem-stat-chip i { color: var(--gold-dark); font-size: 1.1rem; }
+.mem-stat-chip span { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.05rem; }
+.mem-stat-chip small { color: var(--ink-soft); font-size: .68rem; text-transform: uppercase; letter-spacing: .03em; }
+
+.mem-tile-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1rem; }
+.mem-verse-tile {
+    display: flex; align-items: center; gap: .9rem;
+    background: var(--parchment-d); border: 1px solid rgba(201,169,110,.3);
+    border-radius: 16px; padding: .8rem 1rem; cursor: pointer; transition: transform .15s, border-color .15s;
+}
+.mem-verse-tile:hover { transform: translateY(-2px); border-color: var(--gold-dark); }
+.mem-verse-tile.mastered { border-color: var(--gold); background: rgba(201,169,110,.12); }
+.mem-tile-icon {
+    flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--white-alpha); color: var(--gold-dark); font-size: 1.25rem;
+}
+.mem-verse-tile.mastered .mem-tile-icon { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #fff; }
+.mem-tile-body { flex: 1; min-width: 0; }
+.mem-tile-ref { font-family: 'Cinzel', serif; font-weight: 700; font-size: .88rem; color: var(--ink); }
+.mem-tile-title { font-size: .78rem; color: var(--ink-soft); margin: .1rem 0 .4rem; font-style: italic; }
+.mem-tile-dots { display: flex; gap: .25rem; }
+.mem-mini-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(0,0,0,.12); }
+body.dark-theme .mem-mini-dot { background: rgba(255,255,255,.14); }
+.mem-mini-dot.filled { background: var(--gold-dark); }
+.mem-tile-status { flex: 0 0 auto; font-family: 'Cinzel', serif; font-weight: 700; color: var(--gold-dark); font-size: .95rem; }
+.mem-verse-tile.mastered .mem-tile-status { color: var(--gold-dark); font-size: 1.3rem; }
+
+/* --- Prática --- */
+.mem-practice-header { text-align: center; margin-bottom: .8rem; }
+.mem-ref { font-family: 'Cinzel', serif; font-weight: 800; font-size: 1.2rem; color: var(--red-bible); }
+.mem-title { font-size: .85rem; color: var(--ink-soft); font-style: italic; margin-top: .15rem; }
+
+.mem-stage-row { display: flex; flex-direction: column; align-items: center; gap: .4rem; margin-bottom: 1rem; }
+.mem-stage-dots { display: flex; gap: .4rem; }
+.mem-stage-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(0,0,0,.1); border: 1px solid transparent; }
+body.dark-theme .mem-stage-dot { background: rgba(255,255,255,.12); }
+.mem-stage-dot.filled { background: var(--gold-dark); }
+.mem-stage-dot.current { border-color: var(--red-bible); transform: scale(1.25); }
+.mem-stage-label { font-size: .75rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .04em; font-family: 'Cinzel', serif; font-weight: 700; }
+
+.mem-verse-card { margin-bottom: 1rem; }
+.mem-verse { cursor: default; }
+.mem-verse-text { word-spacing: .05em; }
+.mem-word-revealed { color: var(--red-bible); font-weight: 600; }
+.mem-blank {
+    display: inline-block; cursor: pointer; border-bottom: 2px solid var(--gold-dark);
+    margin: 0 .1rem; min-width: 1.4em; text-align: center; transition: border-color .15s;
+}
+.mem-blank:hover { border-color: var(--red-bible); background: rgba(139,26,26,.08); border-radius: 4px 4px 0 0; }
+
+.mem-controls { display: flex; gap: .5rem; margin-bottom: 1rem; }
+.mem-btn {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: .4rem;
+    border: none; border-radius: 14px; padding: .8rem .5rem;
+    font-family: 'Cinzel', serif; font-weight: 700; font-size: .78rem; letter-spacing: .01em;
+    cursor: pointer; transition: transform .15s, opacity .2s;
+}
+.mem-btn:hover:not([disabled]) { transform: translateY(-2px); }
+.mem-btn[disabled] { opacity: .35; cursor: not-allowed; }
+.mem-btn-primary { background: linear-gradient(135deg, var(--red-bible), #a83232); color: #fff; }
+.mem-btn-ghost { background: var(--white-alpha); color: var(--ink); border: 1px solid var(--gold-dark); }
+
+.mem-recite-panel {
+    background: var(--white-alpha); border: 1px solid rgba(201,169,110,.4);
+    border-radius: 16px; padding: 1.1rem; margin-bottom: 1rem;
+}
+.mem-recite-title { font-family: 'Cinzel', serif; font-weight: 700; display: flex; align-items: center; gap: .4rem; color: var(--gold-dark); margin-bottom: .3rem; }
+.mem-recite-desc { font-size: .82rem; color: var(--ink-soft); margin-bottom: .7rem; }
+.mem-recite-textarea {
+    width: 100%; min-height: 90px; resize: vertical; border-radius: 10px;
+    border: 1.5px solid var(--gold-dark); background: var(--parchment); color: var(--ink);
+    font-family: 'EB Garamond', serif; font-size: 1rem; padding: .7rem .8rem; margin-bottom: .7rem;
+}
+.mem-recite-best { font-size: .75rem; color: var(--ink-soft); text-align: center; margin-top: .5rem; }
+.mem-recite-score { font-family: 'Cinzel', serif; font-weight: 800; font-size: 1.4rem; text-align: center; margin-top: 1rem; }
+.mem-recite-score.good { color: #2e7d32; }
+.mem-recite-score.ok { color: var(--gold-dark); }
+.mem-recite-score.low { color: var(--red-bible); }
+.mem-recite-mastered { text-align: center; font-family: 'Cinzel', serif; font-weight: 700; color: var(--gold-dark); display: flex; align-items: center; justify-content: center; gap: .4rem; margin: .4rem 0; }
+.mem-recite-hint { text-align: center; font-size: .82rem; color: var(--ink-soft); margin: .4rem 0; }
+.mem-recall-review { margin-top: .8rem; }
+.mem-recall-correct { color: #2e7d32; font-weight: 600; }
+.mem-recall-missed { color: var(--red-bible); text-decoration: line-through; opacity: .7; }
+
+@media (min-width: 600px) {
+    .mem-controls { gap: .8rem; }
+}

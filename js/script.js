@@ -733,6 +733,9 @@ function switchView(viewName, params = {}) {
         case 'quiz':
             window.openQuizDashboard?.();
             break;
+        case 'memorize':
+            window.openMemorizeDashboard?.();
+            break;
         case 'bible6':
         case 'nt90':
         case 'prov31':
@@ -1229,6 +1232,10 @@ function renderHome() {
                     <div class="action-item" onclick="switchView('quiz')">
                         <div class="action-circle"><i class="ph ph-trophy"></i></div>
                         <span class="action-label">QUIZ</span>
+                    </div>
+                    <div class="action-item" onclick="switchView('memorize')">
+                        <div class="action-circle"><i class="ph ph-brain"></i></div>
+                        <span class="action-label">MEMORIZAR</span>
                     </div>
                 </div>
             </div>
