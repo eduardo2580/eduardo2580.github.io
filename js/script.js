@@ -84,12 +84,44 @@ const BIBLE_VERSIONS = [
     { id: 'ara', abbr: 'ARA', name: 'Almeida Revisada Atualizada' },
     { id: 'acf', abbr: 'ACF', name: 'Almeida Corrigida e Fiel' },
     { id: 'nvi', abbr: 'NVI', name: 'Nova Versão Internacional' },
+    { id: 'ar_svd', abbr: 'SVD', name: 'The Arabic Bible (Arabic)' },
+    { id: 'zh_cuv', abbr: 'CUV', name: 'Chinese Union Version (Chinese)' },
+    { id: 'zh_ncv', abbr: 'NCV', name: 'New Chinese Version (Chinese)' },
+    { id: 'de_schlachter', abbr: 'SCH', name: 'Schlachter (German)' },
+    { id: 'el_greek', abbr: 'MGR', name: 'Modern Greek (Greek)' },
+    { id: 'en_bbe', abbr: 'BBE', name: 'Basic English (English)' },
+    { id: 'en_kjv', abbr: 'KJV', name: 'King James Version (English)' },
+    { id: 'eo_esperanto', abbr: 'ESP', name: 'Esperanto (Esperanto)' },
+    { id: 'es_rvr', abbr: 'RVR', name: 'Reina Valera (Spanish)' },
+    { id: 'fi_finnish', abbr: 'FIN', name: 'Finnish Bible (Finnish)' },
+    { id: 'fi_pr', abbr: 'PR', name: 'Pyhä Raamattu (Finnish)' },
+    { id: 'fr_apee', abbr: 'APEE', name: "Le Bible de l'Épée (French)" },
+    { id: 'ko_ko', abbr: 'KOR', name: 'Korean Version (Korean)' },
+    { id: 'ro_cornilescu', abbr: 'VDC', name: 'Versiunea Dumitru Cornilescu (Romanian)' },
+    { id: 'ru_synodal', abbr: 'RST', name: 'Синодальный перевод (Russian)' },
+    { id: 'vi_vietnamese', abbr: 'VIE', name: 'Tiếng Việt (Vietnamese)' },
 ];
 
 function getBibleData(versionId) {
     switch (versionId) {
         case 'acf': return window.BIBLE_DATA_ACF;
         case 'nvi': return window.BIBLE_DATA_NVI;
+        case 'ar_svd': return window.BIBLE_DATA_AR_SVD;
+        case 'zh_cuv': return window.BIBLE_DATA_ZH_CUV;
+        case 'zh_ncv': return window.BIBLE_DATA_ZH_NCV;
+        case 'de_schlachter': return window.BIBLE_DATA_DE_SCHLACHTER;
+        case 'el_greek': return window.BIBLE_DATA_EL_GREEK;
+        case 'en_bbe': return window.BIBLE_DATA_EN_BBE;
+        case 'en_kjv': return window.BIBLE_DATA_EN_KJV;
+        case 'eo_esperanto': return window.BIBLE_DATA_EO_ESPERANTO;
+        case 'es_rvr': return window.BIBLE_DATA_ES_RVR;
+        case 'fi_finnish': return window.BIBLE_DATA_FI_FINNISH;
+        case 'fi_pr': return window.BIBLE_DATA_FI_PR;
+        case 'fr_apee': return window.BIBLE_DATA_FR_APEE;
+        case 'ko_ko': return window.BIBLE_DATA_KO_KO;
+        case 'ro_cornilescu': return window.BIBLE_DATA_RO_CORNILESCU;
+        case 'ru_synodal': return window.BIBLE_DATA_RU_SYNODAL;
+        case 'vi_vietnamese': return window.BIBLE_DATA_VI_VIETNAMESE;
         case 'ara':
         default: return window.BIBLE_DATA;
     }
@@ -612,7 +644,7 @@ window.state = {
     lang: savedConfig.lang || 'pt',
     userName: savedConfig.userName || '',
     theme: savedConfig.theme || 'light',
-    version: savedConfig.version || 'ara',
+    version: savedConfig.version || 'nvi',
     currentView: 'home'
 };
 const state = window.state;
