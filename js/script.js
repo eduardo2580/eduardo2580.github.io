@@ -3556,27 +3556,212 @@ function toggleTheme() {
     if (state.currentView === 'settings') renderSettings();
 }
 
-/* ════════════════════════ PROFILE ══════════════════════════ */
+/* ════════════════════════ PROFILE / SETUP WIZARD ══════════════════════════ */
+const SETUP_STEPS = ['lang', 'version', 'name', 'theme'];
+let setupStepIndex = 0;
+let setupDraft = { lang: 'pt', version: 'nvi', name: '', theme: 'light' };
+
+const SETUP_TEXT = {
+    pt: {
+        title: ['Idioma preferido', 'Versão da Bíblia', 'Como podemos te chamar?', 'Aparência'],
+        subtitle: [
+            'Escolha o idioma do aplicativo',
+            'Escolha sua versão preferida da Bíblia',
+            'Digite o nome que você gostaria de usar',
+            'Escolha entre o tema claro ou escuro'
+        ],
+        back: 'Voltar', next: 'Próximo', finish: 'Começar',
+        namePlaceholder: 'Seu nome', light: 'Claro', dark: 'Escuro'
+    },
+    en: {
+        title: ['Preferred language', 'Bible version', 'What should we call you?', 'Appearance'],
+        subtitle: [
+            'Choose the app language',
+            'Choose your preferred Bible version',
+            'Type the name you would like to use',
+            'Choose light or dark theme'
+        ],
+        back: 'Back', next: 'Next', finish: 'Get started',
+        namePlaceholder: 'Your name', light: 'Light', dark: 'Dark'
+    },
+    es: {
+        title: ['Idioma preferido', 'Versión de la Biblia', '¿Cómo te llamamos?', 'Apariencia'],
+        subtitle: [
+            'Elige el idioma de la aplicación',
+            'Elige tu versión preferida de la Biblia',
+            'Escribe el nombre que te gustaría usar',
+            'Elige el tema claro u oscuro'
+        ],
+        back: 'Atrás', next: 'Siguiente', finish: 'Comenzar',
+        namePlaceholder: 'Tu nombre', light: 'Claro', dark: 'Oscuro'
+    }
+};
+
+function setupText() {
+    return SETUP_TEXT[setupDraft.lang] || SETUP_TEXT.en;
+}
+
+function openSetupWizard() {
+    setupStepIndex = 0;
+    setupDraft = {
+        lang: state.lang || 'pt',
+        version: state.version || 'nvi',
+        name: state.userName || '',
+        theme: state.theme || 'light'
+    };
+    document.getElementById('name-modal-overlay')?.classList.remove('d-none');
+    renderSetupStep();
+}
+
 function checkProfile() {
     if (!state.userName) {
-        document.getElementById('name-modal-overlay')?.classList.remove('d-none');
+        openSetupWizard();
     }
 }
 
-function saveProfile() {
-    const input = document.getElementById('user-name-input');
-    const name = input.value.trim();
-    if (name) {
-        state.userName = name;
-        saveConfig();
-        document.getElementById('name-modal-overlay').classList.add('d-none');
-        renderTopBar();
-        if (state.currentView === 'home') renderHome();
-        if (state.currentView === 'settings') renderSettings();
-    } else {
-        input.focus();
-        input.style.borderColor = 'var(--red-bible)';
+function renderSetupStepbar() {
+    const bar = document.getElementById('setup-stepbar');
+    if (!bar) return;
+    bar.innerHTML = SETUP_STEPS.map((s, i) => `
+        <div class="setup-step-dot-wrap">
+            <div class="setup-step-dot${i === setupStepIndex ? ' active' : ''}${i < setupStepIndex ? ' done' : ''}">
+                ${i < setupStepIndex ? '<i class="ph ph-check"></i>' : (i + 1)}
+            </div>
+            ${i < SETUP_STEPS.length - 1 ? `<div class="setup-step-line${i < setupStepIndex ? ' done' : ''}"></div>` : ''}
+        </div>
+    `).join('');
+}
+
+function renderSetupStep() {
+    renderSetupStepbar();
+    const t = setupText();
+    const step = SETUP_STEPS[setupStepIndex];
+    const content = document.getElementById('setup-step-content');
+    if (!content) return;
+
+    let html = `<h2>${t.title[setupStepIndex]}</h2><p class="setup-subtitle">${t.subtitle[setupStepIndex]}</p>`;
+
+    if (step === 'lang') {
+        html += `<div class="version-option-list setup-scroll">
+            ${LANGUAGES.map(l => `
+                <button type="button" class="version-option${l.id === setupDraft.lang ? ' active' : ''}" data-lang="${l.id}">
+                    <span class="version-abbr">${l.abbr}</span>
+                    <span class="version-name">${l.name}</span>
+                    <i class="ph ${l.id === setupDraft.lang ? 'ph-fill ph-check-circle' : 'ph-circle'}"></i>
+                </button>
+            `).join('')}
+        </div>`;
+    } else if (step === 'version') {
+        html += `<div class="version-option-list setup-scroll">
+            ${BIBLE_VERSIONS.map(v => `
+                <button type="button" class="version-option${v.id === setupDraft.version ? ' active' : ''}" data-version="${v.id}">
+                    <span class="version-abbr">${v.abbr}</span>
+                    <span class="version-name">${v.name}</span>
+                    <i class="ph ${v.id === setupDraft.version ? 'ph-fill ph-check-circle' : 'ph-circle'}"></i>
+                </button>
+            `).join('')}
+        </div>`;
+    } else if (step === 'name') {
+        html += `<input type="text" id="user-name-input" class="setup-name-input" placeholder="${t.namePlaceholder}" value="${setupDraft.name.replace(/"/g, '&quot;')}" autofocus>`;
+    } else if (step === 'theme') {
+        html += `<div class="setup-theme-options">
+            <button type="button" class="setup-theme-option${setupDraft.theme === 'light' ? ' active' : ''}" data-theme="light">
+                <i class="ph ph-sun"></i><span>${t.light}</span>
+            </button>
+            <button type="button" class="setup-theme-option${setupDraft.theme === 'dark' ? ' active' : ''}" data-theme="dark">
+                <i class="ph ph-moon"></i><span>${t.dark}</span>
+            </button>
+        </div>`;
     }
+
+    content.innerHTML = html;
+
+    if (step === 'lang') {
+        content.querySelectorAll('[data-lang]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setupDraft.lang = btn.dataset.lang;
+                renderSetupStep();
+            });
+        });
+    } else if (step === 'version') {
+        content.querySelectorAll('[data-version]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setupDraft.version = btn.dataset.version;
+                renderSetupStep();
+            });
+        });
+    } else if (step === 'name') {
+        const input = document.getElementById('user-name-input');
+        input?.addEventListener('input', () => {
+            setupDraft.name = input.value;
+            updateSetupNav();
+        });
+        input?.addEventListener('keypress', e => {
+            if (e.key === 'Enter') goSetupNext();
+        });
+    } else if (step === 'theme') {
+        content.querySelectorAll('[data-theme]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setupDraft.theme = btn.dataset.theme;
+                renderSetupStep();
+            });
+        });
+    }
+
+    updateSetupNav();
+}
+
+function updateSetupNav() {
+    const t = setupText();
+    const backBtn = document.getElementById('setup-back-btn');
+    const nextBtn = document.getElementById('setup-next-btn');
+    if (!backBtn || !nextBtn) return;
+
+    backBtn.style.visibility = setupStepIndex === 0 ? 'hidden' : 'visible';
+    backBtn.textContent = t.back;
+
+    const isLast = setupStepIndex === SETUP_STEPS.length - 1;
+    nextBtn.textContent = isLast ? t.finish : t.next;
+
+    const valid = SETUP_STEPS[setupStepIndex] !== 'name' || !!setupDraft.name.trim();
+    nextBtn.disabled = !valid;
+}
+
+function goSetupBack() {
+    if (setupStepIndex > 0) {
+        setupStepIndex--;
+        renderSetupStep();
+    }
+}
+
+function goSetupNext() {
+    const step = SETUP_STEPS[setupStepIndex];
+    if (step === 'name' && !setupDraft.name.trim()) {
+        const input = document.getElementById('user-name-input');
+        input?.focus();
+        if (input) input.style.borderColor = 'var(--red-bible)';
+        return;
+    }
+    if (setupStepIndex < SETUP_STEPS.length - 1) {
+        setupStepIndex++;
+        renderSetupStep();
+    } else {
+        finishSetup();
+    }
+}
+
+function finishSetup() {
+    state.lang = setupDraft.lang;
+    state.version = setupDraft.version;
+    state.userName = setupDraft.name.trim();
+    state.theme = setupDraft.theme;
+    saveConfig();
+    window.applyDocumentDirection(state.lang);
+    applyTheme();
+    document.getElementById('name-modal-overlay')?.classList.add('d-none');
+    renderTopBar();
+    if (state.currentView === 'home') renderHome();
+    if (state.currentView === 'settings') renderSettings();
 }
 
 /* ════════════════════════ SEARCH ════════════════════════════ */
@@ -4205,7 +4390,7 @@ function renderSettings() {
             <h1 class="bible-heading">${window.t('settings')}</h1>
             <div class="ornament">✦ ✦ ✦</div>
             <div class="settings-list">
-                <div class="settings-item" onclick="document.getElementById('name-modal-overlay').classList.remove('d-none')">
+                <div class="settings-item" onclick="openSetupWizard()">
                     <div>
                         <div class="settings-label">${window.t('username')}</div>
                         <div style="font-size: 0.9rem; opacity: 0.6">${state.userName}</div>
@@ -4689,11 +4874,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         btn.addEventListener('click', () => switchView(btn.dataset.view));
     });
 
-    // Profile Modal
-    document.getElementById('save-name-btn')?.addEventListener('click', saveProfile);
-    document.getElementById('user-name-input')?.addEventListener('keypress', e => {
-        if (e.key === 'Enter') saveProfile();
-    });
+    // Setup Wizard Modal
+    document.getElementById('setup-back-btn')?.addEventListener('click', goSetupBack);
+    document.getElementById('setup-next-btn')?.addEventListener('click', goSetupNext);
 
     // Scroll to Top
     const scrollBtn = document.getElementById('scrollTop');

@@ -620,6 +620,154 @@ body.dark-theme {
 }
 .name-modal button:hover { background: var(--gold); }
 
+/* --- ASSISTENTE DE CONFIGURAÇÃO INICIAL (idioma / versão / nome / tema) --- */
+.setup-modal {
+    max-width: 440px;
+    max-height: min(85vh, 660px);
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+.setup-stepbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 1.4rem;
+}
+.setup-step-dot-wrap {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+.setup-step-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--gold-dark);
+    background: var(--white-alpha);
+    border: 2px solid var(--gold-dark);
+    transition: background 0.25s, border-color 0.25s, color 0.25s;
+    flex-shrink: 0;
+}
+.setup-step-dot.active {
+    background: var(--gold-dark);
+    border-color: var(--gold-dark);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(180,130,60,0.22);
+}
+.setup-step-dot.done {
+    background: var(--red-bible);
+    border-color: var(--red-bible);
+    color: #fff;
+}
+.setup-step-dot.done i { font-size: 0.9rem; }
+.setup-step-line {
+    width: 26px;
+    height: 2px;
+    background: var(--gold-dark);
+    opacity: 0.35;
+    margin: 0 4px;
+    transition: opacity 0.25s, background 0.25s;
+}
+.setup-step-line.done { background: var(--red-bible); opacity: 0.7; }
+
+#setup-step-content {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-right: 0.2rem;
+}
+#setup-step-content h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--red-bible);
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 0.4rem;
+}
+.setup-subtitle {
+    text-align: center;
+    font-size: 0.92rem;
+    opacity: 0.75;
+    margin-bottom: 1.2rem;
+}
+.setup-scroll {
+    max-height: min(48vh, 360px);
+}
+.setup-name-input {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 2px solid var(--gold-dark);
+    background: white;
+    font-family: 'EB Garamond', serif;
+    font-size: 1.2rem;
+    text-align: center;
+}
+.setup-theme-options {
+    display: flex;
+    gap: 1rem;
+}
+.setup-theme-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.4rem 1rem;
+    border-radius: 14px;
+    border: 1.5px solid var(--gold-dark);
+    background: var(--white-alpha);
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    transition: background 0.2s, border-color 0.2s;
+}
+.setup-theme-option i { font-size: 1.8rem; color: var(--gold-dark); }
+.setup-theme-option:hover { background: var(--gold); }
+.setup-theme-option.active { border-color: var(--red-bible); border-width: 2px; }
+.setup-theme-option.active i { color: var(--red-bible); }
+
+.setup-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1.4rem;
+    flex-shrink: 0;
+}
+.setup-nav-btn {
+    flex: 1;
+    padding: 0.9rem;
+    border-radius: 10px;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+.setup-back-btn {
+    background: transparent;
+    border: 2px solid var(--gold-dark);
+    color: var(--gold-dark);
+}
+.setup-back-btn:hover { background: var(--gold); color: #fff; }
+.setup-next-btn {
+    background: var(--gold-dark);
+    color: #fff;
+}
+.setup-next-btn:hover { background: var(--gold); }
+.setup-next-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* --- PESQUISA --- */
 .search-container {
     padding: 1.5rem;
@@ -862,7 +1010,7 @@ body.dark-theme {
   .action-item { min-width: 64px; }
   .chap-btn { width: 36px; height: 36px; }
   .book-grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 0.6rem; padding: 1rem; }
-  .name-modal, .version-modal { padding: 1.5rem; }
+  .name-modal, .version-modal, .setup-modal { padding: 1.5rem; }
 }
 
 /* ---------------------------------------------------------
@@ -903,7 +1051,7 @@ body.dark-theme {
 
   .chap-btn { width: 44px; height: 44px; font-size: 0.9rem; }
 
-  .name-modal, .version-modal { max-width: 460px; padding: 2.2rem; }
+  .name-modal, .version-modal, .setup-modal { max-width: 460px; padding: 2.2rem; }
 }
 
 /* ---------------------------------------------------------
