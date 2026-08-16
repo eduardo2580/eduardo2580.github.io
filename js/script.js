@@ -3490,6 +3490,9 @@ function switchView(viewName, params = {}) {
         case 'memorize':
             window.openMemorizeDashboard?.();
             break;
+        case 'maps':
+            window.openMapsDashboard?.();
+            break;
         case 'bible6':
         case 'nt90':
         case 'prov31':
@@ -4176,6 +4179,10 @@ function renderHome() {
                         <div class="action-circle"><i class="ph ph-brain"></i></div>
                         <span class="action-label">MEMORIZAR</span>
                     </div>
+                    <div class="action-item" onclick="switchView('maps')">
+                        <div class="action-circle"><i class="ph ph-map-trifold"></i></div>
+                        <span class="action-label">MAPAS</span>
+                    </div>
                 </div>
             </div>
 
@@ -4223,6 +4230,7 @@ function renderVerses(verses, bookName, chapter, targetVerse = null) {
     const content = document.getElementById('content');
     content.innerHTML = '';
     const book = ALL_BOOKS.find(b => b.id === state.bookId);
+    const mapCtx = window.getMapContextForPassage?.(state.bookId, chapter);
 
     // Reader UI
     content.innerHTML = `
@@ -4234,6 +4242,7 @@ function renderVerses(verses, bookName, chapter, targetVerse = null) {
                 <button class="icon-btn" id="fontDown" title="${window.t('fontDown')}"><i class="ph ph-text-aa"></i>−</button>
                 <button class="icon-btn" id="fontUp" title="${window.t('fontUp')}"><i class="ph ph-text-aa"></i>+</button>
                 <button class="icon-btn" id="ttsBtn" title="${window.t('listenTitle')}"><i class="ph ph-speaker-high" id="ttsIcon"></i></button>
+                ${mapCtx ? `<button class="icon-btn" id="viewOnMapBtn" title="Ver no mapa"><i class="ph ph-map-trifold"></i></button>` : ''}
             </div>
 
             <div class="ornament">✦ ✦ ✦</div>
@@ -4291,6 +4300,10 @@ function renderVerses(verses, bookName, chapter, targetVerse = null) {
 
     document.getElementById('prevBtn').onclick = () => loadChapter(state.bookId, chapter - 1);
     document.getElementById('nextBtn').onclick = () => loadChapter(state.bookId, chapter + 1);
+
+    document.getElementById('viewOnMapBtn')?.addEventListener('click', () => {
+        window.MapsApp?.showPassage(state.bookId, chapter, `${bookName} ${chapter}`);
+    });
 
     // Re-wire font controls
     document.getElementById('fontUp')?.addEventListener('click', () => {

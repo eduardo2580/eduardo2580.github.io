@@ -3,9 +3,12 @@
    v28 – FIXED
    =========================================================== */
 
-const CACHE_VERSION = 'v68';
+const CACHE_VERSION = 'v70';
 const PRECACHE_NAME = `bible-sagrada-${CACHE_VERSION}-precache`;
 const RUNTIME_NAME = `bible-sagrada-${CACHE_VERSION}-runtime`;
+// Cache de tiles de mapa — nome estável (sem CACHE_VERSION) para sobreviver a
+// atualizações do app; do contrário o usuário perderia os mapas baixados a cada versão.
+const MAPTILES_NAME = 'bible-sagrada-maptiles-v1';
 
 const PRECACHE_URLS = [
   './',
@@ -46,7 +49,16 @@ const PRECACHE_URLS = [
   'js/privacy.js',
   'privacy.html',
   'js/teens.js',
-  'js/splash.js'
+  'js/splash.js',
+  'css/vendor/leaflet/leaflet.css',
+  'css/vendor/leaflet/images/marker-icon.png',
+  'css/vendor/leaflet/images/marker-icon-2x.png',
+  'css/vendor/leaflet/images/marker-shadow.png',
+  'css/vendor/leaflet/images/layers.png',
+  'css/vendor/leaflet/images/layers-2x.png',
+  'js/vendor/leaflet/leaflet.js',
+  'js/maps-data.js',
+  'js/maps.js'
 ];
 
 const DEBUG = true;
@@ -76,7 +88,7 @@ self.addEventListener('install', event => {
 // ------------------------------
 self.addEventListener('activate', event => {
   log('Activating version:', CACHE_VERSION);
-  const validCaches = new Set([PRECACHE_NAME, RUNTIME_NAME]);
+  const validCaches = new Set([PRECACHE_NAME, RUNTIME_NAME, MAPTILES_NAME]);
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
@@ -102,8 +114,16 @@ self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
+  if (request.method !== 'GET') return;
+
+  // Tiles de mapa (OpenStreetMap) — cross-origin, mas cacheáveis para uso offline.
+  if (/(^|\.)tile\.openstreetmap\.org$/.test(url.hostname)) {
+    event.respondWith(mapTileCacheFirst(request));
+    return;
+  }
+
   // FIX: strict equality, not startsWith
-  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin) return;
 
   // Never cache the SW itself
   if (url.pathname.includes('sw.js')) return;
@@ -133,6 +153,21 @@ self.addEventListener('fetch', event => {
 // ------------------------------
 // Strategies
 // ------------------------------
+async function mapTileCacheFirst(request) {
+  const cache = await caches.open(MAPTILES_NAME);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  try {
+    // no-cors: tile servers don't send CORS headers; the opaque response is still cacheable.
+    const response = await fetch(request, { mode: 'no-cors' });
+    cache.put(request, response.clone());
+    return response;
+  } catch (err) {
+    log('Tile de mapa indisponível offline:', request.url);
+    throw err;
+  }
+}
+
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) {
