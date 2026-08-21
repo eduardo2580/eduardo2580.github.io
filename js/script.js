@@ -79,6 +79,14 @@ const BOOKS = {
 
 const ALL_BOOKS = [...BOOKS.ot, ...BOOKS.nt];
 
+// Returns the book name in the current app language (falls back to Portuguese).
+function bn(bookId) {
+    const lang = (typeof state !== 'undefined' && state.lang) ? state.lang : 'pt';
+    if (window.getLocalizedBookName) return window.getLocalizedBookName(bookId, lang);
+    const b = ALL_BOOKS.find(x => x.id === bookId);
+    return b ? b.name : bookId;
+}
+
 /* ══════════════════════════ BIBLE VERSIONS ══════════════════════ */
 const BIBLE_VERSIONS = [
     { id: 'ara', abbr: 'ARA', name: 'Almeida Revisada Atualizada' },
@@ -219,6 +227,7 @@ const TRANSLATIONS = {
         chapterWord: 'capítulo',
         chaptersWord: 'capítulos',
         chaptersLabel: 'Capítulos',
+        quiz: 'Quiz', memorize: 'Memorizar', maps: 'Mapas',
         otherPlans: 'OUTROS PLANOS',
         privacy: {
             navLabel: 'Privacidade e Dados',
@@ -376,6 +385,7 @@ const TRANSLATIONS = {
         chapterWord: 'chapter',
         chaptersWord: 'chapters',
         chaptersLabel: 'Chapters',
+        quiz: 'Quiz', memorize: 'Memorize', maps: 'Maps',
         otherPlans: 'OTHER PLANS',
         privacy: {
             navLabel: 'Privacy & Data',
@@ -533,6 +543,7 @@ const TRANSLATIONS = {
         chapterWord: 'capítulo',
         chaptersWord: 'capítulos',
         chaptersLabel: 'Capítulos',
+        quiz: 'Quiz', memorize: 'Memorizar', maps: 'Mapas',
         otherPlans: 'OTROS PLANES',
         privacy: {
             navLabel: 'Privacidad y Datos',
@@ -689,6 +700,7 @@ const TRANSLATIONS = {
         "chapterWord": "chapitre",
         "chaptersWord": "chapitres",
         "chaptersLabel": "Chapitres",
+        "quiz": "Quiz", "memorize": "Mémoriser", "maps": "Cartes",
         "otherPlans": "AUTRES PLANS",
         "privacy": {
                 "navLabel": "Confidentialité et Données",
@@ -934,6 +946,7 @@ const TRANSLATIONS = {
         "chapterWord": "Kapitel",
         "chaptersWord": "Kapitel",
         "chaptersLabel": "Kapitel",
+        "quiz": "Quiz", "memorize": "Merken", "maps": "Karten",
         "otherPlans": "WEITERE PLÄNE",
         "privacy": {
                 "navLabel": "Datenschutz & Daten",
@@ -1179,6 +1192,7 @@ const TRANSLATIONS = {
         "chapterWord": "إصحاح",
         "chaptersWord": "إصحاحات",
         "chaptersLabel": "الإصحاحات",
+        "quiz": "اختبار", "memorize": "حفظ", "maps": "خرائط",
         "otherPlans": "خطط أخرى",
         "privacy": {
                 "navLabel": "الخصوصية والبيانات",
@@ -1424,6 +1438,7 @@ const TRANSLATIONS = {
         "chapterWord": "章",
         "chaptersWord": "章",
         "chaptersLabel": "章节",
+        "quiz": "问答", "memorize": "背诵", "maps": "地图",
         "otherPlans": "其他计划",
         "privacy": {
                 "navLabel": "隐私与数据",
@@ -1669,6 +1684,7 @@ const TRANSLATIONS = {
         "chapterWord": "κεφάλαιο",
         "chaptersWord": "κεφάλαια",
         "chaptersLabel": "Κεφάλαια",
+        "quiz": "Κουίζ", "memorize": "Απομνημόνευση", "maps": "Χάρτες",
         "otherPlans": "ΑΛΛΑ ΠΛΑΝΑ",
         "privacy": {
                 "navLabel": "Απόρρητο & Δεδομένα",
@@ -1914,6 +1930,7 @@ const TRANSLATIONS = {
         "chapterWord": "ĉapitro",
         "chaptersWord": "ĉapitroj",
         "chaptersLabel": "Ĉapitroj",
+        "quiz": "Kvizo", "memorize": "Parkerigi", "maps": "Mapoj",
         "otherPlans": "ALIAJ PLANOJ",
         "privacy": {
                 "navLabel": "Privateco kaj Datumoj",
@@ -2159,6 +2176,7 @@ const TRANSLATIONS = {
         "chapterWord": "luku",
         "chaptersWord": "lukua",
         "chaptersLabel": "Luvut",
+        "quiz": "Tietovisa", "memorize": "Opettele ulkoa", "maps": "Kartat",
         "otherPlans": "MUUT SUUNNITELMAT",
         "privacy": {
                 "navLabel": "Yksityisyys ja Tiedot",
@@ -2404,6 +2422,7 @@ const TRANSLATIONS = {
         "chapterWord": "장",
         "chaptersWord": "장",
         "chaptersLabel": "장",
+        "quiz": "퀴즈", "memorize": "암송", "maps": "지도",
         "otherPlans": "다른 계획",
         "privacy": {
                 "navLabel": "개인정보 및 데이터",
@@ -2649,6 +2668,7 @@ const TRANSLATIONS = {
         "chapterWord": "capitol",
         "chaptersWord": "capitole",
         "chaptersLabel": "Capitole",
+        "quiz": "Chestionar", "memorize": "Memorare", "maps": "Hărți",
         "otherPlans": "ALTE PLANURI",
         "privacy": {
                 "navLabel": "Confidențialitate și Date",
@@ -2894,6 +2914,7 @@ const TRANSLATIONS = {
         "chapterWord": "глава",
         "chaptersWord": "главы",
         "chaptersLabel": "Главы",
+        "quiz": "Викторина", "memorize": "Заучивание", "maps": "Карты",
         "otherPlans": "ДРУГИЕ ПЛАНЫ",
         "privacy": {
                 "navLabel": "Конфиденциальность и Данные",
@@ -3139,6 +3160,7 @@ const TRANSLATIONS = {
         "chapterWord": "chương",
         "chaptersWord": "chương",
         "chaptersLabel": "Các chương",
+        "quiz": "Đố vui", "memorize": "Ghi nhớ", "maps": "Bản đồ",
         "otherPlans": "KẾ HOẠCH KHÁC",
         "privacy": {
                 "navLabel": "Quyền riêng tư & Dữ liệu",
@@ -3793,13 +3815,21 @@ function findBestBookMatch(query) {
     if (q.length < 2) return null;
     let best = null;
     let minDistance = 3;
+    const lang = (typeof state !== 'undefined' && state.lang) ? state.lang : 'pt';
     for (const book of ALL_BOOKS) {
-        const bookName = normalise(book.name);
-        if (bookName.startsWith(q)) return book;
-        const distance = levenshtein(q, bookName.substring(0, q.length));
-        if (distance < minDistance) {
-            minDistance = distance;
-            best = book;
+        const candidates = [book.name];
+        if (window.getLocalizedBookName) {
+            const localized = window.getLocalizedBookName(book.id, lang);
+            if (localized && localized !== book.name) candidates.push(localized);
+        }
+        for (const raw of candidates) {
+            const bookName = normalise(raw);
+            if (bookName.startsWith(q)) return book;
+            const distance = levenshtein(q, bookName.substring(0, q.length));
+            if (distance < minDistance) {
+                minDistance = distance;
+                best = book;
+            }
         }
     }
     return best;
@@ -3962,7 +3992,7 @@ function renderSearchResults(query, results, directRef = null) {
         const vStr = directRef.verse ? `:${directRef.verse}` : '';
         refDiv.innerHTML = `
             <div class="verse-header">${window.t('goToRef')}</div>
-            <div class="verse-reference">${directRef.book.name}${chapStr}${vStr}</div>
+            <div class="verse-reference">${bn(directRef.book.id)}${chapStr}${vStr}</div>
         `;
         refDiv.onclick = () => switchView('bible', { bookId: directRef.book.id, chapter: directRef.chapter || 1, verse: directRef.verse });
         wrap.appendChild(refDiv);
@@ -3989,7 +4019,7 @@ function renderSearchResults(query, results, directRef = null) {
         }).join('');
 
         div.innerHTML = `
-            <span class="verse-num">${r.book.name} ${r.chapter}:${r.verse} ${versionBadges}</span>
+            <span class="verse-num">${bn(r.book.id)} ${r.chapter}:${r.verse} ${versionBadges}</span>
             <span class="verse-text" style="font-size:${state.fontSize}rem">
                 ${r.text.replace(re, '<mark>$1</mark>')}
             </span>`;
@@ -4119,7 +4149,7 @@ function showTopicResults(topic) {
     const refs = resolveTopicRefs(topic);
     wrap.innerHTML = `<h3 class="topic-heading">${topicLabel(topic)}</h3>` + refs.map(r => `
         <div class="verse topic-verse" data-book="${r.book.id}" data-chapter="${r.chapter}" data-verse="${r.verse}">
-            <span class="verse-num">${r.book.name} ${r.chapter}:${r.verse}</span>
+            <span class="verse-num">${bn(r.book.id)} ${r.chapter}:${r.verse}</span>
             <span class="verse-text" style="font-size:${state.fontSize}rem">${r.text || ''}</span>
         </div>
     `).join('');
@@ -4173,15 +4203,15 @@ function renderHome() {
                     </div>
                     <div class="action-item" onclick="switchView('quiz')">
                         <div class="action-circle"><i class="ph ph-trophy"></i></div>
-                        <span class="action-label">QUIZ</span>
+                        <span class="action-label">${window.t('quiz').toUpperCase()}</span>
                     </div>
                     <div class="action-item" onclick="switchView('memorize')">
                         <div class="action-circle"><i class="ph ph-brain"></i></div>
-                        <span class="action-label">MEMORIZAR</span>
+                        <span class="action-label">${window.t('memorize').toUpperCase()}</span>
                     </div>
                     <div class="action-item" onclick="switchView('maps')">
                         <div class="action-circle"><i class="ph ph-map-trifold"></i></div>
-                        <span class="action-label">MAPAS</span>
+                        <span class="action-label">${window.t('maps').toUpperCase()}</span>
                     </div>
                 </div>
             </div>
@@ -4190,7 +4220,7 @@ function renderHome() {
             <div class="verse-card-wrapper">
                 <div class="verse-card" onclick="switchView('bible', {bookId: '${book.id}', chapter: ${chapNum}, verse: ${v.verse}})">
                     <div class="verse-header">${window.t('verseOfDay')}</div>
-                    <div class="verse-reference">${book.name} ${chapNum}:${v.verse}</div>
+                    <div class="verse-reference">${bn(book.id)} ${chapNum}:${v.verse}</div>
                     <div class="verse-text">${v.text}</div>
                 </div>
             </div>
@@ -4219,7 +4249,7 @@ function renderBibleSelector() {
         BOOKS[section].forEach(book => {
             const card = document.createElement('div');
             card.className = 'book-card';
-            card.textContent = book.name;
+            card.textContent = bn(book.id);
             card.onclick = () => loadChapter(book.id, 1);
             grid.appendChild(card);
         });
@@ -4337,7 +4367,7 @@ async function loadChapter(bookId, chapter, verse = null) {
     try {
         const verses = await fetchChapter(bookId, chapter);
         state.verses = verses;
-        renderVerses(verses, ALL_BOOKS.find(b => b.id === bookId).name, chapter, verse);
+        renderVerses(verses, bn(bookId), chapter, verse);
         loader?.classList.add('d-none');
         content?.classList.remove('d-none');
     } catch (e) {
@@ -4815,7 +4845,7 @@ async function refreshOpenChapter() {
         state.verses = verses;
         if (state.currentView === 'bible') {
             const book = ALL_BOOKS.find(b => b.id === state.bookId);
-            if (book) renderVerses(verses, book.name, state.chapter);
+            if (book) renderVerses(verses, bn(book.id), state.chapter);
         }
     } catch (e) {
         // Silently ignore — the chapter will simply reload fresh next time
