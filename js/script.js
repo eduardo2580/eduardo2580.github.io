@@ -4,6 +4,9 @@
  */
 
 /* ══════════════════════════ BOOK DATA ═══════════════════════════ */
+window.BOOK_OF_MORMON_BOOKS ??= [];
+window.BOOK_OF_MORMON_DATA ??= {};
+
 const BOOKS = {
     ot: [
         { id: 'GEN', name: 'Gênesis', chapters: 50 },
@@ -75,7 +78,7 @@ const BOOKS = {
         { id: 'JUD', name: 'Judas', chapters: 1 },
         { id: 'REV', name: 'Apocalipse', chapters: 22 },
     ],
-    mormon: window.BOOK_OF_MORMON_BOOKS || []
+    mormon: Array.isArray(window.BOOK_OF_MORMON_BOOKS) ? window.BOOK_OF_MORMON_BOOKS : []
 };
 
 const ALL_BOOKS = [...BOOKS.ot, ...BOOKS.nt, ...BOOKS.mormon];
@@ -3468,8 +3471,9 @@ function dbPut(key, verses) {
 /* ═══════════════════ CHAPTER LOADING ═══════════════════════════ */
 async function fetchChapter(bookId, chapter) {
     if (bookId.startsWith('BOM_')) {
-        const verses = window.BOOK_OF_MORMON_DATA?.[`${bookId}_${chapter}`];
-        if (verses) return verses;
+        const bomData = window.BOOK_OF_MORMON_DATA || {};
+        const verses = bomData[`${bookId}_${chapter}`];
+        if (Array.isArray(verses) && verses.length) return verses;
         throw new Error(`${window.t('errorChapter')}: ${bookId}_${chapter}`);
     }
     const version = state.version || 'ara';
@@ -4312,7 +4316,7 @@ function renderVerses(verses, bookName, chapter, targetVerse = null) {
     const book = ALL_BOOKS.find(b => b.id === state.bookId);
     const mapCtx = window.getMapContextForPassage?.(state.bookId, chapter);
 
-    const bomContext = bookId.startsWith('BOM_') ? BOOK_OF_MORMON_CONTEXT[bookId] : null;
+    const bomContext = state.bookId.startsWith('BOM_') ? BOOK_OF_MORMON_CONTEXT[state.bookId] : null;
     const bomContextTitle = {
         pt: 'Contexto histórico',
         en: 'Historical context',
