@@ -3,7 +3,7 @@
    v28 – FIXED
    =========================================================== */
 
-const CACHE_VERSION = 'v71';
+const CACHE_VERSION = 'v72';
 const PRECACHE_NAME = `bible-sagrada-${CACHE_VERSION}-precache`;
 const RUNTIME_NAME = `bible-sagrada-${CACHE_VERSION}-runtime`;
 // Cache de tiles de mapa — nome estável (sem CACHE_VERSION) para sobreviver a
