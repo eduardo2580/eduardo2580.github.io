@@ -12,6 +12,7 @@
         'bible-1-year': {id:'bible-1-year',name:{pt:'Bíblia em 1 Ano',en:'Bible in 1 Year',es:'Biblia en 1 Año'},days:365,tag:{pt:'COMPLETO',en:'COMPLETE',es:'COMPLETO'},color:'#8b6f3a',icon:'ph-book-open',category:'full'},
         'bible-6-months': {id:'bible-6-months',name:{pt:'Bíblia em 6 Meses',en:'Bible in 6 Months',es:'Biblia en 6 Meses'},days:180,tag:{pt:'INTENSIVO',en:'INTENSIVE',es:'INTENSIVO'},color:'#b91c1c',icon:'ph-rocket',category:'full'},
         'nt-90-days': {id:'nt-90-days',name:{pt:'Novo Testamento em 90 Dias',en:'New Testament in 90 Days',es:'Nuevo Testamento en 90 Días'},days:90,tag:{pt:'NOVO TESTAMENTO',en:'NEW TESTAMENT',es:'NUEVO TESTAMENTO'},color:'#059669',icon:'ph-cross',category:'testament'},
+        'bom365': {id:'bom365',name:{pt:'Livro de Mórmon em 1 Ano',en:'Book of Mormon in 1 Year',es:'Libro de Mormón en 1 Año'},days:365,tag:{pt:'LIVRO DE MÓRMON',en:'BOOK OF MORMON',es:'LIBRO DE MORMÓN'},description:{pt:'Leia o Livro de Mórmon em um ano.',en:'Read the Book of Mormon in one year.',es:'Lee el Libro de Mormón en un año.'},color:'#7c3aed',icon:'ph-book-open',category:'testament'},
         'psalms-30-days': {id:'psalms-30-days',name:{pt:'Salmos em 30 Dias',en:'Psalms in 30 Days',es:'Salmos en 30 Días'},days:30,tag:{pt:'POESIA',en:'POETRY',es:'POESÍA'},color:'#3b82f6',icon:'ph-music-notes',category:'book'},
         'proverbs-31-days': {id:'proverbs-31-days',name:{pt:'Provérbios em 31 Dias',en:'Proverbs in 31 Days',es:'Proverbios en 31 Días'},days:31,tag:{pt:'SABEDORIA',en:'WISDOM',es:'SABIDURÍA'},color:'#8b5cf6',icon:'ph-lightbulb',category:'book'},
         'gospels-30-days': {id:'gospels-30-days',name:{pt:'Evangelhos em 30 Dias',en:'Gospels in 30 Days',es:'Evangelios en 30 Días'},days:30,tag:{pt:'EVANGELHOS',en:'GOSPELS',es:'EVANGELIOS'},color:'#f59e0b',icon:'ph-sun',category:'gospels'},
@@ -159,6 +160,10 @@
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.book-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
+                    if (planId === 'bom365' && window.openReadingPlan) {
+                        window.openReadingPlan('bom365');
+                        return;
+                    }
                     const startDate = window.loadPlanStartDate(planId);
                     if (!startDate) {
                         if (window[`open${planId.replace(/-/g, '')}Welcome`]) {

@@ -175,7 +175,9 @@
         ['journey1', 'journey2', 'journey3', 'journeyToRome', 'exodus', 'jesus'].forEach(id => {
             if (activeLayers.has(id) && layerGroups[id]) {
                 const meta = layerGroups[id]._routeMeta;
-                items.push(`<span class="maps-legend-item"><span class="maps-legend-dot" style="background:${meta.color}"></span>${meta.name}</span>`);
+                if (meta) {
+                    items.push(`<span class="maps-legend-item"><span class="maps-legend-dot" style="background:${meta.color}"></span>${meta.name}</span>`);
+                }
             }
         });
         el.innerHTML = items.join('');
@@ -286,9 +288,9 @@
     function initMap() {
         const el = document.getElementById('bibleMap');
         if (!el || typeof L === 'undefined') return;
-        map = L.map('bibleMap', { scrollWheelZoom: false, worldCopyJump: true }).setView([32.0, 33.0], 5);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
+        map = L.map('bibleMap', { scrollWheelZoom: false, worldCopyJump: true, attributionControl: true }).setView([20.0, -85.0], 5);
+        L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', {
+            maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
         }).addTo(map);
 

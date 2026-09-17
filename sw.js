@@ -3,7 +3,7 @@
    v28 – FIXED
    =========================================================== */
 
-const CACHE_VERSION = 'v70';
+const CACHE_VERSION = 'v71';
 const PRECACHE_NAME = `bible-sagrada-${CACHE_VERSION}-precache`;
 const RUNTIME_NAME = `bible-sagrada-${CACHE_VERSION}-runtime`;
 // Cache de tiles de mapa — nome estável (sem CACHE_VERSION) para sobreviver a
@@ -43,6 +43,7 @@ const PRECACHE_URLS = [
   'js/bible-data-ro-cornilescu.js',
   'js/bible-data-ru-synodal.js',
   'js/bible-data-vi-vietnamese.js',
+  'js/book-of-mormon-data.js',
   'js/bootstrap.min.js',
   'js/script.js',
   'js/memorize.js',
@@ -116,8 +117,9 @@ self.addEventListener('fetch', event => {
 
   if (request.method !== 'GET') return;
 
-  // Tiles de mapa (OpenStreetMap) — cross-origin, mas cacheáveis para uso offline.
-  if (/(^|\.)tile\.openstreetmap\.org$/.test(url.hostname)) {
+  // Tiles de mapa — usamos uma fonte compatível com CORS para evitar bloqueios de uso
+  // como o 403 do OpenStreetMap em páginas públicas/hotlink e no service worker.
+  if (/(^|\.)tile\.openstreetmap\.org$|(^|\.)openstreetmap\.de$|(^|\.)basemaps\.cartocdn\.com$/.test(url.hostname)) {
     event.respondWith(mapTileCacheFirst(request));
     return;
   }
@@ -158,9 +160,10 @@ async function mapTileCacheFirst(request) {
   const cached = await cache.match(request);
   if (cached) return cached;
   try {
-    // no-cors: tile servers don't send CORS headers; the opaque response is still cacheable.
-    const response = await fetch(request, { mode: 'no-cors' });
-    cache.put(request, response.clone());
+    const response = await fetch(request);
+    if (response && response.status === 200) {
+      cache.put(request, response.clone());
+    }
     return response;
   } catch (err) {
     log('Tile de mapa indisponível offline:', request.url);

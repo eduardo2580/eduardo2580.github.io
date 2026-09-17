@@ -1697,9 +1697,17 @@ body.dark-theme .mem-stage-dot { background: rgba(255,255,255,.12); }
 .maps-chip.active { background: var(--gold-dark); color: #fff; border-color: var(--gold-dark); }
 
 .bible-map {
-    width: 100%; height: min(60vh, 480px); border-radius: 14px; overflow: hidden;
+    width: 100%; height: min(60vh, 520px); min-height: 300px; border-radius: 14px; overflow: hidden;
     border: 2px solid var(--gold-dark); box-shadow: 0 6px 18px rgba(0,0,0,.12);
     margin: 0 0 .7rem;
+}
+
+@media (max-width: 600px) {
+    .maps-view { padding: 0 .15rem 1rem; }
+    .maps-layer-chips { padding-inline: .45rem; }
+    .maps-chip { padding: .48rem .7rem; font-size: .68rem; }
+    .bible-map { height: min(52vh, 380px); min-height: 280px; }
+    .maps-place-list, .maps-legend { padding-left: .5rem; padding-right: .5rem; }
 }
 .maps-legend {
     display: flex; flex-wrap: wrap; gap: .6rem 1rem; padding: 0 1.2rem; margin-bottom: .6rem;

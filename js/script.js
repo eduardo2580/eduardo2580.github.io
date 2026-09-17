@@ -74,10 +74,29 @@ const BOOKS = {
         { id: '3JN', name: '3 João', chapters: 1 },
         { id: 'JUD', name: 'Judas', chapters: 1 },
         { id: 'REV', name: 'Apocalipse', chapters: 22 },
-    ]
+    ],
+    mormon: window.BOOK_OF_MORMON_BOOKS || []
 };
 
-const ALL_BOOKS = [...BOOKS.ot, ...BOOKS.nt];
+const ALL_BOOKS = [...BOOKS.ot, ...BOOKS.nt, ...BOOKS.mormon];
+
+const BOOK_OF_MORMON_CONTEXT = {
+    BOM_1_NE: '1 Nephi tells the story of Lehi and his family leaving Jerusalem, a crisis of faith and covenant in a time of political and spiritual instability in the ancient Near East.',
+    BOM_2_NE: '2 Nephi continues the narrative after exile in the wilderness, emphasizing covenant, prophetic warning, and the tension between obedience and apostasy.',
+    BOM_JACOB: 'Jacob records warnings against pride, hypocrisy, and social injustice, calling the people back to charity, covenant faithfulness, and spiritual humility.',
+    BOM_ENOS: 'Enos shows a personal turning point of repentance and prayer, reflecting the emotional and spiritual depth of a family struggling to remain faithful.',
+    BOM_JAROM: 'Jarom preserves a brief summary of the people’s survival, conflict, and preservation, highlighting the long arc of endurance in a difficult land.',
+    BOM_OMNI: 'Omni gives a compressed recollection of generations, showing the rise and fall of spiritual commitment through family continuity and memory.',
+    BOM_W_OF_M: 'Words of Mormon connects major histories by focusing on the significance of the small plates and the continuity of God’s covenant record.',
+    BOM_MOSIAH: 'Mosiah narrates the return of the people to the land of promise, the rise of a prophetic kingdom, and the central importance of Christ’s coming.',
+    BOM_ALMA: 'Alma traces the conflict between faith and unbelief across a large community, with sermons, conversion, and repeated moral crises.',
+    BOM_HEL: 'Helaman focuses on the spiritual decline of the Nephites, the rising threat of apostasy, and the continuing calls to repentance.',
+    BOM_3_NE: '3 Nephi records the Savior’s appearance to the Nephites and the establishment of a righteous kingdom after centuries of conflict and struggle.',
+    BOM_4_NE: '4 Nephi summarizes a golden period of unity, peace, and righteousness before the unraveling caused by pride and apostasy.',
+    BOM_MORM: 'Mormon writes as a prophet-historian, gathering and abridging sacred records during a time of war, spiritual erosion, and impending judgment.',
+    BOM_ETHER: 'Ether recounts the Jaredites, a separate civilization that rose and fell amid repeated cycles of pride, conflict, and divine warning.',
+    BOM_MORO: 'Moroni closes the record with a final appeal to faith, conversion, and the importance of Christ’s mercy in the final days of the Nephite civilization.',
+};
 
 // Returns the book name in the current app language (falls back to Portuguese).
 function bn(bookId) {
@@ -3448,6 +3467,11 @@ function dbPut(key, verses) {
 
 /* ═══════════════════ CHAPTER LOADING ═══════════════════════════ */
 async function fetchChapter(bookId, chapter) {
+    if (bookId.startsWith('BOM_')) {
+        const verses = window.BOOK_OF_MORMON_DATA?.[`${bookId}_${chapter}`];
+        if (verses) return verses;
+        throw new Error(`${window.t('errorChapter')}: ${bookId}_${chapter}`);
+    }
     const version = state.version || 'ara';
     const dataKey = `${bookId}_${chapter}`;
     const cacheKey = `${version}_${dataKey}`;
@@ -3518,6 +3542,7 @@ function switchView(viewName, params = {}) {
         case 'bible6':
         case 'nt90':
         case 'prov31':
+        case 'bom365':
             window.openReadingPlan?.(viewName);
             break;
         case 'search':
@@ -3905,6 +3930,29 @@ function searchVerses(query) {
         }
     }
 
+    if (results.length < MAX_RESULTS) {
+        for (const book of BOOKS.mormon) {
+            for (let c = 1; c <= book.chapters; c++) {
+                const verses = window.BOOK_OF_MORMON_DATA?.[`${book.id}_${c}`];
+                if (!verses) continue;
+                for (const v of verses) {
+                    if (!normalise(v.text).includes(q)) continue;
+                    const refKey = `${book.id}_${c}_${v.verse}`;
+                    let entry = byRef.get(refKey);
+                    if (!entry) {
+                        entry = { book, chapter: c, verse: v.verse, versions: {} };
+                        byRef.set(refKey, entry);
+                        results.push(entry);
+                    }
+                    entry.versions.bom = v.text;
+                    if (results.length >= MAX_RESULTS) break;
+                }
+                if (results.length >= MAX_RESULTS) break;
+            }
+            if (results.length >= MAX_RESULTS) break;
+        }
+    }
+
     // Pick the text to preview for each result: prefer the version the
     // user currently reads in, then fall back to whichever matched.
     for (const entry of results) {
@@ -4240,11 +4288,13 @@ function renderBibleSelector() {
                 <div class="book-grid" id="ot-grid"></div>
                 <h3 class="sidebar-title" style="margin-top: 2rem">${window.t('nt')}</h3>
                 <div class="book-grid" id="nt-grid"></div>
+                <h3 class="sidebar-title" style="margin-top: 2rem">Book of Mormon</h3>
+                <div class="book-grid" id="mormon-grid"></div>
             </div>
         </div>
     `;
 
-    ['ot', 'nt'].forEach(section => {
+    ['ot', 'nt', 'mormon'].forEach(section => {
         const grid = document.getElementById(section + '-grid');
         BOOKS[section].forEach(book => {
             const card = document.createElement('div');
@@ -4262,11 +4312,24 @@ function renderVerses(verses, bookName, chapter, targetVerse = null) {
     const book = ALL_BOOKS.find(b => b.id === state.bookId);
     const mapCtx = window.getMapContextForPassage?.(state.bookId, chapter);
 
+    const bomContext = bookId.startsWith('BOM_') ? BOOK_OF_MORMON_CONTEXT[bookId] : null;
+    const bomContextTitle = {
+        pt: 'Contexto histórico',
+        en: 'Historical context',
+        es: 'Contexto histórico'
+    }[state.lang] || 'Historical context';
+
     // Reader UI
     content.innerHTML = `
         <div class="fade-in">
             <h1 class="bible-heading">${bookName}</h1>
             <div class="bible-subheading">${window.t('chapter')} ${chapter}</div>
+            ${bomContext ? `
+                <div class="card" style="margin: 1rem 0; padding: 1rem 1.1rem; border-left: 4px solid #7c3aed; background: rgba(124, 58, 237, 0.06); border-radius: 14px;">
+                    <div style="font-weight: 700; font-size: 0.88rem; letter-spacing: 0.08em; text-transform: uppercase; color: #7c3aed; margin-bottom: 0.5rem;">${bomContextTitle}</div>
+                    <div style="line-height: 1.6; color: var(--text-color);">${bomContext}</div>
+                </div>
+            ` : ''}
 
             <div class="reading-controls">
                 <button class="icon-btn" id="fontDown" title="${window.t('fontDown')}"><i class="ph ph-text-aa"></i>−</button>
@@ -4408,6 +4471,10 @@ function renderPlans() {
                 </div>
                 <div class="settings-item" onclick="switchView('nt90')">
                     <div class="settings-label">✝️ ${window.t('title', 'nt90')}</div>
+                    <i class="ph ph-caret-right"></i>
+                </div>
+                <div class="settings-item" onclick="switchView('bom365')">
+                    <div class="settings-label">📖 ${window.t('title', 'bom365') === 'title' ? 'Livro de Mórmon em 1 Ano' : window.t('title', 'bom365')}</div>
                     <i class="ph ph-caret-right"></i>
                 </div>
                 <div class="settings-item" onclick="switchView('prov31')">

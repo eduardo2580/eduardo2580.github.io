@@ -21,6 +21,34 @@
             icon: 'ph-cross',
             getBooks: () => BOOKS.nt,
         },
+        bom365: {
+            ns: 'bom365',
+            days: 365,
+            icon: 'ph-book-open',
+            getBooks: () => BOOKS.mormon,
+            defaults: {
+                title: 'Book of Mormon in 1 Year',
+                planName: 'Book of Mormon in 1 Year',
+                tag: 'BOOK OF MORMON',
+                desc: 'Read the Book of Mormon in one year.',
+                daysWord: 'days',
+                startBtn: 'Start plan',
+                startInfo: 'Your progress is saved on this device.',
+                planStarted: 'Plan started!',
+                day: 'Day',
+                of: 'of',
+                today: 'Today',
+                concluded: 'Completed',
+                done: 'Completed',
+                concludeBtn: 'Mark as read',
+                progressLabel: 'Progress',
+                resetBtn: 'Reset plan',
+                resetTitle: 'Reset plan?',
+                resetSub: 'Your progress will be cleared.',
+                cancel: 'Cancel',
+                confirm: 'Reset'
+            }
+        },
         prov31: {
             ns: 'prov31',
             days: 31,
@@ -115,7 +143,7 @@
             const r = window.t(key, ns);
             if (r !== key && r != null) return r;
         }
-        return key;
+        return CONFIGS[id].defaults?.[key] || key;
     }
 
     /* ════════════════════════════════════════════════════════════
