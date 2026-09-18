@@ -890,7 +890,82 @@ window.BOOK_NAMES_I18N = {
     },
 };
 
+window.BOOK_OF_MORMON_NAMES_I18N = {
+    pt: {
+        'BOM_1_NE': '1 Néfi',
+        'BOM_2_NE': '2 Néfi',
+        'BOM_JACOB': 'Jacó',
+        'BOM_ENOS': 'Enos',
+        'BOM_JAROM': 'Jarom',
+        'BOM_OMNI': 'Ômni',
+        'BOM_W_OF_M': 'Palavras de Mórmon',
+        'BOM_MOSIAH': 'Mosias',
+        'BOM_ALMA': 'Alma',
+        'BOM_HEL': 'Helamã',
+        'BOM_3_NE': '3 Néfi',
+        'BOM_4_NE': '4 Néfi',
+        'BOM_MORM': 'Mórmon',
+        'BOM_ETHER': 'Éter',
+        'BOM_MORO': 'Morôni'
+    },
+    en: {
+        'BOM_1_NE': '1 Nephi',
+        'BOM_2_NE': '2 Nephi',
+        'BOM_JACOB': 'Jacob',
+        'BOM_ENOS': 'Enos',
+        'BOM_JAROM': 'Jarom',
+        'BOM_OMNI': 'Omni',
+        'BOM_W_OF_M': 'Words of Mormon',
+        'BOM_MOSIAH': 'Mosiah',
+        'BOM_ALMA': 'Alma',
+        'BOM_HEL': 'Helaman',
+        'BOM_3_NE': '3 Nephi',
+        'BOM_4_NE': '4 Nephi',
+        'BOM_MORM': 'Mormon',
+        'BOM_ETHER': 'Ether',
+        'BOM_MORO': 'Moroni'
+    },
+    es: {
+        'BOM_1_NE': '1 Nefi',
+        'BOM_2_NE': '2 Nefi',
+        'BOM_JACOB': 'Jacob',
+        'BOM_ENOS': 'Enós',
+        'BOM_JAROM': 'Jarom',
+        'BOM_OMNI': 'Omni',
+        'BOM_W_OF_M': 'Palabras de Mormón',
+        'BOM_MOSIAH': 'Mosías',
+        'BOM_ALMA': 'Alma',
+        'BOM_HEL': 'Helamán',
+        'BOM_3_NE': '3 Nefi',
+        'BOM_4_NE': '4 Nefi',
+        'BOM_MORM': 'Mormón',
+        'BOM_ETHER': 'Éter',
+        'BOM_MORO': 'Moroni'
+    },
+    fr: {
+        'BOM_1_NE': '1 Néphi',
+        'BOM_2_NE': '2 Néphi',
+        'BOM_JACOB': 'Jacob',
+        'BOM_ENOS': 'Énos',
+        'BOM_JAROM': 'Jarom',
+        'BOM_OMNI': 'Omni',
+        'BOM_W_OF_M': 'Paroles de Mormon',
+        'BOM_MOSIAH': 'Mosiah',
+        'BOM_ALMA': 'Alma',
+        'BOM_HEL': 'Hélaman',
+        'BOM_3_NE': '3 Néphi',
+        'BOM_4_NE': '4 Néphi',
+        'BOM_MORM': 'Mormon',
+        'BOM_ETHER': 'Éther',
+        'BOM_MORO': 'Moroni'
+    }
+};
+
 window.getLocalizedBookName = function (bookId, lang) {
+    if (bookId && bookId.startsWith('BOM_')) {
+        const bomMap = window.BOOK_OF_MORMON_NAMES_I18N?.[lang] || window.BOOK_OF_MORMON_NAMES_I18N?.pt;
+        if (bomMap && bomMap[bookId]) return bomMap[bookId];
+    }
     if (lang && lang !== 'pt' && window.BOOK_NAMES_I18N[lang] && window.BOOK_NAMES_I18N[lang][bookId]) {
         return window.BOOK_NAMES_I18N[lang][bookId];
     }

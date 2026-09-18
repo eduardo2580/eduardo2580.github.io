@@ -1,5 +1,5 @@
 /**
- * BÍBLIA SAGRADA — 100% OFFLINE
+ * ESCRITURAS SAGRADAS — 100% OFFLINE
  * Modern Re-design
  */
 
@@ -197,7 +197,7 @@ window.langLocale = function (lang) {
 /* ════════════════════════ TRANSLATIONS ═════════════════════════ */
 const TRANSLATIONS = {
     pt: {
-        brand: '✦ Bíblia Sagrada',
+        brand: '✦ Escrituras Sagradas',
         searchPlaceholder: 'Buscar na Bíblia...',
         daily: '✦ Diário',
         todayReading: 'Leitura de Hoje',
@@ -232,7 +232,8 @@ const TRANSLATIONS = {
         langBtn: 'Português',
         hello: 'Olá',
         verseOfDay: 'Versículo do Dia',
-        bible: 'Bíblia',
+        bible: 'Escrituras',
+        bookOfMormon: 'Livro de Mórmon',
         plans: 'Planos',
         settings: 'Mais',
         home: 'Início',
@@ -355,7 +356,7 @@ const TRANSLATIONS = {
         }
     },
     en: {
-        brand: '✦ Holy Bible',
+        brand: '✦ Holy Scriptures',
         searchPlaceholder: 'Search the Bible...',
         daily: '✦ Daily',
         todayReading: "Today's Reading",
@@ -390,7 +391,8 @@ const TRANSLATIONS = {
         langBtn: 'English',
         hello: 'Hello',
         verseOfDay: 'Verse of the Day',
-        bible: 'Bible',
+        bible: 'Scriptures',
+        bookOfMormon: 'Book of Mormon',
         plans: 'Plans',
         settings: 'More',
         home: 'Home',
@@ -513,7 +515,7 @@ const TRANSLATIONS = {
         }
     },
     es: {
-        brand: '✦ Santa Biblia',
+        brand: '✦ Escrituras Sagradas',
         searchPlaceholder: 'Buscar en la Biblia...',
         daily: '✦ Diario',
         todayReading: 'Lectura de Hoy',
@@ -548,7 +550,8 @@ const TRANSLATIONS = {
         langBtn: 'Español',
         hello: 'Hola',
         verseOfDay: 'Versículo del Día',
-        bible: 'Biblia',
+        bible: 'Escrituras',
+        bookOfMormon: 'Libro de Mormón',
         plans: 'Planes',
         settings: 'Más',
         home: 'Inicio',
@@ -3494,6 +3497,7 @@ function switchView(viewName, params = {}) {
     state.currentView = viewName;
     window.speechSynthesis?.cancel();
     ttsSetPlaying(false);
+    syncBottomNavLabels();
 
     // Update Bottom Nav UI
     document.querySelectorAll('.nav-item').forEach(btn => {
@@ -3557,6 +3561,51 @@ function switchView(viewName, params = {}) {
             break;
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function syncBottomNavLabels() {
+    document.querySelectorAll('.nav-item').forEach(btn => {
+        const key = btn.dataset.view;
+        const labelMap = {
+            home: 'home',
+            bible: 'bible',
+            plans: 'plans',
+            search: 'search',
+            quiz: 'quiz',
+            settings: 'settings'
+        };
+        const label = labelMap[key];
+        if (label && btn.querySelector('span')) {
+            const text = window.t(label);
+            btn.querySelector('span').textContent = text === label ? btn.dataset.defaultLabel || text : text;
+        }
+    });
+}
+
+function localizedBookOfMormonLabel() {
+    const lang = state.lang || 'pt';
+    const map = {
+        pt: 'Livro de Mórmon',
+        en: 'Book of Mormon',
+        es: 'Libro de Mormón',
+        fr: 'Livre de Mormon',
+        de: 'Buch Mormon',
+        ar: 'كتاب مورمون',
+        zh: '摩门经',
+        el: 'Βιβλίο του Μορμόν',
+        eo: 'Libro de Mormon',
+        fi: 'Mormonin kirja',
+        ko: '몰몬경',
+        ro: 'Cartea lui Mormon',
+        ru: 'Книга Мормона',
+        vi: 'Sách Mặc Môn'
+    };
+
+    if (lang === 'pt') {
+        return 'Livro de Mórmon';
+    }
+
+    return map[lang] || 'Book of Mormon';
 }
 
 function renderTopBar() {
@@ -4292,7 +4341,7 @@ function renderBibleSelector() {
                 <div class="book-grid" id="ot-grid"></div>
                 <h3 class="sidebar-title" style="margin-top: 2rem">${window.t('nt')}</h3>
                 <div class="book-grid" id="nt-grid"></div>
-                <h3 class="sidebar-title" style="margin-top: 2rem">Book of Mormon</h3>
+                <h3 class="sidebar-title" style="margin-top: 2rem">✦ ${localizedBookOfMormonLabel()}</h3>
                 <div class="book-grid" id="mormon-grid"></div>
             </div>
         </div>
@@ -4637,10 +4686,12 @@ function openLanguageModal() {
                 state.lang = langId;
                 saveConfig();
                 window.applyDocumentDirection(state.lang);
+                syncBottomNavLabels();
                 renderTopBar();
             }
             overlay.remove();
             if (state.currentView === 'settings') switchView('settings');
+            else if (state.currentView === 'home') renderHome();
         });
     });
 }
@@ -4985,8 +5036,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Bottom Nav Events
     document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.dataset.defaultLabel = btn.querySelector('span')?.textContent || btn.dataset.view;
         btn.addEventListener('click', () => switchView(btn.dataset.view));
     });
+    syncBottomNavLabels();
 
     // Setup Wizard Modal
     document.getElementById('setup-back-btn')?.addEventListener('click', goSetupBack);

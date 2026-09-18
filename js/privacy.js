@@ -1,5 +1,5 @@
 /* ============================================================
-   Bíblia Sagrada — Privacy & Data Manager
+   Escrituras Sagradas — Privacy & Data Manager
    ------------------------------------------------------------
    Everything this app stores, lives on this device:
      - localStorage  → preferences + reading-plan progress
@@ -13,7 +13,7 @@
     'use strict';
 
     const APP_DB_NAME = 'BibleDB_local';
-    const ENC_FORMAT = 'biblia-sagrada-encrypted-backup';
+    const ENC_FORMAT = 'escrituras-sagradas-encrypted-backup';
     const PBKDF2_ITERATIONS = 210000;
 
     /* ───────────────────── helpers ───────────────────── */
@@ -65,8 +65,8 @@
 
     async function buildExportPayload() {
         return {
-            app: 'Bíblia Sagrada',
-            format: 'biblia-sagrada-backup',
+            app: 'Escrituras Sagradas',
+            format: 'escrituras-sagradas-backup',
             formatVersion: 1,
             exportedAt: new Date().toISOString(),
             localStorage: collectLocalStorage()

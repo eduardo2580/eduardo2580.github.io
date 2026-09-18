@@ -1,5 +1,5 @@
 /* ===========================================================
-   Service Worker – Bíblia Sagrada PW
+   Service Worker – Escrituras Sagradas PW
    v28 – FIXED
    =========================================================== */
 
@@ -210,7 +210,7 @@ async function networkFirstWithOfflineFallback(request) {
     return new Response(`
       <!DOCTYPE html>
       <html lang="pt-BR">
-      <head><meta charset="UTF-8"><title>Offline – Bíblia Sagrada</title>
+      <head><meta charset="UTF-8"><title>Offline – Escrituras Sagradas</title>
       <style>body{text-align:center;padding:2rem;font-family:sans-serif;background:#f5edd8}</style></head>
       <body><h1>📖 Sem conexão</h1><p>Verifique sua internet e tente novamente.</p>
       <button onclick="location.reload()">Tentar novamente</button></body>

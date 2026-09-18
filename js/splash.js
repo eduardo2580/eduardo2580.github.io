@@ -1,5 +1,5 @@
 /* ===========================================================
-   Splash Screen – Bíblia Sagrada PWA (Versão Estabilizada)
+   Splash Screen – Escrituras Sagradas PWA (Versão Estabilizada)
    =========================================================== */
 
 (function () {
@@ -169,7 +169,7 @@
     overlay.id = 'bs-splash';
     overlay.innerHTML = `
       <div id="bs-logo-wrap"><div id="bs-ring"></div><div id="bs-logo-circle">✦</div></div>
-      <div id="bs-brand">Bíblia Sagrada</div>
+      <div id="bs-brand">Escrituras Sagradas</div>
       <div id="bs-subtitle">Palavra de Deus</div>
       <div id="bs-verse-block">
         <p id="bs-verse-text">"${verse.text}"</p>
