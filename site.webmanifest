@@ -1,7 +1,7 @@
 {
-    "name": "Bíblia Sagrada",
-    "short_name": "Bíblia",
-    "description": "Leia a Bíblia Sagrada em português",
+    "name": "Escrituras Sagradas",
+    "short_name": "Escrituras",
+    "description": "Leia as Escrituras Sagradas em português",
     "start_url": "./",
     "scope": "./",
     "icons": [

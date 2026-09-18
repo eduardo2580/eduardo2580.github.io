@@ -3477,6 +3477,16 @@ async function fetchChapter(bookId, chapter) {
         const bomData = window.BOOK_OF_MORMON_DATA || {};
         const verses = bomData[`${bookId}_${chapter}`];
         if (Array.isArray(verses) && verses.length) return verses;
+
+        const bookName = (window.getLocalizedBookName && window.getLocalizedBookName(bookId, state.lang || 'pt')) || bookId;
+        const noticeText = (state.lang || 'pt') === 'pt'
+            ? `Este capítulo de ${bookName} ainda não está disponível nesta versão do aplicativo.`
+            : `This chapter of ${bookName} is not available in this app version yet.`;
+
+        if (bookId === 'BOM_MORM') {
+            return [{ reference: `${bookName} ${chapter}:1`, text: noticeText, verse: 1 }];
+        }
+
         throw new Error(`${window.t('errorChapter')}: ${bookId}_${chapter}`);
     }
     const version = state.version || 'ara';
@@ -3580,6 +3590,39 @@ function syncBottomNavLabels() {
             btn.querySelector('span').textContent = text === label ? btn.dataset.defaultLabel || text : text;
         }
     });
+}
+
+function refreshCurrentView() {
+    const currentView = state.currentView || 'home';
+    switch (currentView) {
+        case 'home':
+            renderHome();
+            break;
+        case 'bible':
+            if (state.bookId) {
+                loadChapter(state.bookId, state.chapter || 1);
+            } else {
+                renderBibleSelector();
+            }
+            break;
+        case 'plans':
+            renderPlans();
+            break;
+        case 'search':
+            renderSearchInput();
+            break;
+        case 'settings':
+            renderSettings();
+            break;
+        case 'daily':
+            if (typeof window.loadDailyReading === 'function') {
+                window.loadDailyReading();
+            }
+            break;
+        default:
+            renderHome();
+            break;
+    }
 }
 
 function localizedBookOfMormonLabel() {
@@ -3862,9 +3905,9 @@ function finishSetup() {
     window.applyDocumentDirection(state.lang);
     applyTheme();
     document.getElementById('name-modal-overlay')?.classList.add('d-none');
+    syncBottomNavLabels();
     renderTopBar();
-    if (state.currentView === 'home') renderHome();
-    if (state.currentView === 'settings') renderSettings();
+    refreshCurrentView();
 }
 
 /* ════════════════════════ SEARCH ════════════════════════════ */
@@ -4688,6 +4731,7 @@ function openLanguageModal() {
                 window.applyDocumentDirection(state.lang);
                 syncBottomNavLabels();
                 renderTopBar();
+                refreshCurrentView();
             }
             overlay.remove();
             if (state.currentView === 'settings') switchView('settings');
